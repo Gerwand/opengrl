@@ -28,22 +28,110 @@
       <Extensions>moc;h;cpp</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
+    <Filter Include="Source Files\GUI">
+      <UniqueIdentifier>{8d94abb9-c67d-4101-ac72-c57306267629}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Tools">
+      <UniqueIdentifier>{2d8ff6ed-0e0d-43b2-8684-c30b94df0694}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Tools\Capture">
+      <UniqueIdentifier>{5dfce811-d563-4b84-b554-826eb6c5b6ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Tools\Extract">
+      <UniqueIdentifier>{d72acb1b-131e-4043-8408-279454a1470b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Tools\Track">
+      <UniqueIdentifier>{9af09dae-60fe-4428-af12-7988f1d1f447}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Tools\Classify">
+      <UniqueIdentifier>{00824834-60b3-46c8-9bb2-3cd354342cb1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Tools\General">
+      <UniqueIdentifier>{9d8d8347-376f-4297-963e-ed7243ed06c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\GUI">
+      <UniqueIdentifier>{462b1028-e69b-4b0c-be05-ccbdfb023742}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Tools">
+      <UniqueIdentifier>{122e93b3-019c-4341-8c34-5b58954a9975}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Tools\Capture">
+      <UniqueIdentifier>{c3a70c72-e161-459e-bd2f-0d395172f2f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Tools\Extract">
+      <UniqueIdentifier>{f144d9d2-2a38-4830-9709-308ed83dd047}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Tools\Classify">
+      <UniqueIdentifier>{128cae7f-f247-43dd-8ac6-27f377caab61}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Tools\Track">
+      <UniqueIdentifier>{9118d2ac-ad60-42da-804b-942c43d8f6e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Tools\General">
+      <UniqueIdentifier>{1d8b0099-234c-4269-a5b0-b7bcaf2a4b64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Resources">
+      <UniqueIdentifier>{22ce3ae1-5dd6-4007-b466-e507af00c825}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Histogram.cpp">
+      <Filter>Source Files\Tools\General</Filter>
+    </ClCompile>
+    <ClCompile Include="HistogramGray.cpp">
+      <Filter>Source Files\Tools\General</Filter>
+    </ClCompile>
     <ClCompile Include="MainWindow.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GestureRecognizer.cpp">
+      <Filter>Source Files\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="ShapeAnalyzer.cpp">
+      <Filter>Source Files\Tools\Classify</Filter>
+    </ClCompile>
+    <ClCompile Include="ORBMatcher.cpp">
+      <Filter>Source Files\Tools\Classify</Filter>
+    </ClCompile>
+    <ClCompile Include="KinectCamera.cpp">
+      <Filter>Source Files\Tools\Capture</Filter>
+    </ClCompile>
+    <ClCompile Include="FloodFillClipped.cpp">
+      <Filter>Source Files\Tools\Extract</Filter>
+    </ClCompile>
+    <ClCompile Include="GestureExtractor.cpp">
+      <Filter>Source Files\Tools\Extract</Filter>
+    </ClCompile>
+    <ClCompile Include="SkeletonExtractor.cpp">
+      <Filter>Source Files\Tools\Extract</Filter>
+    </ClCompile>
+    <ClCompile Include="GestureTracker.cpp">
+      <Filter>Source Files\Tools\Track</Filter>
+    </ClCompile>
+    <ClCompile Include="DiscretizedGestureTracker.cpp">
+      <Filter>Source Files\Tools\Track</Filter>
+    </ClCompile>
+    <ClCompile Include="TrackSaver.cpp">
+      <Filter>Source Files\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="RandomDecisionForest.cpp">
+      <Filter>Source Files\Tools\Classify</Filter>
+    </ClCompile>
+    <ClCompile Include="DecisionTree.cpp">
+      <Filter>Source Files\Tools\Classify</Filter>
+    </ClCompile>
+    <ClCompile Include="SegmentedDepthUtils.cpp">
+      <Filter>Source Files\Tools\Classify</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="MainWindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-  </ItemGroup>
-  <ItemGroup>
     <QtUic Include="MainWindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="SaveTrackDialog.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
@@ -51,5 +139,84 @@
     <QtRcc Include="MainWindow.qrc">
       <Filter>Resource Files</Filter>
     </QtRcc>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Algorithm.h">
+      <Filter>Header Files\Tools\General</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugTools.h">
+      <Filter>Header Files\Tools\General</Filter>
+    </ClInclude>
+    <ClInclude Include="DoG.h">
+      <Filter>Header Files\Tools\General</Filter>
+    </ClInclude>
+    <ClInclude Include="FloodFill.h">
+      <Filter>Header Files\Tools\Extract</Filter>
+    </ClInclude>
+    <ClInclude Include="GestureRecognizer.h">
+      <Filter>Header Files\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="Histogram.h">
+      <Filter>Header Files\Tools\General</Filter>
+    </ClInclude>
+    <ClInclude Include="HistogramGray.h">
+      <Filter>Header Files\Tools\General</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageToolkit.h">
+      <Filter>Header Files\Tools\General</Filter>
+    </ClInclude>
+    <ClInclude Include="MathUtils.h">
+      <Filter>Header Files\Tools\General</Filter>
+    </ClInclude>
+    <ClInclude Include="ORBMatcher.h">
+      <Filter>Header Files\Tools\Classify</Filter>
+    </ClInclude>
+    <ClInclude Include="GestureMatcher.h">
+      <Filter>Header Files\Tools\Classify</Filter>
+    </ClInclude>
+    <ClInclude Include="KinectCamera.h">
+      <Filter>Header Files\Tools\Capture</Filter>
+    </ClInclude>
+    <ClInclude Include="DepthCamera.h">
+      <Filter>Header Files\Tools\Capture</Filter>
+    </ClInclude>
+    <ClInclude Include="ShapeAnalyzer.h">
+      <Filter>Header Files\Tools\Extract</Filter>
+    </ClInclude>
+    <ClInclude Include="SkeletonExtractor.h">
+      <Filter>Header Files\Tools\Extract</Filter>
+    </ClInclude>
+    <ClInclude Include="FloodFillClipped.h">
+      <Filter>Header Files\Tools\Extract</Filter>
+    </ClInclude>
+    <ClInclude Include="GestureTracker.h">
+      <Filter>Header Files\Tools\Track</Filter>
+    </ClInclude>
+    <ClInclude Include="DiscretizedGestureTracker.h">
+      <Filter>Header Files\Tools\Track</Filter>
+    </ClInclude>
+    <ClInclude Include="QTUtils.h">
+      <Filter>Header Files\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleTracks.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="RandomDecisionForest.h">
+      <Filter>Header Files\Tools\Classify</Filter>
+    </ClInclude>
+    <ClInclude Include="DecisionTree.h">
+      <Filter>Header Files\Tools\Classify</Filter>
+    </ClInclude>
+    <ClInclude Include="SegmentedDepthUtils.h">
+      <Filter>Header Files\Tools\Classify</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="MainWindow.h">
+      <Filter>Header Files\GUI</Filter>
+    </QtMoc>
+    <QtMoc Include="TrackSaver.h">
+      <Filter>Header Files\GUI</Filter>
+    </QtMoc>
   </ItemGroup>
 </Project>
