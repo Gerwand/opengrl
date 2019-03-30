@@ -19,7 +19,7 @@ So let's go!
 
 | Task name | Time | Type of task | Link | Is done | When done |
 |----------:|:--------------:|:------------:|:----:|:-------:|-----------|
-| Basic documentation    | 2h  | Documentation | [Go!](#bdoc)     | [ ] | - |
+| Basic documentation    | 2h  | Documentation | [Go!](#bdoc)     | [1/2] | - |
 | Fix the project        | 6h  | Configuration | [Go!](#pfix)     | [ ] | - |
 | Make project portable  | 3h  | Configuration | [Go!](#portable) | [ ] | - |
 | Reorganize project     | 6h  | Structure     | [Go!](#reorg)    | [ ] | - |
