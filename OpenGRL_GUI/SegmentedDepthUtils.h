@@ -6,7 +6,9 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#ifdef USE_GPU
 #include <CL/cl.hpp>
+#endif
 
 #include <array>
 #include <limits>
@@ -96,6 +98,7 @@ enum HandClassColor
     grlPinkyTipColor = 0xFF00FF,
 };
 
+#ifdef USE_GPU
 #pragma pack(push, 1)
 typedef struct Pixel
 {
@@ -105,7 +108,15 @@ typedef struct Pixel
     cl_char classIndex;
 } Pixel;
 #pragma pack(pop)
-
+#else // !USE_GPU
+typedef struct Pixel
+{
+    Vector2<short> coords;
+    float depth;
+    uint imgID;
+    char classIndex;
+} Pixel;
+#endif
 
 inline bool
 compareRGBwithVal(uint32_t rgb, uint8_t b, uint8_t g, uint8_t r)

@@ -1,6 +1,8 @@
 #pragma once
 
+#ifdef USE_GPU
 #include <CL/cl.hpp>
+#endif
 
 #include "SegmentedDepthUtils.h"
 
@@ -15,6 +17,7 @@
 
 namespace grl {
 
+#ifdef USE_GPU
 struct TreeTrainGPUContext
 {
     // Delivered to the tree
@@ -42,6 +45,18 @@ struct Decision
     cl_float t;
 };
 #pragma pack(pop)
+#else // !USE_GPU
+typedef void * TreeTrainGPUContext;
+
+struct Decision
+{
+    // Offsets (feature)
+    Vec2i u;
+    Vec2i v;
+    // Threshold
+    float t;
+};
+#endif
 
 constexpr uint8_t grlNodeGoLeft = 0;
 constexpr uint8_t grlNodeGoRight = 1;

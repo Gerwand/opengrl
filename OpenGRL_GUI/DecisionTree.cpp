@@ -193,7 +193,9 @@ DecisionTree::train(std::vector<Pixel> *pixels, const std::vector<cv::Mat> &dept
     Node *node = _root.get();
     int depth = 1;
     int good = 0;
+#ifdef USE_GPU
     cl_int err = 0;
+#endif
     while (node != nullptr) {
         // Determine if we should stay at this node, go up or go right
         if (node->getPixels() == nullptr) {
@@ -236,6 +238,7 @@ DecisionTree::train(std::vector<Pixel> *pixels, const std::vector<cv::Mat> &dept
         std::vector<float> bestLeftProbabilities, bestRightProbabilities;
         float bestScore = -std::numeric_limits<float>::infinity();
         const clock_t begin_time = clock();
+#ifdef USE_GPU
         if (useGPU) {
             err = gpuContext->queue.enqueueWriteBuffer(gpuContext->bufferAllPix, CL_TRUE, 0,
                                                        sizeof(Pixel)*data.allPixels->size(), data.allPixels->data());
@@ -262,7 +265,7 @@ DecisionTree::train(std::vector<Pixel> *pixels, const std::vector<cv::Mat> &dept
                 }
             }
         }
-
+#endif
         for (int i = 0; i < nodeTrainLimit; ++i) {
             Decision decision = {
                 {offsetDistribution(gen), offsetDistribution(gen)}, // u
@@ -270,6 +273,7 @@ DecisionTree::train(std::vector<Pixel> *pixels, const std::vector<cv::Mat> &dept
             thresholdDistribution(gen)}; // t
             node->setDecision(decision);
             float score;
+#ifdef USE_GPU
             if (useGPU) {
                 err = gpuContext->getFeatureTrain.setArg(2, sizeof(Decision), &decision);
                 if (err != CL_SUCCESS) {
@@ -278,8 +282,11 @@ DecisionTree::train(std::vector<Pixel> *pixels, const std::vector<cv::Mat> &dept
                 }
                 score = evaluateNode(node, data, depthImages, gpuContext);
             } else {
+#endif
                 score = evaluateNode(node, data, depthImages);
+#ifdef USE_GPU
             }
+#endif
             if (score > bestScore) {
                 bestScore = score;
                 bestDecision = decision;
@@ -393,6 +400,7 @@ DecisionTree::readFromFile(std::ifstream & file)
     }
 }
 
+#ifdef USE_GPU
 float
 DecisionTree::evaluateNode(Node *node, NodeTrainingData &data, const std::vector<cv::Mat> &depthImages, TreeTrainGPUContext *gpuContext)
 {
@@ -536,6 +544,7 @@ DecisionTree::getProbabilities(const std::vector<Pixel> *pixels, std::vector<flo
     for (auto itp = probabilities.begin(); itp != probabilities.end(); ++itp, ++itc)
         (*itp) = (*itc)/static_cast<float>(sum);
 }
+#endif
 
 const std::vector<float> & 
 DecisionTree::classifyPixel(const cv::Mat &depthImage, const Pixel &p)

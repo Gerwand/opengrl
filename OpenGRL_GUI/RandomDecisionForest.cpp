@@ -5,6 +5,7 @@ namespace grl {
 void
 RandomDecisionForest::train(const ForestTrainContext &context)
 {
+#ifdef USE_GPU
     if (context.gpuContext != nullptr) {
         std::ifstream file("rdf.cl");
         std::string kernels((std::istreambuf_iterator<char>(file)),
@@ -21,6 +22,7 @@ RandomDecisionForest::train(const ForestTrainContext &context)
         }
 
     }
+#endif
 
     for (size_t i = 0; i < _trees.size(); i += context.nthreads) {
         size_t size = std::min(_trees.size() - i, context.nthreads);
@@ -167,7 +169,7 @@ RandomDecisionForest::trainTree(DecisionTree *tree, const ForestTrainContext *co
     static std::hash<std::thread::id> hasher;
 
     size_t pixelsNum = sizeof(Pixel) * context->pixelsPerImage * context->classImages.size();
-
+#ifdef USE_GPU
     TreeTrainGPUContext treeGPU;
     bool useGPU = false;
     cl_int err = 0;
@@ -207,7 +209,7 @@ RandomDecisionForest::trainTree(DecisionTree *tree, const ForestTrainContext *co
         treeGPU.getFeatureTrain = cl::Kernel(treeGPU.program, "getFeatureTrain", &err);
         treeGPU.getProbabilities = cl::Kernel(treeGPU.program, "getProbabilities", &err);
     }
-
+#endif
     // Chose class pixels from each class image
     std::vector<Pixel> *pixels = new std::vector<Pixel>;
     pixels->reserve(context->pixelsPerImage * context->classImages.size());
@@ -244,7 +246,11 @@ RandomDecisionForest::trainTree(DecisionTree *tree, const ForestTrainContext *co
                 continue;
 
             pixels->push_back(Pixel{
+#ifdef USE_GPU
                 Vector2<cl_short>{static_cast<cl_short>(coords.x), static_cast<cl_short>(coords.y)}, // Coords
+#else
+                Vector2<short>{static_cast<short>(coords.x), static_cast<short>(coords.y)}, // Coords
+#endif
                 itd->at<float>(coords), // Depth
                 imgID,
                 index
@@ -255,7 +261,12 @@ RandomDecisionForest::trainTree(DecisionTree *tree, const ForestTrainContext *co
 
     printf("Tree training...\n");
     tree->train(pixels, context->depthImages, context->nodeTrainLimit, context->maxDepth,
-                gen, useGPU ? &treeGPU : nullptr);
+                gen,
+#ifdef USE_GPU
+                useGPU ? &treeGPU : nullptr);
+#else
+                nullptr);
+#endif
 }
 
 }

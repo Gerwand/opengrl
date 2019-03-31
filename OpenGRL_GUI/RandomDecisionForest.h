@@ -7,6 +7,7 @@
 
 namespace grl {
 
+#ifdef USE_GPU
 struct ForestTrainGPUContext
 {
     cl::Device device;
@@ -15,10 +16,13 @@ struct ForestTrainGPUContext
     cl::Program program;
     int maxImages;
 };
+#endif
 
 struct ForestTrainContext
 {
+#ifdef USE_GPU
     ForestTrainGPUContext *gpuContext;
+#endif
     size_t nthreads;
     size_t pixelsPerImage;
     int nodeTrainLimit;
