@@ -179,13 +179,13 @@ DecisionTree::train(std::vector<Pixel> *pixels, const std::vector<cv::Mat> &dept
 
     NodeTrainingData data;
     data.allPixels = pixels;
-
+#ifdef USE_GPU
     bool useGPU = gpuContext != nullptr;
     if (useGPU) {
         getProbabilities(data.allPixels, data.allProbabilities, gpuContext);
-    } else {
+    } else
+#endif
         getProbabilities(data.allPixels, data.allProbabilities);
-    }
 
     if (_root.get() != nullptr)
         _root.release();

@@ -186,9 +186,11 @@ private:
     int _maxDepth;
 
     void getProbabilities(const std::vector<Pixel> *pixels, std::vector<float> &probabilities);
+#ifdef USE_GPU
 
     void getProbabilities(const std::vector<Pixel> *pixels, std::vector<float> &probabilities,
                           TreeTrainGPUContext *gpuContext);
+#endif
 
     bool isSingleClass(const std::vector<float> &probabilities);
 
