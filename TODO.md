@@ -3,7 +3,7 @@
 Hi, dear fella! \
 If your name is not Michał and it's not your project, I don't think you should
 be there... \
-If so, please contact me at: michal7650@gmail.com.
+If so, please contact me at: krawczyk.michal93@gmail.com.
 
 This is just development plan for keeping up track of my Master Of Science
 progress and to plan further steps. \
@@ -20,8 +20,8 @@ So let's go!
 | Task name | Time | Type of task | Link | Is done | When done |
 |----------:|:--------------:|:------------:|:----:|:-------:|-----------|
 | Basic documentation    | 2h  | Documentation | [Go!](#bdoc)     | [1/2] | - |
-| Fix the project        | 6h  | Configuration | [Go!](#pfix)     | [ ] | - |
-| Make project portable  | 3h  | Configuration | [Go!](#portable) | [ ] | - |
+| Fix the project        | 6h  | Configuration | [Go!](#pfix)     | [v] | - |
+| Make project portable  | 3h  | Configuration | [Go!](#portable) | [1/2] | - |
 | Reorganize project     | 6h  | Structure     | [Go!](#reorg)    | [ ] | - |
 | Merge Linux trainer    | 2h  | Code          | [Go!](#lmerge)   | [ ] | - |
 | Remove redundant files | 3h  | Code          | [Go!](#fclean)   | [ ] | - |
@@ -90,7 +90,7 @@ RDF trainer.
 
 Moreover, consider making the app being cross platform (Windows and Linux).
 
-### <a name="fclean"></a> Remove redundant files
+### <a name="fclean"></a> Remove redundant files from git
 
 All files were included to the git, however, some of there were backups and
 some old changes. For now they were not checked, but they should be removed

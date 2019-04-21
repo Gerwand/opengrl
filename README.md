@@ -73,7 +73,52 @@ To make the project build, below environment variables must be set:
 
 ## How to setup and build
 
-TODO
+VS preparation
+
+1. Install Visual Studio 2017 - v141 was used for development
+1. Install [Windows 10 SDK 10.0.17763.0](
+   https://developer.microsoft.com/en-US/windows/downloads/windows-10-sdk) -
+   this step is needed for building this VS project
+
+Qt setup for **OpenGRL_GUI** project
+
+1. Install [Qt 5.12.2](https://www.qt.io/download) - VS 2017 64bit binaries
+    * It can be set in the installer
+    * Alternatively, the Qt can be built from source
+    * One can also download the binaries from [here](127.0.0.1)
+    * Next, the envirnoment variable QTDIR must be set. It should indicate
+      location of the Qt `lib`, `bin` and `include` folders, like this:\
+        `C:\Qt\5.12.2\msvc2017_64`
+1. Install `Qt Visual Studio Tools` extension for VS 2017
+1. In `Qt VS Tools -> Qt Options` add Qt path and set the default version
+
+OpenCV setup
+
+1. The OpenCV must be built from scratch. First, download the [sources](
+    https://github.com/opencv/opencv/archive/3.4.5.zip).
+1. Extract and open it using [CMake](https://cmake.org/download/)
+1. Specify build target and click Configure
+1. Set `WITH_QT` and `WITH_OPENGL`
+1. Click Configure again and set variables `QT_MAKE_EXECUTABLE` to
+   $QTDIR\bin\qmake.exe and `Qt5Concurrent_DIR`, `Qt5Core_DIR`, `Qt5Gui_DIR`,
+   `Qt5Test_DIR`, `Qt5Widgets_DIR`, `Qt5OpenGL_DIR` to $QTDIR\lib\cmake\X,
+   where X is the variable name without DIR appendix. Note, it may be required
+   to hit the Configure multiple times to make show up all of the variables.
+1. Click configure again to make it build without errors.
+1. After configuring successfully, click generate
+1. Open the location where the project was generated and open OpenCV.sln
+1. Now execute build for `BUILD_ALL` in Debug and Release config on x64
+1. Next, execute build for `INSTALL` in Debug and Release config on x64
+1. In the build folder, the `install` will be created. Create new folder for
+   default OpenCV directory somewhere and copy `install/include` and
+   `install/x64` to the newly created folder.
+1. Point the env variable to this folder and call it OPENCV_DIR
+
+Kinect setup
+
+1. Download Kinect SDK from [there](
+   https://www.microsoft.com/en-us/download/details.aspx?id=44561)
+1. Install it
 
 ## List and description of all subprojects
 
