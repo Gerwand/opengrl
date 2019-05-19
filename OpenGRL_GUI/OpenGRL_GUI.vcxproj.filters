@@ -126,6 +126,9 @@
     <ClCompile Include="SegmentedDepthUtils.cpp">
       <Filter>Source Files\Tools\Classify</Filter>
     </ClCompile>
+    <ClCompile Include="..\OpenGRL\src\track\TrackSaver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="MainWindow.ui">
@@ -209,6 +212,9 @@
     </ClInclude>
     <ClInclude Include="SegmentedDepthUtils.h">
       <Filter>Header Files\Tools\Classify</Filter>
+    </ClInclude>
+    <ClInclude Include="..\OpenGRL\include\grl\track\TrackSaver.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

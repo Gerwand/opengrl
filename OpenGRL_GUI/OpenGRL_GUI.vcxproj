@@ -130,6 +130,7 @@ xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_imgproc345.dll" "$(TargetDir)" /R /Y</
     </QtRcc>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\OpenGRL\src\track\TrackSaver.cpp" />
     <ClCompile Include="DecisionTree.cpp" />
     <ClCompile Include="FloodFillClipped.cpp" />
     <ClCompile Include="GestureExtractor.cpp" />
@@ -161,6 +162,7 @@ xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_imgproc345.dll" "$(TargetDir)" /R /Y</
     <QtRcc Include="MainWindow.qrc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\OpenGRL\include\grl\track\TrackSaver.h" />
     <ClInclude Include="Algorithm.h" />
     <ClInclude Include="DebugTools.h" />
     <ClInclude Include="DecisionTree.h" />

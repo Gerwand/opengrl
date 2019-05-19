@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Pliki źródłowe">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Pliki nagłówkowe">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Pliki zasobów">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Pliki nagłówkowe\grl">
+      <UniqueIdentifier>{d775d4aa-f16a-4a5a-a27f-40f6c9ac7b6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\grl">
+      <UniqueIdentifier>{35ada9e5-1646-4529-960a-fb6339849aab}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\grl\gesture\SkeletonExtractor.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\utils\Algorithm.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\utils\DebugTools.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\rdf\DecisionTree.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\camera\DepthCamera.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\track\DiscretizedGestureTracker.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\utils\DoG.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\gesture\FloodFill.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\gesture\FloodFillClipped.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\gesture\GestureAnalyzer.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\gesture\GestureExtractor.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\gesture\GestureMatcher.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\gesture\GestureRecognizer.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\track\GestureTracker.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\utils\Histogram.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\utils\HistogramGray.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\utils\ImageToolkit.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\camera\KinectCamera.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\utils\MathUtils.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\gesture\ORBMatcher.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\rdf\SegmentedDepthUtils.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\gesture\ShapeAnalyzer.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\rdf\DecisionTree.cpp">
+      <Filter>Pliki źródłowe\grl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\track\DiscretizedGestureTracker.cpp">
+      <Filter>Pliki źródłowe\grl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gesture\FloodFillClipped.cpp">
+      <Filter>Pliki źródłowe\grl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gesture\GestureExtractor.cpp">
+      <Filter>Pliki źródłowe\grl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gesture\GestureRecognizer.cpp">
+      <Filter>Pliki źródłowe\grl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\track\GestureTracker.cpp">
+      <Filter>Pliki źródłowe\grl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utils\Histogram.cpp">
+      <Filter>Pliki źródłowe\grl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utils\HistogramGray.cpp">
+      <Filter>Pliki źródłowe\grl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\camera\KinectCamera.cpp">
+      <Filter>Pliki źródłowe\grl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gesture\ORBMatcher.cpp">
+      <Filter>Pliki źródłowe\grl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rdf\RandomDecisionForest.cpp">
+      <Filter>Pliki źródłowe\grl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rdf\SegmentedDepthUtils.cpp">
+      <Filter>Pliki źródłowe\grl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gesture\ShapeAnalyzer.cpp">
+      <Filter>Pliki źródłowe\grl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gesture\SkeletonExtractor.cpp">
+      <Filter>Pliki źródłowe\grl</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
