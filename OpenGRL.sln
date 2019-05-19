@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.27004.2006
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenGRL_GUI", "OpenGRL_GUI\OpenGRL_GUI.vcxproj", "{B12702AD-ABFB-343A-A199-8E24837244A3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EBB61D5B-8347-4A30-943F-807E2C8B30DB} = {EBB61D5B-8347-4A30-943F-807E2C8B30DB}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenGRL_RDF_Trainer", "OpenGRL_RDF_Trainer\OpenGRL_RDF_Trainer.vcxproj", "{85762517-3D3E-4932-892D-9B271CA8B4E1}"
 EndProject

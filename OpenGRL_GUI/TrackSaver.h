@@ -1,8 +1,8 @@
 #pragma once
 
 #include "ui_SaveTrackDialog.h"
-#include "DepthCamera.h"
-#include "GestureTracker.h"
+#include <grl/camera/DepthCamera.h>
+#include <grl/track/GestureTracker.h>
 
 class TrackSaver : public QDialog
 {

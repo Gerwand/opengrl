@@ -1,7 +1,9 @@
 #include "MainWindow.h"
 
-#include "RandomDecisionForest.h"
-#include "SampleTracks.h"
+#include <grl/rdf/RandomDecisionForest.h>
+
+// Temporary solution TODO: load database from file
+#include "../OpenGRL_RDF_Tester/SampleTracks.h"
 #include "QTUtils.h"
 
 #include <QTimer>

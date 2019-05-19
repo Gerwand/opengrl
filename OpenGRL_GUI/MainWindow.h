@@ -7,11 +7,11 @@
 #include "ui_MainWindow.h"
 #include "TrackSaver.h"
 
-#include "GestureRecognizer.h"
-#include "SkeletonExtractor.h"
-#include "KinectCamera.h"
-#include "ORBMatcher.h"
-#include "DiscretizedGestureTracker.h"
+#include <grl/gesture/GestureRecognizer.h>
+#include <grl/gesture/SkeletonExtractor.h>
+#include <grl/camera/KinectCamera.h>
+#include <grl/gesture/ORBMatcher.h>
+#include <grl/track/DiscretizedGestureTracker.h>
 
 constexpr int recordDelay = 5;
 constexpr int idleDelay = 3;

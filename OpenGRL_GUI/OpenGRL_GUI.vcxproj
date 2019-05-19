@@ -29,7 +29,7 @@
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">UNICODE;_UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.\include;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(OPENCV_DIR)\include;$(SolutionDir)\include;$(OPENCL_INCLUDE)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.\include;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(OPENCV_DIR)\include;$(SolutionDir)\include;$(OPENCL_INCLUDE);$(SolutionDir)\OpenGRL\include</AdditionalIncludeDirectories>
       <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
       <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</TreatWChar_tAsBuiltInType>
@@ -37,16 +37,16 @@
     <Link>
       <SubSystem Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Console</SubSystem>
       <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)\$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\lib;$(OPENCV_DIR)\x64\vc15\lib;$(SolutionDir)\lib\x64;$(OPENCL_LIB64);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\lib;$(OPENCV_DIR)\x64\vc15\lib;$(SolutionDir)\lib\x64;$(OPENCL_LIB64);$(SolutionDir)\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</GenerateDebugInformation>
-      <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Kinect20.lib;qtmain.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib;opencv_core345.lib;opencv_features2d345.lib;opencv_highgui345.lib;opencv_imgcodecs345.lib;opencv_imgproc345.lib;opencv_video345.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Kinect20.lib;qtmain.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib;opencv_core345.lib;opencv_features2d345.lib;opencv_highgui345.lib;opencv_imgcodecs345.lib;opencv_imgproc345.lib;opencv_video345.lib;OpenGRL02.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <QtMoc>
       <InputFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(FullPath)</InputFile>
       <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)GeneratedFiles\$(Configuration)\moc_%(Filename).cpp</OutputFile>
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">output</DynamicSource>
       <ExecutionDescription Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc'ing %(Identity)...</ExecutionDescription>
-      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.\include;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(OPENCV_DIR)\include;$(SolutionDir)\include;$(OPENCL_INCLUDE)</IncludePath>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.\include;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(OPENCV_DIR)\include;$(SolutionDir)\include;$(OPENCL_INCLUDE);$(SolutionDir)\OpenGRL\include</IncludePath>
       <Define Condition="'$(Configuration)|$(Platform)'=='Release|x64'">UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB</Define>
       <QTDIR Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)</QTDIR>
     </QtMoc>
@@ -97,7 +97,7 @@ xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_imgproc345.dll" "$(TargetDir)" /R /Y</
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PreprocessorDefinitions>UNICODE;_UNICODE;WIN32;WIN64;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles;.\include;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(OPENCV_DIR)\include;$(SolutionDir)\include;$(OPENCL_INCLUDE)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\GeneratedFiles;.\include;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(OPENCV_DIR)\include;$(SolutionDir)\include;$(OPENCL_INCLUDE);$(SolutionDir)\OpenGRL\include</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -107,14 +107,14 @@ xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_imgproc345.dll" "$(TargetDir)" /R /Y</
     <Link>
       <SubSystem>Console</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(OPENCV_DIR)\x64\vc15\lib;$(SolutionDir)\lib\x64;$(OPENCL_LIB64);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(OPENCV_DIR)\x64\vc15\lib;$(SolutionDir)\lib\x64;$(OPENCL_LIB64);$(SolutionDir)\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Kinect20.lib;qtmaind.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;opencv_core345d.lib;opencv_highgui345d.lib;opencv_imgcodecs345d.lib;opencv_imgproc345d.lib;opencv_features2d345d.lib;opencv_video345d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Kinect20.lib;qtmaind.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;opencv_core345d.lib;opencv_highgui345d.lib;opencv_imgcodecs345d.lib;opencv_imgproc345d.lib;opencv_features2d345d.lib;opencv_video345d.lib;OpenGRL02d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <QtMoc>
       <OutputFile>.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</OutputFile>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
-      <IncludePath>.\GeneratedFiles;.\include;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(OPENCV_DIR)\include;$(SolutionDir)\include;$(OPENCL_INCLUDE)</IncludePath>
+      <IncludePath>.\GeneratedFiles;.\include;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(OPENCV_DIR)\include;$(SolutionDir)\include;$(OPENCL_INCLUDE);$(SolutionDir)\OpenGRL\include</IncludePath>
       <Define>UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB</Define>
       <QTDIR>$(QTDIR)</QTDIR>
     </QtMoc>
@@ -130,23 +130,8 @@ xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_imgproc345.dll" "$(TargetDir)" /R /Y</
     </QtRcc>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\OpenGRL\src\track\TrackSaver.cpp" />
-    <ClCompile Include="DecisionTree.cpp" />
-    <ClCompile Include="FloodFillClipped.cpp" />
-    <ClCompile Include="GestureExtractor.cpp" />
-    <ClCompile Include="GestureTracker.cpp" />
-    <ClCompile Include="KinectCamera.cpp" />
-    <ClCompile Include="RandomDecisionForest.cpp" />
-    <ClCompile Include="SegmentedDepthUtils.cpp" />
-    <ClCompile Include="ShapeAnalyzer.cpp" />
-    <ClCompile Include="ORBMatcher.cpp" />
-    <ClCompile Include="GestureRecognizer.cpp" />
-    <ClCompile Include="Histogram.cpp" />
-    <ClCompile Include="HistogramGray.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
-    <ClCompile Include="DiscretizedGestureTracker.cpp" />
-    <ClCompile Include="SkeletonExtractor.cpp" />
     <ClCompile Include="TrackSaver.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -162,31 +147,8 @@ xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_imgproc345.dll" "$(TargetDir)" /R /Y</
     <QtRcc Include="MainWindow.qrc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\OpenGRL\include\grl\track\TrackSaver.h" />
-    <ClInclude Include="Algorithm.h" />
-    <ClInclude Include="DebugTools.h" />
-    <ClInclude Include="DecisionTree.h" />
-    <ClInclude Include="DepthCamera.h" />
-    <ClInclude Include="FloodFillClipped.h" />
-    <ClInclude Include="GestureTracker.h" />
-    <ClInclude Include="KinectCamera.h" />
-    <ClInclude Include="DoG.h" />
-    <ClInclude Include="FloodFill.h" />
-    <ClInclude Include="GestureMatcher.h" />
     <ClInclude Include="QTUtils.h" />
-    <ClInclude Include="RandomDecisionForest.h" />
-    <ClInclude Include="SampleTracks.h" />
-    <ClInclude Include="SegmentedDepthUtils.h" />
-    <ClInclude Include="ShapeAnalyzer.h" />
-    <ClInclude Include="ORBMatcher.h" />
-    <ClInclude Include="GestureRecognizer.h" />
-    <ClInclude Include="Histogram.h" />
-    <ClInclude Include="HistogramGray.h" />
-    <ClInclude Include="ImageToolkit.h" />
-    <ClInclude Include="DiscretizedGestureTracker.h" />
-    <ClInclude Include="SkeletonExtractor.h" />
     <QtMoc Include="TrackSaver.h" />
-    <ClInclude Include="MathUtils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
