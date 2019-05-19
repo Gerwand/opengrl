@@ -20,11 +20,15 @@ SkeletonExtractor::extractHands(const cv::Mat &depthImage, const Skeleton &skele
 
 	if (rightValid) {
 		_floodFillRight.setup(_config.tolerance, depthImage);
-		Vec3f rElbow = Vec3f(jRightElbow.coordDepthImage.x, jRightElbow.coordDepthImage.y, 
-							 depthImage.at<uint16_t>(cv::Point(jRightElbow.coordDepthImage.x, jRightElbow.coordDepthImage.y)));
+		Vec3f rElbow = Vec3f(
+            static_cast<float>(jRightElbow.coordDepthImage.x),
+            static_cast<float>(jRightElbow.coordDepthImage.y),
+            depthImage.at<uint16_t>(cv::Point(jRightElbow.coordDepthImage.x, jRightElbow.coordDepthImage.y)));
 		
-		Vec3f rWrist = Vec3f(jRightWrist.coordDepthImage.x, jRightWrist.coordDepthImage.y,
-							 depthImage.at<uint16_t>(cv::Point(jRightWrist.coordDepthImage.x, jRightWrist.coordDepthImage.y)));
+		Vec3f rWrist = Vec3f(
+            static_cast<float>(jRightWrist.coordDepthImage.x),
+            static_cast<float>(jRightWrist.coordDepthImage.y),
+            depthImage.at<uint16_t>(cv::Point(jRightWrist.coordDepthImage.x, jRightWrist.coordDepthImage.y)));
 		//Vec3f rShoulder = Vec3f(jRightShoulder.coordDepthImage.x, jRightShoulder.coordDepthImage.y,
 		//						depthImage.at<uint16_t>(cv::Point(jRightShoulder.coordDepthImage.x, jRightShoulder.coordDepthImage.y)));
 		Vec3f vrew, vres, vrmid, vrn;
@@ -61,10 +65,14 @@ SkeletonExtractor::extractHands(const cv::Mat &depthImage, const Skeleton &skele
 
 	if (leftValid) {
 		_floodFillLeft.setup(_config.tolerance, depthImage);
-		Vec3f lElbow = Vec3f(jLeftElbow.coordDepthImage.x, jLeftElbow.coordDepthImage.y,
-							 depthImage.at<uint16_t>(cv::Point(jLeftElbow.coordDepthImage.x, jLeftElbow.coordDepthImage.y)));
-		Vec3f lWrist = Vec3f(jLeftWrist.coordDepthImage.x, jLeftWrist.coordDepthImage.y,
-							 depthImage.at<uint16_t>(cv::Point(jLeftWrist.coordDepthImage.x, jLeftWrist.coordDepthImage.y)));
+		Vec3f lElbow = Vec3f(
+            static_cast<float>(jLeftElbow.coordDepthImage.x),
+            static_cast<float>(jLeftElbow.coordDepthImage.y),
+            depthImage.at<uint16_t>(cv::Point(jLeftElbow.coordDepthImage.x, jLeftElbow.coordDepthImage.y)));
+		Vec3f lWrist = Vec3f(
+            static_cast<float>(jLeftWrist.coordDepthImage.x), 
+            static_cast<float>(jLeftWrist.coordDepthImage.y),
+            depthImage.at<uint16_t>(cv::Point(jLeftWrist.coordDepthImage.x, jLeftWrist.coordDepthImage.y)));
 		
 		//Vec3f lShoulder = Vec3f(jLeftShoulder.coordDepthImage.x, jLeftShoulder.coordDepthImage.y,
 		//						depthImage.at<uint16_t>(cv::Point(jLeftShoulder.coordDepthImage.x, jLeftShoulder.coordDepthImage.y)));	

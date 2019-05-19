@@ -104,13 +104,13 @@ VoxelArray2D::getData()
 class FloodFillClipped
 {
 public:
-	void setup(double tolerance, const cv::Mat &source);
+	void setup(int tolerance, const cv::Mat &source);
 
 	bool extractObject(Vec2i startingPoint, Object &object, Plane plane);
 	bool isAnalyzed(Vec2i point);
 
 private:
-	double _tolerance;
+	int _tolerance;
 	VoxelArray2D _voxelImage;
 
 };
@@ -122,7 +122,7 @@ FloodFillClipped::isAnalyzed(Vec2i point)
 }
 
 inline void
-FloodFillClipped::setup(double tolerance, const cv::Mat &source)
+FloodFillClipped::setup(int tolerance, const cv::Mat &source)
 {
 	_tolerance = tolerance;
 	_voxelImage.fromImage(source, tolerance);

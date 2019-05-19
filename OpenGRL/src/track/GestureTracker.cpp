@@ -78,7 +78,7 @@ TrackRecorder::addPoint(Vec3f point)
         bufferDistances.push_back(bufDistance);
     }
     std::sort(bufferDistances.begin(), bufferDistances.end(), indexedFloatLess);
-    int midIndex = bufferDistances.size()/2;
+    size_t midIndex = bufferDistances.size()/2;
 
     // If the moved distance was too small, do not add it to the track
     const IndexedFloat &midDistance = bufferDistances[midIndex];
@@ -116,7 +116,7 @@ GestureTracker::recognizeTrack(const TrackPoints &track, TrackedHand hand)
         scores.reserve(itGesture->second.size());
 
         // Get score for each track in the gesture
-        const TrackPoints *bestTrack;
+        const TrackPoints *bestTrack = nullptr;
         float minScore = std::numeric_limits<float>::infinity();
         for (auto itTracks = itGesture->second.cbegin(); itTracks != itGesture->second.cend(); ++itTracks) {
             float score = compareTracks(track, **itTracks);

@@ -15,7 +15,7 @@ struct Voxel
 struct Object
 {
 	std::vector<const Voxel *> voxels;
-	int size;
+	size_t size;
 	int minVal = INT_MAX;
 	int maxVal = INT_MIN;
 

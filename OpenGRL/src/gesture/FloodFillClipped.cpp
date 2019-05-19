@@ -158,7 +158,9 @@ FloodFillClipped::extractObject(Vec2i startingPoint, Object &object, Plane plane
 		// Analyze all neighbours
 		for (int i = 0; i < currentVoxel->neighboursNumber; ++i) {
 			FFVoxel *neighbour = currentVoxel->neighbours[i];
-			Vec3f neighbourCoords = Vec3f(neighbour->coords.x, neighbour->coords.y, neighbour->coords.z);
+			Vec3f neighbourCoords = Vec3f(static_cast<float>(neighbour->coords.x),
+                                          static_cast<float>(neighbour->coords.y),
+                                          static_cast<float>(neighbour->coords.z));
 			if (neighbour->analyzed || plane(neighbourCoords) < 0.0f)
 				continue;
 

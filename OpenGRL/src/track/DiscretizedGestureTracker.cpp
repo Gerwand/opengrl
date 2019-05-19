@@ -16,8 +16,8 @@ DiscretizedGestureTracker::init(std::unique_ptr<TrackerConfig> config)
 float
 DiscretizedGestureTracker::compareTracks(const TrackPoints &first, const TrackPoints &second)
 {
-    int firstSize = first.points.size();
-    int secondSize = second.points.size();
+    int firstSize = static_cast<int>(first.points.size());
+    int secondSize = static_cast<int>(second.points.size());
     int sizeDiff = _discretizedConfig->maxCompareSegmentsDiff;
 
     if (!absBetween(firstSize - secondSize, sizeDiff))

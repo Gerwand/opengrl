@@ -112,7 +112,6 @@ err_depths_release:
 	safeRelease(depthFrameSource);
 err_sensor_release:
 	safeRelease(_sensor);
-err_sensor:
 	return hr;
 }
 
@@ -291,7 +290,7 @@ KinectCamera::getSkeletons(Skeletons *skeletons)
 
 			float leanX = acos(spine.y/spineLenXY);
 			float leanZ = acos(spine.y/spineLenZY);
-			skeleton.lean = std::max(leanX, leanZ) * 180.0f / M_PI;
+			skeleton.lean = std::max(leanX, leanZ) * 180.0f / static_cast<float>(M_PI);
 
 			skeleton.distance = skeleton.joints[JointType::SPINE_SHOULDERS].coordWorld.z;
 
@@ -320,7 +319,10 @@ KinectCamera::worldToImage(const std::vector<Vec3f>& world, std::vector<Vec2f>& 
     DepthSpacePoint *depthPoints = reinterpret_cast<DepthSpacePoint *>(image.data());
 
     // Map the points
-    _coordMapper->MapCameraPointsToDepthSpace(world.size(), cameraPoints, image.size(), depthPoints);
+    _coordMapper->MapCameraPointsToDepthSpace(static_cast<UINT>(world.size()),
+                                              cameraPoints,
+                                              static_cast<UINT>(image.size()),
+                                              depthPoints);
 
     return true;
 }

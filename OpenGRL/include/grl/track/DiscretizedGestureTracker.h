@@ -76,7 +76,7 @@ DiscretizedGestureTracker::discretizeTrack(ForwardIt itBegin, ForwardIt itEnd, T
         discretizedPoints.push_back(lastPoint);
 
         // Discretize, until the delta is reached
-        int wholeSegments = len /  delta;
+        int wholeSegments = static_cast<int>(len /  delta);
         Vec3f deltaOffset = itOffset->getUnitVector() *  delta;
         for (int i = 0; i < wholeSegments; ++i) {
             lastPoint += deltaOffset;
