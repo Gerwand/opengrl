@@ -1,9 +1,6 @@
 # Development plan for project
 
-Hi, dear fella! \
-If your name is not Michał and it's not your project, I don't think you should
-be there... \
-If so, please contact me at: krawczyk.michal93@gmail.com.
+Hi, dear fella!
 
 This is just development plan for keeping up track of my Master Of Science
 progress and to plan further steps. \
@@ -22,7 +19,7 @@ So let's go!
 | Basic documentation    | 2h  | Documentation | [Go!](#bdoc)     | [1/2] | - |
 | Fix the project        | 6h  | Configuration | [Go!](#pfix)     | [v] | - |
 | Make project portable  | 3h  | Configuration | [Go!](#portable) | [1/2] | - |
-| Reorganize project     | 6h  | Structure     | [Go!](#reorg)    | [ ] | - |
+| Reorganize project     | 6h  | Structure     | [Go!](#reorg)    | [1/2] | - |
 | Merge Linux trainer    | 2h  | Code          | [Go!](#lmerge)   | [ ] | - |
 | Remove redundant files | 3h  | Code          | [Go!](#fclean)   | [ ] | - |
 | Code cleanup           | 20h | Code          | [Go!](#pclean)   | [ ] | - |
