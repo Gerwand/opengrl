@@ -1,5 +1,5 @@
 #include "ImageWindow.h"
-#include "../OpenGRL_GUI/RandomDecisionForest.h"
+#include <grl/rdf/RandomDecisionForest.h>
 
 static grl::GaussianKernel kernelBig(25.0f, 51);
 static grl::GaussianKernel kernelSmall(12.0f, 25);
@@ -394,7 +394,7 @@ void approximateJoints(const cv::Mat &depthImage,
     }
 }
 
-int main(int argc, char **argv)
+int main_old(int argc, char **argv)
 {
     QApplication app(argc, argv);
 
