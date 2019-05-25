@@ -128,6 +128,11 @@ xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_imgproc345.dll" "$(TargetDir)" /R /Y</
       <OutputFile>.\GeneratedFiles\qrc_%(Filename).cpp</OutputFile>
       <QTDIR>$(QTDIR)</QTDIR>
     </QtRcc>
+    <PostBuildEvent>
+      <Command>xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_core345.dll" "$(TargetDir)" /R /Y
+xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_imgcodecs345.dll" "$(TargetDir)" /R /Y
+xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_imgproc345.dll" "$(TargetDir)" /R /Y</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
