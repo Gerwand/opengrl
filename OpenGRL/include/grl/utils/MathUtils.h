@@ -4,7 +4,9 @@
 #include <iomanip>
 #include <cassert>
 #include <vector>
+#ifndef OPENCV_SKIP
 #include <opencv2/core/core.hpp>
+#endif
 
 namespace grl {
 constexpr float epsilon = 0.00001f;
@@ -38,7 +40,9 @@ struct Vector2
 	};
 
     float length() const { return sqrtf(static_cast<float>(x*x + y*y)); }
+#ifndef OPENCV_SKIP
     operator cv::Point() const { return cv::Point(static_cast<int>(x), static_cast<int>(y)); }
+#endif
 };
 
 typedef Vector2<int> Vec2i;
@@ -58,7 +62,6 @@ struct Vector3
 			coords[0]*vec3[1] - coords[1]*vec3[0]
 		};
 	}
-    
 	float length() const { return sqrtf(static_cast<float>(x*x + y*y + z*z)); }
 
 	void normalize();
@@ -89,7 +92,7 @@ Vector3<T>::operator std::string() const
         ',' << y <<
         ',' << z <<
         '>';
-    
+
     return ss.str();
 }
 

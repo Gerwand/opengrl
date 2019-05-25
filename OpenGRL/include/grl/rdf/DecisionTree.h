@@ -14,7 +14,6 @@
 #include <fstream>
 #include <iostream>
 
-
 namespace grl {
 
 #ifdef USE_GPU
@@ -57,6 +56,16 @@ struct Decision
     float t;
 };
 #endif
+
+#ifdef _OPENMP
+// Max size when it is better to use single process instead of multiple ones
+// TODO: This value is experimental and needs adjustement!
+constexpr size_t pixelSizeSP = 10000;
+#endif
+
+// Values used for tree training
+constexpr int learnOffsetDistr = 10;        // Offset - 10 pixels for each direction
+constexpr float learnThresholdDistr = 0.2f; // Depth - 20cm can be assumed as max hand size
 
 constexpr uint8_t grlNodeGoLeft = 0;
 constexpr uint8_t grlNodeGoRight = 1;
@@ -105,14 +114,14 @@ private:
     std::unique_ptr<Node> _left;
     std::unique_ptr<Node> _right;
     // Used for training
-    
+
     Decision _decision;
     std::vector<float> _probabilities;
 };
 
 inline
-Node::Node(Node *parent) 
-    : _parent(parent) 
+Node::Node(Node *parent)
+    : _parent(parent)
 {
 }
 
@@ -120,21 +129,21 @@ inline
 Node::Node(std::vector<Pixel> *pixels, const std::vector<float> &probabilities, Node *parent)
     : _parent(parent)
     , _pixels(pixels)
-{ 
+{
     setProbabilities(probabilities);
 }
 
 inline
 Node::Node(const Decision &decision, Node *parent)
     : _parent(parent)
-{ 
+{
     setDecision(decision);
 }
 
 inline
 Node::Node(const std::vector<float> &probabilities, Node *parent)
     : _parent(parent)
-{ 
+{
     setProbabilities(probabilities);
 }
 
@@ -186,19 +195,18 @@ private:
     int _maxDepth;
 
     void getProbabilities(const std::vector<Pixel> *pixels, std::vector<float> &probabilities);
-#ifdef USE_GPU
+    float evaluateNode(Node *node, NodeTrainingData &data, const std::vector<cv::Mat> &depthImages);
 
+#ifdef USE_GPU
     void getProbabilities(const std::vector<Pixel> *pixels, std::vector<float> &probabilities,
                           TreeTrainGPUContext *gpuContext);
+    float evaluateNode(Node *node, NodeTrainingData &data, const std::vector<cv::Mat> &depthImages,
+                       TreeTrainGPUContext *gpuContext);
 #endif
 
     bool isSingleClass(const std::vector<float> &probabilities);
 
     float getShannonEntropy(const std::vector<float> &probabilities);
-
-    float evaluateNode(Node *node, NodeTrainingData &data, const std::vector<cv::Mat> &depthImages,
-                       TreeTrainGPUContext *gpuContext);
-    float evaluateNode(Node *node, NodeTrainingData &data, const std::vector<cv::Mat> &depthImages);
 };
 
 inline bool
@@ -212,7 +220,7 @@ DecisionTree::isSingleClass(const std::vector<float> &probabilities)
     return notZero == 1;
 }
 
-inline float 
+inline float
 DecisionTree::getShannonEntropy(const std::vector<float> &probabilities)
 {
     float entropy = 0.0f;

@@ -21,7 +21,6 @@ RandomDecisionForest::train(const ForestTrainContext &context)
                 << "\n";
             exit(EINVAL);
         }
-
     }
 #endif
 
@@ -64,13 +63,12 @@ RandomDecisionForest::loadFromFile(const std::string &fileName)
         file >> cmd;
         if (cmd != 'T')
             return file.eof();
-        
+
         int num;
         file >> num;
         if (num != treeNum)
             return file.eof();
 
-        std::cout << "Loading tree " << num << std::endl;
         _trees.push_back(DecisionTree());
         _trees.back().readFromFile(file);
 
@@ -82,7 +80,7 @@ RandomDecisionForest::loadFromFile(const std::string &fileName)
 
 using ProbabilitiesVector = std::vector<const std::vector<float> *>;
 
-void 
+void
 RandomDecisionForest::classifyImage(const cv::Mat &depthImage, cv::Mat &classImage,
                                     ClassesWeights &weights, ClassesPoints &bestPoints)
 {
@@ -169,10 +167,11 @@ RandomDecisionForest::trainTree(DecisionTree *tree, const ForestTrainContext *co
 {
     static std::hash<std::thread::id> hasher;
 
-    size_t pixelsNum = sizeof(Pixel) * context->pixelsPerImage * context->classImages.size();
 #ifdef USE_GPU
     TreeTrainGPUContext treeGPU;
     bool useGPU = false;
+    size_t pixelsNum = sizeof(Pixel) * context->pixelsPerImage * context->classImages.size();
+
     cl_int err = 0;
     if (context->gpuContext != nullptr) {
         useGPU = true;
@@ -235,7 +234,7 @@ RandomDecisionForest::trainTree(DecisionTree *tree, const ForestTrainContext *co
                 maskVal = 1;
                 tryAgain = 0;
             } else {
-                // If we are finding masked pixel for 1000 times contiously, break the loop 
+                // If we are finding masked pixel for 1000 times contiously, break the loop
                 if (++tryAgain == 1000)
                     break;
                 continue;
@@ -254,15 +253,13 @@ RandomDecisionForest::trainTree(DecisionTree *tree, const ForestTrainContext *co
 #endif
                 itd->at<float>(coords), // Depth
                 imgID,
-                index
-                              });
+                index});
             ++pixelsAcquired;
         }
     }
 
     printf("Tree training...\n");
-    tree->train(pixels, context->depthImages, context->nodeTrainLimit, context->maxDepth,
-                gen,
+    tree->train(pixels, context->depthImages, context->nodeTrainLimit, context->maxDepth, gen,
 #ifdef USE_GPU
                 useGPU ? &treeGPU : nullptr);
 #else

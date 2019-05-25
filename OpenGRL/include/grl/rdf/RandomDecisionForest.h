@@ -61,7 +61,7 @@ private:
     static void trainTree(DecisionTree *tree, const ForestTrainContext *context);
 };
 
-inline 
+inline
 RandomDecisionForest::RandomDecisionForest(size_t ntrees)
 {
     _trees.resize(ntrees);

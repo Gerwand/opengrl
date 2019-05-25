@@ -113,8 +113,8 @@ typedef struct Pixel
 {
     Vector2<short> coords;
     float depth;
-    uint imgID;
-    char classIndex;
+    uint32_t imgID;
+    int8_t classIndex;
 } Pixel;
 #endif
 
@@ -139,7 +139,7 @@ void convertRGBToHandClasses(const cv::Mat &src, cv::Mat &dst);
 void convertHandClassesToRGB(const cv::Mat &src, cv::Mat &dst);
 cv::Rect loadDepthImageWithClasses(const std::string &className, const std::string &depthName,
                                    cv::Mat &classImage, cv::Mat &depthImage);
-void loadDepthImagesWithClasses(size_t start, size_t stop,
+void loadDepthImagesWithClasses(size_t start, size_t stop, size_t step,
                                 uint8_t nameDigits,
                                 const std::string &className,
                                 const std::string &depthName,

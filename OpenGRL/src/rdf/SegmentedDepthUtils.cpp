@@ -47,7 +47,7 @@ convertRGBToHandClasses(const cv::Mat &src, cv::Mat &dst)
     }
 }
 
-void 
+void
 convertHandClassesToRGB(const cv::Mat &src, cv::Mat &dst)
 {
     dst = cv::Mat(src.rows, src.cols, CV_8UC3);
@@ -131,7 +131,7 @@ loadDepthImageWithClasses(const std::string &className, const std::string &depth
 }
 
 void
-loadDepthImagesWithClasses(size_t start, size_t stop,
+loadDepthImagesWithClasses(size_t start, size_t stop, size_t step,
                            uint8_t nameDigits,
                            const std::string &className, const std::string &depthName,
                            std::vector<cv::Mat> &classImages, std::vector<cv::Mat> &depthImages)
@@ -139,8 +139,8 @@ loadDepthImagesWithClasses(size_t start, size_t stop,
     classImages.reserve(stop-start);
     depthImages.reserve(stop-start);
     cv::Size sizeMax(0, 0);
-    for (size_t i = start; i < stop; i += 3) {
-        printf("Image %llu\n", i);
+    for (size_t i = start; i < stop; i += step) {
+        printf("Image %ju\n", i);
         std::ostringstream ssClass;
         std::ostringstream ssDepth;
         ssClass << className << std::setfill('0') << std::setw(nameDigits) << i << ".png";

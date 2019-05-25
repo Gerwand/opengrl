@@ -1,9 +1,11 @@
 #include <grl/rdf/DecisionTree.h>
 
 #include <cassert>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 namespace grl {
-
 
 void
 Node::setLeaf(bool leaf)
@@ -101,7 +103,7 @@ Node::saveToFile(std::ofstream &file)
     file << ".U\n";
 }
 
-const Node * 
+const Node *
 Node::getLeafForPixel(const cv::Mat &depthImage, const Pixel &p)
 {
     const Node *node = this;
@@ -114,16 +116,34 @@ Node::getLeafForPixel(const cv::Mat &depthImage, const Pixel &p)
     return node;
 }
 
-void 
+void
 DecisionTree::getProbabilities(const std::vector<Pixel> *pixels, std::vector<float> &probabilities)
 {
     probabilities.clear();
     probabilities.resize(grlHandIndexNum);
+    std::fill(probabilities.begin(), probabilities.end(), 0.0f);
 
-    // Get the histogram
-    for (auto it = pixels->cbegin(); it != pixels->cend(); ++it) {
-        ++probabilities[it->classIndex];
-    }
+#ifdef _OPENMP
+    if (pixels->size() > pixelSizeSP) {
+        // Get the histogram
+#pragma omp parallel shared(probabilities)
+        {
+            std::vector<float> tprobabilities(grlHandIndexNum);
+            std::fill(tprobabilities.begin(), tprobabilities.end(), 0.0f);
+#pragma omp for
+            for (size_t i = 0; i < pixels->size(); ++i) {
+                ++tprobabilities[(*pixels)[i].classIndex];
+            }
+
+            for (int i = 0; i < grlHandIndexNum; ++i) {
+#pragma omp atomic
+                probabilities[i] += tprobabilities[i];
+            }
+        }
+    } else
+#endif _OPENMP
+	    for (auto it = pixels->cbegin(); it != pixels->cend(); ++it)
+		    ++probabilities[it->classIndex];
 
     // Normalize the probabilities
     size_t sum = pixels->size();
@@ -140,15 +160,34 @@ DecisionTree::evaluateNode(Node *node, NodeTrainingData &data, const std::vector
     data.rightPixels->clear();
     data.rightProbabilities.clear();
 
-    for (auto it = data.allPixels->cbegin(); it != data.allPixels->cend(); ++it) {
-        const Pixel &p = *it;
-        const cv::Mat &depthImage = depthImages[p.imgID];
+#ifdef _OPENMP
+    if (data.allPixels->size() > pixelSizeSP) {
+        std::vector<uint8_t> directions(data.allPixels->size());
 
-        if (node->evaluateFeature(depthImage, p) == grlNodeGoLeft)
-            data.leftPixels->push_back(p);
-        else
-            data.rightPixels->push_back(p);
-    }
+#pragma omp parallel for
+        for (size_t i = 0; i < data.allPixels->size(); ++i) {
+            const Pixel &p = (*data.allPixels)[i];
+            const cv::Mat &depthImage = depthImages[p.imgID];
+            directions[i] = node->evaluateFeature(depthImage, p);
+        }
+
+        auto itPix = data.allPixels->cbegin();
+        for (auto it = directions.begin(); it != directions.end(); ++it, ++itPix) {
+            if (*it == grlNodeGoLeft)
+                data.leftPixels->push_back(*itPix);
+            else
+                data.rightPixels->push_back(*itPix);
+        }
+    } else
+#endif // _OPENMP
+        for (size_t i = 0; i < data.allPixels->size(); ++i) {
+            const Pixel &p = (*data.allPixels)[i];
+            const cv::Mat &depthImage = depthImages[p.imgID];
+            if (node->evaluateFeature(depthImage, p) == grlNodeGoLeft)
+                data.leftPixels->push_back(p);
+            else
+                data.rightPixels->push_back(p);
+        }
 
     if (data.leftPixels->empty() || data.rightPixels->empty()) {
         return -std::numeric_limits<float>::infinity();
@@ -167,23 +206,22 @@ DecisionTree::evaluateNode(Node *node, NodeTrainingData &data, const std::vector
     return allShanon - leftEntropy - rightEntropy;
 }
 
-
 void
 DecisionTree::train(std::vector<Pixel> *pixels, const std::vector<cv::Mat> &depthImages,
                     int nodeTrainLimit, int maxDepth, std::mt19937 &gen, TreeTrainGPUContext *gpuContext)
 {
     // For offsets
-    std::uniform_int_distribution<> offsetDistribution(-10, 10);
-    // Biggest size for the hand is around 20cm
-    std::uniform_real_distribution<float> thresholdDistribution(-0.2f, 0.2f);
+    std::uniform_int_distribution<> offsetDistribution(-learnOffsetDistr, learnOffsetDistr);
+    std::uniform_real_distribution<float> thresholdDistribution(-learnThresholdDistr, learnThresholdDistr);
 
     NodeTrainingData data;
     data.allPixels = pixels;
+
 #ifdef USE_GPU
     bool useGPU = gpuContext != nullptr;
-    if (useGPU) {
+    if (useGPU)
         getProbabilities(data.allPixels, data.allProbabilities, gpuContext);
-    } else
+    else
 #endif
         getProbabilities(data.allPixels, data.allProbabilities);
 
@@ -193,9 +231,6 @@ DecisionTree::train(std::vector<Pixel> *pixels, const std::vector<cv::Mat> &dept
     Node *node = _root.get();
     int depth = 1;
     int good = 0;
-#ifdef USE_GPU
-    cl_int err = 0;
-#endif
     while (node != nullptr) {
         // Determine if we should stay at this node, go up or go right
         if (node->getPixels() == nullptr) {
@@ -210,12 +245,13 @@ DecisionTree::train(std::vector<Pixel> *pixels, const std::vector<cv::Mat> &dept
         }
 
         ++good;
-        printf("Training node %d at depth %d\n", good, depth);
 
         // Get all pixels which should be split further
         data.allPixels = node->getPixels();
         data.allProbabilities = node->getProbabilities();
 
+        printf("Training node %d at depth %d with %ju\n", good, depth, data.allPixels->size());
+        fflush(stdout);
         // Set the node as leaf if max depth is achieved or the all pixels are from
         // only one class
         if (depth == maxDepth || isSingleClass(data.allProbabilities)) {
@@ -231,13 +267,19 @@ DecisionTree::train(std::vector<Pixel> *pixels, const std::vector<cv::Mat> &dept
 
         data.leftPixels = new std::vector<Pixel>;
         data.rightPixels = new std::vector<Pixel>;
+        data.leftPixels->reserve(data.allPixels->size());
+        data.rightPixels->reserve(data.allPixels->size());
 
         Decision bestDecision;
         std::vector<Pixel> *bestLeftPixels = nullptr;
         std::vector<Pixel> *bestRightPixels = nullptr;
         std::vector<float> bestLeftProbabilities, bestRightProbabilities;
         float bestScore = -std::numeric_limits<float>::infinity();
+#ifdef _OPENMP
+        const float begin_time = omp_get_wtime();
+#else
         const clock_t begin_time = clock();
+#endif
 #ifdef USE_GPU
         if (useGPU) {
             err = gpuContext->queue.enqueueWriteBuffer(gpuContext->bufferAllPix, CL_TRUE, 0,
@@ -292,6 +334,8 @@ DecisionTree::train(std::vector<Pixel> *pixels, const std::vector<cv::Mat> &dept
                 bestDecision = decision;
                 delete bestLeftPixels;
                 delete bestRightPixels;
+                data.leftPixels->shrink_to_fit();
+                data.rightPixels->shrink_to_fit();
                 bestLeftPixels = data.leftPixels;
                 bestRightPixels = data.rightPixels;
                 data.leftPixels = new std::vector<Pixel>;
@@ -300,10 +344,15 @@ DecisionTree::train(std::vector<Pixel> *pixels, const std::vector<cv::Mat> &dept
                 bestRightProbabilities = data.rightProbabilities;
             }
         }
+#ifdef _OPENMP
+        std::cout << float(omp_get_wtime() - begin_time) << " With score: " << bestScore << std::endl;
+#else
         std::cout << float(clock() - begin_time) /  CLOCKS_PER_SEC << std::endl;
+#endif
 
         // if didn't managed to get any score, go up and make the parent the leaf
-        if (bestScore == -std::numeric_limits<float>::infinity()) {
+        if (bestScore == -std::numeric_limits<float>::infinity() ||
+            bestLeftPixels->empty() || bestRightPixels->empty()) {
             std::cout << "No best score at depth " << depth << ". Go up.\n";
             node = node->getParent();
             --depth;
@@ -312,7 +361,7 @@ DecisionTree::train(std::vector<Pixel> *pixels, const std::vector<cv::Mat> &dept
             }
         } else {
             std::cout << "Best score " << bestScore << " at depth " << depth
-                << ". Left: " << data.leftPixels->size() << ", Right: " << data.rightPixels->size()
+                << ". Left: " << bestLeftPixels->size() << ", Right: " << bestRightPixels->size()
                 << " .\n";
             std::cout << "Best decision: t = " << bestDecision.t
                 << " u = (" << bestDecision.u.x << ", " << bestDecision.u.y
@@ -546,7 +595,7 @@ DecisionTree::getProbabilities(const std::vector<Pixel> *pixels, std::vector<flo
 }
 #endif
 
-const std::vector<float> & 
+const std::vector<float> &
 DecisionTree::classifyPixel(const cv::Mat &depthImage, const Pixel &p)
 {
     const Node *leaf = _root->getLeafForPixel(depthImage, p);
