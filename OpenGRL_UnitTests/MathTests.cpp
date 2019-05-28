@@ -5,7 +5,6 @@
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
-constexpr size_t msgBufSize = 256;
 
 TEST_MODULE_INITIALIZE(ModuleInitialize)
 {
@@ -28,6 +27,9 @@ private:
         T min;
         T max;
     };
+
+    static constexpr float floatTolerance = 0.00001f;
+    static constexpr size_t msgBufSize = 256;
 
     wchar_t message[msgBufSize];
 public:
@@ -174,14 +176,14 @@ public:
 
         constexpr size_t examplesSize = 4;
         MinMax<float> trueRanges[valuesSize][examplesSize] = {
-            { {-4.91f,-4.9f}, {-4.9f,-4.89f}, {-4.89f,-4.91f}, {-8.0f, 5.0f}},
-            { {10.321f,10.322f}, {10.320f,-10.321f}, {10.320f,10.322f}, {-9.0f, 20.0f}},
+            { {-4.91f,-4.9f}, {-4.9f,-4.89f}, {-4.91f,-4.89f}, {-8.0f, 5.0f}},
+            { {10.321f,10.322f}, {10.320f,10.321f}, {10.320f,10.322f}, {-9.0f, 20.0f}},
             { {-0.01f,0.0f}, {0.0f,0.01f}, {-0.01f,0.01f}, {-5.0f, 5.0f} }
         };
         MinMax<float> falseRanges[valuesSize][examplesSize] = {
-            { {-4.92f,-4.91f}, {-4.90f,-4.89f}, {-5.0f,-11.0f}, {-2.0f,10.0f} },
+            { {-4.92f,-4.91f}, {-4.89f,-4.88f}, {-11.0f,-5.0f}, {-2.0f,10.0f} },
             { {10.322f,10.323f}, {10.319f,10.320f}, {11.0f,15.0f}, {-15.0f,6.0f} },
-            { {-0.02f,-0.01f}, {0.01f,0.02f}, {11.0f,15.0f}, {-15.0f,6.0f} },
+            { {-0.02f,-0.01f}, {0.01f,0.02f}, {11.0f,15.0f}, {-15.0f,-6.0f} },
         };
 
         // True scenarios
@@ -203,7 +205,167 @@ public:
         Logger::WriteMessage("----isBetweenFloat done");
     }
 
+    TEST_METHOD(clampInt)
+    {
+         Logger::WriteMessage("----In clampInt");
+
+        constexpr size_t valuesSize = 2;
+        int values[valuesSize] = { 5, -5 };
+
+        constexpr size_t examplesSize = 7;
+        MinMax<int> ranges[valuesSize][examplesSize] = {
+            { {-1,5}, {1,4}, {1,6}, {5,10}, {6,10}, {4,10}, {-1, 11} },
+            { {-9,-5}, {-9,-6}, {-9,-4}, {-4,4}, {-5,4}, {-6,7}, {-9,1} },
+        };
+        int expectedValues[valuesSize][examplesSize] = {
+            {5, 4, 5, 5, 6, 5, 5},
+            {-5, -6, -5, -4, -5, -5, -5},
+        };
+
+        for (size_t n = 0; n < valuesSize; ++n) {
+            for (size_t i = 0; i < examplesSize; ++i) {
+                MinMax<int> &range = ranges[n][i];
+                int result = grl::clamp(values[n], range.min, range.max);
+                swprintf(message, msgBufSize,
+                         L"Clamping %d to range (%d, %d).\n",
+                         values[n], range.min, range.max);
+                Assert::AreEqual(expectedValues[n][i], result, message);
+            }
+        }
+
+        Logger::WriteMessage("----clampInt done");
+    }
+
+    TEST_METHOD(clampFloat)
+    {
+        Logger::WriteMessage("----In clampFloat");
+        constexpr size_t valuesSize = 2;
+        float values[valuesSize] = { 5.2f, -1.53f};
+
+        constexpr size_t examplesSize = 7;
+        MinMax<float> ranges[valuesSize][examplesSize] = {
+            { {0.0f,5.2f}, {1.0f,5.21f}, {0.0f,5.19f},
+              {5.2f,10.0f}, {5.21f,10.0f}, {5.19f,10.0f},
+              {-1.0f, 11.0f} },
+            { {-9.0f,-1.53f}, {-9.0f,-1.531f}, {-9.0f,-1.529f},
+              {-1.53f,4.0f}, {-1.531f,4.0f}, {-1.529f,4.0f},
+              {-9.2f,1.5f} },
+        };
+        float expectedValues[valuesSize][examplesSize] = {
+            {5.2f, 5.2f, 5.19f, 5.2f, 5.21f, 5.2f, 5.2f},
+            {-1.53f, -1.531f, -1.53f, -1.53f, -1.53f, -1.529f, -1.53f},
+        };
+
+        for (size_t n = 0; n < valuesSize; ++n) {
+            for (size_t i = 0; i < examplesSize; ++i) {
+                MinMax<float> &range = ranges[n][i];
+                float result = grl::clamp(values[n], range.min, range.max);
+                swprintf(message, msgBufSize,
+                         L"Clamping %f to range (%f, %f)\n",
+                         values[n], range.min, range.max);
+                Assert::AreEqual(expectedValues[n][i], result, floatTolerance, message);
+            }
+        }
+
+        Logger::WriteMessage("----clampFloat done");
+    }
+
+    TEST_METHOD(clampMin)
+    {
+         Logger::WriteMessage("----In clampMin");
+
+        constexpr size_t valuesSize = 2;
+        int values[valuesSize] = { 5, -5 };
+
+        constexpr size_t examplesSize = 4;
+        int minimums[valuesSize][examplesSize] = {
+            { 4, 5, 6, 10 },
+            { -6, -5, -4, 1 },
+        };
+        int expectedValues[valuesSize][examplesSize] = {
+            { 5, 5, 6, 10 },
+            { -5, -5, -4, 1 }
+        };
+
+        for (size_t n = 0; n < valuesSize; ++n) {
+            for (size_t i = 0; i < examplesSize; ++i) {
+                int result = grl::clampMin(values[n], minimums[n][i]);
+                swprintf(message, msgBufSize,
+                         L"Clamping %d to range (%d, -).\n",
+                         values[n], minimums[n][i]);
+                Assert::AreEqual(expectedValues[n][i], result, message);
+            }
+        }
+
+        Logger::WriteMessage("----clampMin done");
+    }
+
+    TEST_METHOD(clampMax)
+    {
+         Logger::WriteMessage("----In clampMax");
+
+        constexpr size_t valuesSize = 2;
+        int values[valuesSize] = { 5, -5 };
+
+        constexpr size_t examplesSize = 4;
+        int maximums[valuesSize][examplesSize] = {
+            { 4, 5, 6, 1 },
+            { -6, -5, -4, -10 },
+        };
+        int expectedValues[valuesSize][examplesSize] = {
+            { 4, 5, 5, 1 },
+            { -6, -5, -5, -10 },
+        };
+
+        for (size_t n = 0; n < valuesSize; ++n) {
+            for (size_t i = 0; i < examplesSize; ++i) {
+                int result = grl::clampMax(values[n], maximums[n][i]);
+                swprintf(message, msgBufSize,
+                         L"Clamping %d to range (-, %d).\n",
+                         values[n], maximums[n][i]);
+                Assert::AreEqual(expectedValues[n][i], result, message);
+            }
+        }
+
+        Logger::WriteMessage("----clampMax done");
+    }
+
+    TEST_METHOD(sigmaInt)
+    {
+         Logger::WriteMessage("----In sigmaInt");
+
+        constexpr size_t valuesSize = 5;
+        int values[valuesSize] = { 12, -12, -1, 1, 0};
+        int expectedValues[valuesSize] = { 1, -1, -1, 1, 1 };
+
+        for (size_t n = 0; n < valuesSize; ++n) {
+            int result = grl::sigma(values[n]);
+            swprintf(message, msgBufSize,
+                        L"Sigmoid function for input %d.\n", values[n]);
+            Assert::AreEqual(expectedValues[n], result, message);
+        }
+
+        Logger::WriteMessage("----sigmaInt done");
+    }
+
+    TEST_METHOD(sigmaFloat)
+    {
+        Logger::WriteMessage("----In sigmaFloat");
+
+        constexpr size_t valuesSize = 5;
+        float values[valuesSize] = { 6.4f, -2.5, -0.001f, 0.001f, 0.0f};
+        int expectedValues[valuesSize] = { 1, -1, -1, 1, 1 };
+
+        for (size_t n = 0; n < valuesSize; ++n) {
+            int result = grl::sigma(values[n]);
+            swprintf(message, msgBufSize,
+                        L"Sigmoid function for input %f.\n", values[n]);
+            Assert::AreEqual(expectedValues[n], result, message);
+        }
+
+        Logger::WriteMessage("----sigmaFloat done");
+    }
+
+    
 };
-
-
 }

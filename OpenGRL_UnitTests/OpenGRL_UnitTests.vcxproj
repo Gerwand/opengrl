@@ -174,7 +174,7 @@ xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_imgproc345.dll" "$(TargetDir)" /R /Y</
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="unittests.cpp" />
+    <ClCompile Include="MathTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OpenGRL\OpenGRL.vcxproj">
