@@ -114,6 +114,14 @@ struct Vector3
      * @returns dot product of two vectors.
      */
 	T dot(const Vector3 &vec3) { return x*vec3.x + y*vec3.y + z*vec3.z; }
+
+    /**
+     * Cross (vector) product of two vectors.
+     * It creates orthogonal vector to the plane defined by two input vectors.
+     *
+     * @param vec3 the cons Vector3 which should be used for calculating cross product.
+     * @returns cross product of two vectors.
+     */
 	Vector3 cross(const Vector3 &vec3) {
 		return Vector3 {
 			coords[1]*vec3[2] - coords[2]*vec3[1],
