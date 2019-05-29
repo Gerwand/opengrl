@@ -366,4 +366,166 @@ public:
         Logger::WriteMessage("----sigmaFloat done");
     }
 };
+
+TEST_CLASS(Vector2Tester)
+{
+private:
+    static constexpr float floatTolerance = 0.001f;
+public:
+    Vector2Tester()
+    {
+        Logger::WriteMessage("--In Vector2Tester");
+    }
+
+    ~Vector2Tester()
+    {
+        Logger::WriteMessage("--Vector2Tester Done");
+    }
+
+    TEST_METHOD(lengthInt)
+    {
+        Logger::WriteMessage("----In lengthInt");
+
+        grl::Vec2i vec = { 1, 0 };
+        Assert::AreEqual(1.0f, vec.length());
+
+        vec = { 0, 1 };
+        Assert::AreEqual(1.0f, vec.length());
+
+        vec.x = 2; vec.y = 5;
+        Assert::AreEqual(5.385f, vec.length(), floatTolerance);
+
+        Logger::WriteMessage("----lengthInt Done");
+    }
+
+    TEST_METHOD(lengthFloat)
+    {
+        Logger::WriteMessage("----In lengthFloat");
+
+        grl::Vec2f vec = { 1.0f, 0.0f };
+        Assert::AreEqual(1.0f, vec.length());
+
+        vec = { 0.0f, 1.0f };
+        Assert::AreEqual(1.0f, vec.length());
+
+        vec.x = 2.5f; vec.y = 5.2f;
+        Assert::AreEqual(5.769f, vec.length(), floatTolerance);
+
+        Logger::WriteMessage("----lengthFloat Done");
+    }
+
+
+    TEST_METHOD(toCVPointInt)
+    {
+        Logger::WriteMessage("----In toCPPointInt");
+        cv::Point p;
+        grl::Vec2i vec = { 3, 5 };
+
+        p = vec;
+        Assert::AreEqual(p.x, vec.x);
+        Assert::AreEqual(p.y, vec.y);
+
+        Logger::WriteMessage("----toCVPointDone Done");
+    }
+};
+
+TEST_CLASS(Vector3Tester)
+{
+private:
+    static constexpr float floatTolerance = 0.001f;
+
+    grl::Vec3f vec1;
+    grl::Vec3f vec2;
+public:
+    Vector3Tester()
+    {
+        Logger::WriteMessage("--In Vector3Tester");
+    }
+
+    ~Vector3Tester()
+    {
+        Logger::WriteMessage("--Vector3Tester Done");
+    }
+
+    TEST_METHOD_INITIALIZE(prepareVectors)
+    {
+        vec1 = grl::Vec3f(1.0f, 3.0f, -2.0f);
+        vec2 = grl::Vec3f(5.0f, -3.0f, 2.0f);
+    }
+
+    TEST_METHOD(dot)
+    {
+        Logger::WriteMessage("----In dot");
+
+        float dotProduct = vec1.dot(vec2);
+        Assert::AreEqual(-8.0f, dotProduct, floatTolerance);
+
+        Logger::WriteMessage("----dot Done");
+    }
+
+    TEST_METHOD(cross)
+    {
+        Logger::WriteMessage("----In dot");
+
+        grl::Vec3f ortho = vec1.cross(vec2);
+        Assert::AreEqual(0.0f, ortho.x, floatTolerance);
+        Assert::AreEqual(-12.0f, ortho.y, floatTolerance);
+        Assert::AreEqual(-18.0f, ortho.z, floatTolerance);
+
+        Logger::WriteMessage("----dot Done");
+    }
+
+    TEST_METHOD(length)
+    {
+        Logger::WriteMessage("----In length");
+
+        Assert::AreEqual(1.0f, grl::Vec3f(1.0f, 0.0f, 0.0f).length());
+        Assert::AreEqual(1.0f, grl::Vec3f(0.0f, 1.0f, 0.0f).length());
+        Assert::AreEqual(1.0f, grl::Vec3f(0.0f, 0.0f, -1.0f).length());
+        Assert::AreEqual(3.741f, vec1.length(), floatTolerance);
+        Assert::AreEqual(6.164f, vec2.length(), floatTolerance);
+
+        Logger::WriteMessage("----length Done");
+    }
+
+    TEST_METHOD(normalize)
+    {
+        Logger::WriteMessage("----In normalize");
+
+        grl::Vec3f unit(5.0f, 0.0f, 0.0f);
+        unit.normalize();
+        Assert::AreEqual(1.0f, unit.x);
+        Assert::AreEqual(0.0f, unit.y);
+        Assert::AreEqual(0.0f, unit.z);
+        unit = grl::Vec3f(0.0f, 2.0f, 0.0f);
+        unit.normalize();
+        Assert::AreEqual(0.0f, unit.x);
+        Assert::AreEqual(1.0f, unit.y);
+        Assert::AreEqual(0.0f, unit.z);
+        unit = grl::Vec3f(0.0f, 0.0f, 12.0f);
+        unit.normalize();
+        Assert::AreEqual(0.0f, unit.x);
+        Assert::AreEqual(0.0f, unit.y);
+        Assert::AreEqual(1.0f, unit.z);
+
+        vec1.normalize();
+        grl::Vec3f normalizedVec2 = grl::Vec3f::normalize(vec2);
+        Assert::AreEqual(1.0f, vec1.length(), floatTolerance);
+        Assert::AreEqual(1.0f, normalizedVec2.length(), floatTolerance);
+
+        Logger::WriteMessage("----normalize Done");
+    }
+
+    TEST_METHOD(distance)
+    {
+        Logger::WriteMessage("----In length");
+
+        float dist1 = grl::Vec3f::distance(vec1, vec2);
+        float dist2 = grl::Vec3f::distance(vec2, vec1);
+        Assert::AreEqual(dist1, dist2);
+        Assert::AreEqual(8.246f, dist1, floatTolerance);
+
+        Logger::WriteMessage("----length Done");
+    }
+};
 }
