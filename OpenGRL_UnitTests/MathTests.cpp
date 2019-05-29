@@ -43,8 +43,8 @@ public:
         Logger::WriteMessage("--MathFunctionsTester Done");
     }
 
-	TEST_METHOD(asbBetweenInt)
-	{
+    TEST_METHOD(asbBetweenInt)
+    {
         Logger::WriteMessage("----In asbBetweenInt");
 
         constexpr size_t valuesSize = 3;
@@ -83,7 +83,7 @@ public:
         }
 
         Logger::WriteMessage("----asbBetweenInt done");
-	}
+    }
 
     TEST_METHOD(asbBetweenFloat)
     {
@@ -207,7 +207,7 @@ public:
 
     TEST_METHOD(clampInt)
     {
-         Logger::WriteMessage("----In clampInt");
+        Logger::WriteMessage("----In clampInt");
 
         constexpr size_t valuesSize = 2;
         int values[valuesSize] = { 5, -5 };
@@ -240,7 +240,7 @@ public:
     {
         Logger::WriteMessage("----In clampFloat");
         constexpr size_t valuesSize = 2;
-        float values[valuesSize] = { 5.2f, -1.53f};
+        float values[valuesSize] = { 5.2f, -1.53f };
 
         constexpr size_t examplesSize = 7;
         MinMax<float> ranges[valuesSize][examplesSize] = {
@@ -272,7 +272,7 @@ public:
 
     TEST_METHOD(clampMin)
     {
-         Logger::WriteMessage("----In clampMin");
+        Logger::WriteMessage("----In clampMin");
 
         constexpr size_t valuesSize = 2;
         int values[valuesSize] = { 5, -5 };
@@ -302,7 +302,7 @@ public:
 
     TEST_METHOD(clampMax)
     {
-         Logger::WriteMessage("----In clampMax");
+        Logger::WriteMessage("----In clampMax");
 
         constexpr size_t valuesSize = 2;
         int values[valuesSize] = { 5, -5 };
@@ -332,16 +332,16 @@ public:
 
     TEST_METHOD(sigmaInt)
     {
-         Logger::WriteMessage("----In sigmaInt");
+        Logger::WriteMessage("----In sigmaInt");
 
         constexpr size_t valuesSize = 5;
-        int values[valuesSize] = { 12, -12, -1, 1, 0};
+        int values[valuesSize] = { 12, -12, -1, 1, 0 };
         int expectedValues[valuesSize] = { 1, -1, -1, 1, 1 };
 
         for (size_t n = 0; n < valuesSize; ++n) {
             int result = grl::sigma(values[n]);
             swprintf(message, msgBufSize,
-                        L"Sigmoid function for input %d.\n", values[n]);
+                     L"Sigmoid function for input %d.\n", values[n]);
             Assert::AreEqual(expectedValues[n], result, message);
         }
 
@@ -353,19 +353,17 @@ public:
         Logger::WriteMessage("----In sigmaFloat");
 
         constexpr size_t valuesSize = 5;
-        float values[valuesSize] = { 6.4f, -2.5, -0.001f, 0.001f, 0.0f};
+        float values[valuesSize] = { 6.4f, -2.5f, -0.001f, 0.001f, 0.0f };
         int expectedValues[valuesSize] = { 1, -1, -1, 1, 1 };
 
         for (size_t n = 0; n < valuesSize; ++n) {
             int result = grl::sigma(values[n]);
             swprintf(message, msgBufSize,
-                        L"Sigmoid function for input %f.\n", values[n]);
+                     L"Sigmoid function for input %f.\n", values[n]);
             Assert::AreEqual(expectedValues[n], result, message);
         }
 
         Logger::WriteMessage("----sigmaFloat done");
     }
-
-    
 };
 }
