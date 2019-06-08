@@ -432,6 +432,7 @@ DecisionTree::readFromFile(std::ifstream & file)
                 node->setProbabilities(probabilities);
                 break;
             case 'D':
+            {
                 // Read decision
                 Decision decision;
                 file >> decision.u.x >> decision.u.y
@@ -439,6 +440,7 @@ DecisionTree::readFromFile(std::ifstream & file)
                     >> decision.t;
                 node->setDecision(decision);
                 break;
+            }
             default:
                 assert(false);
             }
