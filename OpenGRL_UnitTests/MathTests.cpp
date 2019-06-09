@@ -527,5 +527,248 @@ public:
 
         Logger::WriteMessage("----length Done");
     }
+
+    TEST_METHOD(operatorSum)
+    {
+        Logger::WriteMessage("----In operatorSum");
+
+        grl::Vec3f sum = vec1 + vec2;
+        Assert::AreEqual(6.0f, sum.x);
+        Assert::AreEqual(0.0f, sum.y);
+        Assert::AreEqual(0.0f, sum.z);
+
+        vec1 += vec2;
+        Assert::AreEqual(6.0f, vec1.x);
+        Assert::AreEqual(0.0f, vec1.y);
+        Assert::AreEqual(0.0f, vec1.z);
+
+        Logger::WriteMessage("----operatorSum Done");
+    }
+
+    TEST_METHOD(operatorSubtract)
+    {
+        Logger::WriteMessage("----In operatorSubtract");
+
+        grl::Vec3f sub1 = vec1 - vec2;
+        Assert::AreEqual(-4.0f, sub1.x);
+        Assert::AreEqual(6.0f, sub1.y);
+        Assert::AreEqual(-4.0f, sub1.z);
+
+        grl::Vec3f sub2 = vec2 - vec1;
+        Assert::AreEqual(4.0f, sub2.x);
+        Assert::AreEqual(-6.0f, sub2.y);
+        Assert::AreEqual(4.0f, sub2.z);
+
+        vec1 -= vec2;
+        Assert::AreEqual(-4.0f, vec1.x);
+        Assert::AreEqual(6.0f, vec1.y);
+        Assert::AreEqual(-4.0f, vec1.z);
+
+        Logger::WriteMessage("----operatorSubtract Done");
+    }
+
+    TEST_METHOD(operatorMultiply)
+    {
+        Logger::WriteMessage("----In operatorMultiply");
+
+        float val = -2.5f;
+        grl::Vec3f mul1 = vec1 * val;
+        Assert::AreEqual(-2.5f, mul1.x);
+        Assert::AreEqual(-7.5f, mul1.y);
+        Assert::AreEqual(5.0f, mul1.z);
+        grl::Vec3f mul2 = val * vec1;
+        Assert::AreEqual(-2.5f, mul2.x);
+        Assert::AreEqual(-7.5f, mul2.y);
+        Assert::AreEqual(5.0f, mul2.z);
+
+        vec2 *= val;
+        Assert::AreEqual(-12.5f, vec2.x);
+        Assert::AreEqual(7.5f, vec2.y);
+        Assert::AreEqual(-5.0f, vec2.z);
+
+        Logger::WriteMessage("----operatorMultiply Done");
+    }
+
+    TEST_METHOD(operatorDivide)
+    {
+        Logger::WriteMessage("----In operatorDivide");
+
+        float val = 2.0f;
+        grl::Vec3f div1 = vec1 / val;
+        Assert::AreEqual(0.5f, div1.x, floatTolerance);
+        Assert::AreEqual(1.5f, div1.y, floatTolerance);
+        Assert::AreEqual(-1.0f, div1.z, floatTolerance);
+
+        vec2 /= val;
+        Assert::AreEqual(2.5f, vec2.x, floatTolerance);
+        Assert::AreEqual(-1.5f, vec2.y, floatTolerance);
+        Assert::AreEqual(1.0f, vec2.z, floatTolerance);
+
+        Logger::WriteMessage("----operatorDivide Done");
+    }
 };
+
+TEST_CLASS(PlaneTester)
+{
+private:
+    static constexpr float floatTolerance = 0.001f;
+
+    grl::Vec3f p0;
+    grl::Plane plane;
+    grl::Plane planeXY;
+    grl::Plane planeXZ;
+    grl::Plane planeYZ;
+    grl::Plane planeXYInv;
+public:
+    PlaneTester()
+    {
+        Logger::WriteMessage("--In PlaneTester");
+    }
+
+    ~PlaneTester()
+    {
+        Logger::WriteMessage("--PlaneTester Done");
+    }
+
+    TEST_METHOD_INITIALIZE(preparePlanes)
+    {
+        grl::Vec3f normal = grl::Vec3f::normalize(grl::Vec3f(15.0f, 94.0f, 127.0f));
+        p0 = grl::Vec3f(1.0f, -4.0f, 8.0f);
+
+        plane.set(normal, p0);
+        planeXY.set(grl::Vec3f(0.0f, 0.0f, 1.0f), p0);
+        planeXZ.set(grl::Vec3f(0.0f, 1.0f, 0.0f), p0);
+        planeYZ.set(grl::Vec3f(1.0f, 0.0f, 0.0f), p0);
+        planeXYInv.set(grl::Vec3f(0.0f, 0.0f, -1.0f), p0);
+    }
+
+    TEST_METHOD(function)
+    {
+        Logger::WriteMessage("----In function");
+
+        // Plane XY
+        // On plane
+        Assert::AreEqual(0.0f, planeXY(p0), floatTolerance);
+        Assert::AreEqual(0.0f, planeXY(p0 + grl::Vec3f(5.0f, -3.0f, 0.0f)), floatTolerance);
+        // Behind plane
+        Assert::AreEqual(-5.0f, planeXY(p0 + grl::Vec3f(0.0f, 0.0f, -5.0f)), floatTolerance);
+        Assert::IsTrue(planeXY(p0+ grl::Vec3f(-8.0f, 6.0f, -1.0f)) < 0.0f);
+        // In front of plane
+        Assert::AreEqual(3.0f, planeXY(p0 + grl::Vec3f(0.0f, 0.0f, 3.0f)), floatTolerance);
+        Assert::IsTrue(planeXY(p0+ grl::Vec3f(5.0f, 4.0f, 9.0f)) > 0.0f);
+
+        // Plane YZ
+        // On plane
+        Assert::AreEqual(0.0f, planeYZ(p0), floatTolerance);
+        Assert::AreEqual(0.0f, planeYZ(p0 + grl::Vec3f(0.0f, 2.0f, 3.0f)), floatTolerance);
+        // Behind plane
+        Assert::AreEqual(-5.0f, planeYZ(p0 + grl::Vec3f(-5.0f, 0.0f, 0.0f)), floatTolerance);
+        Assert::IsTrue(planeXY(p0+ grl::Vec3f(-8.0f, 6.0f, -1.0f)) < 0.0f);
+        // In front of plane
+        Assert::AreEqual(3.0f, planeYZ(p0 + grl::Vec3f(3.0f, 0.0f, 0.0f)), floatTolerance);
+        Assert::IsTrue(planeYZ(p0+ grl::Vec3f(5.0f, 4.0f, 9.0f)) > 0.0f);
+
+        // Plane XZ
+        // On plane
+        Assert::AreEqual(0.0f, planeXZ(p0), floatTolerance);
+        Assert::AreEqual(0.0f, planeXZ(p0 + grl::Vec3f(-5.0f, 0.0f, 3.0f)), floatTolerance);
+        // Behind plane
+        Assert::AreEqual(-5.0f, planeXZ(p0 + grl::Vec3f(0.0f, -5.0f, 0.0f)), floatTolerance);
+        Assert::IsTrue(planeXZ(p0+ grl::Vec3f(-3.0f, -6.0f, -2.0f)) < 0.0f);
+        // In front of plane
+        Assert::AreEqual(3.0f, planeXZ(p0 + grl::Vec3f(0.0f, 3.0f, 0.0f)), floatTolerance);
+        Assert::IsTrue(planeXZ(p0+ grl::Vec3f(-3.0f, 6.0f, 8.0f)) > 0.0f);
+
+        // Plane XY inverted
+        // On plane
+        Assert::AreEqual(0.0f, planeXYInv(p0), floatTolerance);
+        Assert::AreEqual(0.0f, planeXYInv(p0 + grl::Vec3f(5.0f, -3.0f, 0.0f)), floatTolerance);
+        // Behind plane
+        Assert::AreEqual(-3.0f, planeXYInv(p0 + grl::Vec3f(0.0f, 0.0f, 3.0f)), floatTolerance);
+        Assert::IsTrue(planeXYInv(p0+ grl::Vec3f(5.0f, 4.0f, 9.0f)) < 0.0f);
+        // In front of plane
+        Assert::AreEqual(5.0f, planeXYInv(p0 + grl::Vec3f(0.0f, 0.0f, -5.0f)), floatTolerance);
+        Assert::IsTrue(planeXYInv(p0+ grl::Vec3f(-8.0f, 6.0f, -1.0f)) > 0.0f);
+
+        // Plane 3D
+        // On plane
+        Assert::AreEqual(0.0f, plane(p0), floatTolerance);
+        // Behind plane
+        Assert::IsTrue(plane(p0+ grl::Vec3f(-5.0f, -4.0f, -10.0f)) < 0.0f);
+        // In front of plane
+        Assert::IsTrue(plane(p0+ grl::Vec3f(2.0f, 4.0f, 13.0f)) > 0.0f);
+
+        Logger::WriteMessage("----function Done");
+    }
+
+    TEST_METHOD(isOnPlane)
+    {
+        Logger::WriteMessage("----In isOnPlane");
+
+        // Plane XY
+        Assert::IsTrue(planeXY.isOnPlane(p0));
+        Assert::IsTrue(planeXY.isOnPlane(p0 + grl::Vec3f(5.0f, -3.0f, 0.0f)));
+        Assert::IsFalse(planeXY.isOnPlane(p0 + grl::Vec3f(1.0f, -1.0f, 1.0f)));
+
+        // Plane YZ
+        Assert::IsTrue(planeYZ.isOnPlane(p0));
+        Assert::IsTrue(planeYZ.isOnPlane(p0 + grl::Vec3f(0.0f, 2.0f, 3.0f)));
+        Assert::IsFalse(planeYZ.isOnPlane(p0 + grl::Vec3f(1.0f, -1.0f, 1.0f)));
+
+        // Plane XZ
+        Assert::IsTrue(planeXZ.isOnPlane(p0));
+        Assert::IsTrue(planeXZ.isOnPlane(p0 + grl::Vec3f(-5.0f, 0.0f, 3.0f)));
+        Assert::IsFalse(planeXZ.isOnPlane(p0 + grl::Vec3f(1.0f, -1.0f, 1.0f)));
+
+        // Plane XY inverted
+        Assert::IsTrue(planeXYInv.isOnPlane(p0));
+        Assert::IsTrue(planeXYInv.isOnPlane(p0 + grl::Vec3f(5.0f, -3.0f, 0.0f)));
+        Assert::IsFalse(planeXYInv.isOnPlane(p0 + grl::Vec3f(1.0f, -1.0f, 1.0f)));
+
+        // Plane 3D
+        // On plane
+        Assert::IsTrue(plane.isOnPlane(p0));
+        Assert::IsFalse(plane.isOnPlane(p0 + grl::Vec3f(1.0f, -1.0f, 1.0f)));
+
+        Logger::WriteMessage("----isOnPlane Done");
+    }
+
+    TEST_METHOD(fromPoints)
+    {
+        Logger::WriteMessage("----In fromPoints");
+
+        grl::Vec3f p1(1.0f, 2.0f, 4.0f);
+        grl::Vec3f p2(3.0f, 2.0f, 2.0f);
+        grl::Vec3f p3(2.0f, 2.0f, 5.0f);
+        grl::Plane plane = grl::Plane::fromPoints(p1, p2, p3);
+
+        Assert::IsTrue(plane.isOnPlane(p1));
+        Assert::IsTrue(plane.isOnPlane(p2));
+        Assert::IsTrue(plane.isOnPlane(p3));
+        Assert::AreEqual(0.0f, plane.getNormal().x, floatTolerance);
+        Assert::AreEqual(1.0f, plane.getNormal().y, floatTolerance);
+        Assert::AreEqual(0.0f, plane.getNormal().z, floatTolerance);
+
+        Logger::WriteMessage("----fromPoints Done");
+    }
+
+    TEST_METHOD(fromVectors)
+    {
+        Logger::WriteMessage("----In fromVectors");
+
+        grl::Vec3f p0(3.0f, 2.0f, 2.0f);
+        grl::Vec3f v1(-2.0f, 0.0f, 2.0f);
+        grl::Vec3f v2(-1.0f, 0.0f, 3.0f);
+        grl::Plane plane = grl::Plane::fromVectors(p0, v1, v2);
+
+        Assert::IsTrue(plane.isOnPlane(p0));
+        Assert::AreEqual(0.0f, plane.getNormal().x, floatTolerance);
+        Assert::AreEqual(1.0f, plane.getNormal().y, floatTolerance);
+        Assert::AreEqual(0.0f, plane.getNormal().z, floatTolerance);
+
+        Logger::WriteMessage("----fromVectors Done");
+    }
+
+};
+
 }
