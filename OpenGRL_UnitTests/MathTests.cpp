@@ -768,7 +768,40 @@ public:
 
         Logger::WriteMessage("----fromVectors Done");
     }
+};
 
+TEST_CLASS(OrientedTransformationTester)
+{
+private:
+    static constexpr float floatTolerance = 0.001f;
+public:
+    OrientedTransformationTester()
+    {
+        Logger::WriteMessage("--In OrientedTransformationTester");
+    }
+
+    ~OrientedTransformationTester()
+    {
+        Logger::WriteMessage("--OrientedTransformationTester done");
+    }
+
+    TEST_METHOD(all)
+    {
+        Logger::WriteMessage("----In all");
+
+        grl::OrientedTransformation ot(5.0f, grl::Vec3f(1.0f, 5.0f, 2.0f), false);
+        Assert::AreEqual(1.0f, ot.getUnitVector().length(), floatTolerance);
+        Assert::AreEqual(5.0f, ot.getTransformationVector().length(), floatTolerance);
+
+        ot = grl::OrientedTransformation(grl::Vec3f(5.0f, 0.0f, 0.0f));
+        Assert::AreEqual(1.0f, ot.getUnitVector().length(), floatTolerance);
+        Assert::AreEqual(1.0f, ot.getUnitVector().x, floatTolerance);
+        Assert::AreEqual(5.0f, ot.getTransformationVector().length(), floatTolerance);
+        Assert::AreEqual(5.0f, ot.getTransformationVector().x, floatTolerance);
+        Assert::AreEqual(5.0f, ot.getDistance(), floatTolerance);
+
+        Logger::WriteMessage("----all Done");
+    }
 };
 
 }
