@@ -63,13 +63,7 @@
     <ClInclude Include="include\grl\camera\KinectCamera.h">
       <Filter>Pliki nagłówkowe\grl\camera</Filter>
     </ClInclude>
-    <ClInclude Include="include\grl\gesture\FloodFill.h">
-      <Filter>Pliki nagłówkowe\grl\gesture</Filter>
-    </ClInclude>
     <ClInclude Include="include\grl\gesture\FloodFillClipped.h">
-      <Filter>Pliki nagłówkowe\grl\gesture</Filter>
-    </ClInclude>
-    <ClInclude Include="include\grl\gesture\GestureAnalyzer.h">
       <Filter>Pliki nagłówkowe\grl\gesture</Filter>
     </ClInclude>
     <ClInclude Include="include\grl\gesture\GestureExtractor.h">
@@ -82,9 +76,6 @@
       <Filter>Pliki nagłówkowe\grl\gesture</Filter>
     </ClInclude>
     <ClInclude Include="include\grl\gesture\ORBMatcher.h">
-      <Filter>Pliki nagłówkowe\grl\gesture</Filter>
-    </ClInclude>
-    <ClInclude Include="include\grl\gesture\ShapeAnalyzer.h">
       <Filter>Pliki nagłówkowe\grl\gesture</Filter>
     </ClInclude>
     <ClInclude Include="include\grl\gesture\SkeletonExtractor.h">
@@ -180,9 +171,6 @@
       <Filter>Pliki źródłowe\grl\gesture</Filter>
     </ClCompile>
     <ClCompile Include="src\gesture\ORBMatcher.cpp">
-      <Filter>Pliki źródłowe\grl\gesture</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gesture\ShapeAnalyzer.cpp">
       <Filter>Pliki źródłowe\grl\gesture</Filter>
     </ClCompile>
     <ClCompile Include="src\gesture\SkeletonExtractor.cpp">

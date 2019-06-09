@@ -21,14 +21,11 @@
   <ItemGroup>
     <ClInclude Include="include\grl\camera\DepthCamera.h" />
     <ClInclude Include="include\grl\camera\KinectCamera.h" />
-    <ClInclude Include="include\grl\gesture\FloodFill.h" />
     <ClInclude Include="include\grl\gesture\FloodFillClipped.h" />
-    <ClInclude Include="include\grl\gesture\GestureAnalyzer.h" />
     <ClInclude Include="include\grl\gesture\GestureExtractor.h" />
     <ClInclude Include="include\grl\gesture\GestureMatcher.h" />
     <ClInclude Include="include\grl\gesture\GestureRecognizer.h" />
     <ClInclude Include="include\grl\gesture\ORBMatcher.h" />
-    <ClInclude Include="include\grl\gesture\ShapeAnalyzer.h" />
     <ClInclude Include="include\grl\gesture\SkeletonExtractor.h" />
     <ClInclude Include="include\grl\rdf\DecisionTree.h" />
     <ClInclude Include="include\grl\rdf\RandomDecisionForest.h" />
@@ -54,7 +51,6 @@
     <ClCompile Include="src\gesture\GestureExtractor.cpp" />
     <ClCompile Include="src\gesture\GestureRecognizer.cpp" />
     <ClCompile Include="src\gesture\ORBMatcher.cpp" />
-    <ClCompile Include="src\gesture\ShapeAnalyzer.cpp" />
     <ClCompile Include="src\gesture\SkeletonExtractor.cpp" />
     <ClCompile Include="src\rdf\DecisionTree.cpp" />
     <ClCompile Include="src\rdf\RandomDecisionForest.cpp" />
