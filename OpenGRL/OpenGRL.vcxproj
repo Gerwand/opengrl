@@ -31,6 +31,7 @@
     <ClInclude Include="include\grl\gesture\ShapeAnalyzer.h" />
     <ClInclude Include="include\grl\gesture\SkeletonExtractor.h" />
     <ClInclude Include="include\grl\rdf\DecisionTree.h" />
+    <ClInclude Include="include\grl\rdf\RandomDecisionForest.h" />
     <ClInclude Include="include\grl\rdf\SegmentedDepthUtils.h" />
     <ClInclude Include="include\grl\track\DiscretizedGestureTracker.h" />
     <ClInclude Include="include\grl\track\GestureTracker.h" />
