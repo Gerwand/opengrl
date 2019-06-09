@@ -213,7 +213,7 @@ GestureTracker::updateBuffer(const Joint& hand)
     auto itOr = sortedFilterBuffer.begin();
     for (int i = 0; itVec != offsets.cend(); ++itVec, ++itOr) {
         itOr->first = i++;
-        itOr->second.set(*itVec);
+        itOr->second = grl::OrientedTransformation(*itVec);
     }
 
     std::sort(sortedFilterBuffer.begin(), sortedFilterBuffer.end(),

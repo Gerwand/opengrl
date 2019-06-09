@@ -1,6 +1,7 @@
 #include <grl/rdf/DecisionTree.h>
 
 #include <cassert>
+#include <ctime>
 #ifdef _OPENMP
 #include <omp.h>
 #endif

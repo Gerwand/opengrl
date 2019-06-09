@@ -2,6 +2,16 @@
 
 namespace grl {
 
+template<typename T>
+inline void
+safeRelease(T& COMptr)
+{
+    if (COMptr != nullptr) {
+        COMptr->Release();
+        COMptr = nullptr;
+    }
+}
+
 int
 KinectCamera::init()
 {

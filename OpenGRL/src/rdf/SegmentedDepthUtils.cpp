@@ -1,5 +1,7 @@
 #include <grl/rdf/SegmentedDepthUtils.h>
 
+#include <iomanip>
+
 namespace grl {
 
 static std::array<HandClassColor, grlHandIndexNum + grlHandIndexOffset> classColors = {

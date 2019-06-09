@@ -87,6 +87,21 @@
     <ClInclude Include="include\grl\gesture\ShapeAnalyzer.h">
       <Filter>Pliki nagłówkowe\grl</Filter>
     </ClInclude>
+    <ClInclude Include="include\grl\utils\math\Vectors.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\utils\math\Plane.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\utils\math\Ranges.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\utils\math\OrientedTransformation.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\utils\math\GaussianKernel.h">
+      <Filter>Pliki nagłówkowe\grl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\rdf\DecisionTree.cpp">
@@ -129,6 +144,12 @@
       <Filter>Pliki źródłowe\grl</Filter>
     </ClCompile>
     <ClCompile Include="src\gesture\SkeletonExtractor.cpp">
+      <Filter>Pliki źródłowe\grl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utils\math\GaussianKernel.cpp">
+      <Filter>Pliki źródłowe\grl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utils\math\Plane.cpp">
       <Filter>Pliki źródłowe\grl</Filter>
     </ClCompile>
   </ItemGroup>
