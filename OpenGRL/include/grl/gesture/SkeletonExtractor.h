@@ -5,33 +5,81 @@
 
 namespace grl {
 
+/**
+ * Configuration for the SkeletonExtractor. Adds paramemter for the depth
+ * tolerance for flood fill extraction.
+ */
 struct SkeletonExtractorConfig : ExtractorConfig
 {
-	int tolerance;
+    // Tolerance of the depth for FloodFill.
+    int depthTolerance;
 };
 
+/**
+ * Class responsible for extracting gestures using data from skeleton and depth
+ * image.
+ */
 class SkeletonExtractor : public GestureExtractor
 {
 public:
-	virtual bool init(const ExtractorConfig &config) override;
-	virtual void extractHands(const cv::Mat &depthImage, const Skeleton &skeleton, Object &leftHand, Object &rightHand) override;
+    /**
+     * Initialize the SkeletonExtractor.
+     * The config should be of type SkeletonExtractorConfig which is adding
+     * additional configuration options.
+     *
+     * @param config configuration for the object.
+     * @returns true if the object was intiialized successfully
+     */
+    bool init(const SkeletonExtractorConfig &config);
+
+protected:
+    /**
+     * Check if the hand is visiable on the image and can be extraced with the
+     * given input data.
+     *
+     * @param side Hand (left/right) which should be checked.
+     * @param depthImage depth image of the hands.
+     * @param skeleton skeleton of the person detected on the image.
+     * @returns true if the hand can be further extracted, false otherwise.
+     */
+    virtual bool isHandValid(Side side, const cv::Mat &depthImage, const Skeleton &skeleton) const override;
+
+    /**
+     * Extract the hand using the depth image and the skeleton.
+     * The flood fill is used for extracting the hand object.
+     *
+     * @param side[in] Hand (left/right) which should be checked.
+     * @param depthImagep[in] depth image of the hands.
+     * @param skeleton[in] skeleton of the person detected on the image.
+     * @param hand[out] object representing hand, to which the hand will be
+     * exported.
+     */
+    virtual void extractHand(Side side, const cv::Mat &depthImage, const Skeleton &skeleton, DepthObject     &hand) override;
 
 private:
-	SkeletonExtractorConfig _config;
-	FloodFillClipped _floodFillRight;
-	FloodFillClipped _floodFillLeft;
+    // Configuration of the extractor.
+    SkeletonExtractorConfig _config;
+    // Flood fill extracting the object on the image with possibility to use the
+    // plane for taking in only some voxels (in front of th plane).
+    // As the voxels are not persistent, they should be kept in the two distinct
+    // objects for both hands.
+    FloodFillClipped _floodFillRight;
+    // Flood fill extracting the object on the image with possibility to use the
+    // plane for taking in only some voxels (in front of th plane).
+    // As the voxels are not persistent, they should be kept in the two distinct
+    // objects for both hands.
+    FloodFillClipped _floodFillLeft;
 };
 
-inline bool 
-SkeletonExtractor::init(const ExtractorConfig &config)
+inline bool
+SkeletonExtractor::init(const SkeletonExtractorConfig &config)
 {
-	const SkeletonExtractorConfig &skeletonConfig =
-		static_cast<const SkeletonExtractorConfig &>(config);
+    if (!GestureExtractor::init(config))
+        return false;
 
-	_config = skeletonConfig;
+    _config = config;
 
-	return true;
+    return true;
 }
-
 
 }

@@ -35,9 +35,9 @@ public:
 	GestureExtractor * getExtractor() { return _extractor; }
     GestureTracker * getTracker() { return _tracker; }
 	GestureMatcher * getMatcher() { return _matcher; }
-	
-    const Object& getLeftHand() { return _leftHand; }
-    const Object& getRightHand() { return _rightHand; }
+
+    const DepthObject& getLeftHand() { return _leftHand; }
+    const DepthObject& getRightHand() { return _rightHand; }
 	const cv::Mat & getNormalizedDepth() { return _normalizedDepth; }
 	const cv::Mat & getExtractedHand() { return _extractedHand; }
 	void getHandsImage(cv::Mat &destination);
@@ -57,8 +57,8 @@ private:
 
 	Skeleton _skeleton;
 
-	Object _leftHand;
-	Object _rightHand;
+	DepthObject _leftHand;
+	DepthObject _rightHand;
 
 	bool _valid = false;
 	bool _handFound = false;

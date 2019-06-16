@@ -3,172 +3,202 @@
 
 namespace grl {
 
-bool 
-VoxelArray2D::init(int width, int height)
+//////////////////////////////////////////////////
+// FFVoxel
+//////////////////////////////////////////////////
+
+FFVoxel::FFVoxel(int x, int y, int z)
 {
-	destroy();
-
-	_voxels = new FFVoxel[width*height];
-	if (_voxels == nullptr)
-		return false;
-
-	_width = width;
-	_height = height;
-	FFVoxel *voxel = _voxels;
-	for (int h = 0; h < height; ++h) {
-		for (int w = 0; w < width; ++w) {
-			voxel->coords = Vec3i(w, h, 0);
-			voxel->analyzed = false;
-			voxel->planePosition = UNKNOWN;
-
-			// Fill neighbours
-			voxel->neighboursNumber = 0;
-			for (int y = clampMin(h - 1, 0); y < clampMax(h + 1, height - 1); ++y) {
-				for (int x = clampMin(w - 1, 0); w < clampMax(w + 1, width - 1); ++x) {
-					if (y == h && x == w)
-						continue;
-					voxel->neighbours[voxel->neighboursNumber] = &getVoxel(x, y);
-					++voxel->neighboursNumber;
-				}
-			}
-
-			++voxel;
-		}
-	}	
-
-	return true;
+    coords = Vec3i(x, y, z);
+    analyzed = false;
 }
 
-bool
-VoxelArray2D::fromImage(const cv::Mat &image, int tolerance)
+//////////////////////////////////////////////////
+// VoxelArray2D
+//////////////////////////////////////////////////
+
+VoxelArray2D::~VoxelArray2D()
 {
-	assert(image.type() == CV_16UC1);
-
-	destroy();
-
-	_voxels = new FFVoxel[image.rows * image.cols];
-	if (_voxels == nullptr)
-		return false;
-
-	_width = image.cols;
-	_height = image.rows;
-	FFVoxel *voxel = _voxels;
-	const uint16_t *dataStart = reinterpret_cast<const uint16_t *>(image.data);
-	const uint16_t *pixel = reinterpret_cast<const uint16_t *>(image.data);
-	for (int h = 0; h < image.rows; ++h) {
-		for (int w = 0; w < image.cols; ++w) {
-			voxel->coords = Vec3i(w, h, *pixel);
-			voxel->analyzed = false;
-			voxel->planePosition = UNKNOWN;
-
-			// Fill neighbours
-			voxel->neighboursNumber = 0;
-			for (int y = clampMin(h - 1, 0); y <= clampMax(h + 1, image.rows - 1); ++y) {
-				for (int x = clampMin(w - 1, 0); x <= clampMax(w + 1, image.cols - 1); ++x) {
-					if (y == h && x == w)
-						continue;
-
-					// Get neigbour only if the diff of the value is lower 
-					// than the tolerance (for optimization)
-					const uint16_t *neighbour = dataStart + x + y*image.cols;
-					if (!absBetween(static_cast<int>(*neighbour) - static_cast<int>(*pixel), tolerance))
-						continue;
-
-					voxel->neighbours[voxel->neighboursNumber] = &getVoxel(x, y);
-					++voxel->neighboursNumber;
-				}
-			}
-
-			++voxel;
-			++pixel;
-		}
-	}
-
-	return true;
+    destroy();
 }
 
-void 
-VoxelArray2D::toImage(cv::Mat &destination)
+FFVoxel & VoxelArray2D::operator()(int x, int y)
 {
-	destination = cv::Mat(_height, _width, CV_16UC1);
-	uint16_t *imgData = reinterpret_cast<uint16_t *>(destination.data);
-	Voxel *voxel = _voxels;
-
-	for (int i = 0; i < _height*_width; ++i, ++voxel, ++imgData)
-		*imgData = static_cast<uint16_t>(voxel->coords.z);
+    return getVoxel(x, y);
 }
 
-bool 
-FloodFillClipped::extractObject(Vec2i startingPoint, Object &object, Plane plane)
+FFVoxel & VoxelArray2D::getVoxel(int x, int y)
 {
-	/*
-	Vec3i borderPoint(plane.p0.x, plane.p0.y, plane.p0.z);
-	FFVoxel *firstBorderVoxel = &_voxelImage.getVoxel(borderPoint.x, borderPoint.y);
+    return _voxels[x + y * _width];
+}
 
-	if (firstBorderVoxel->analyzed)
-		return false;
+const FFVoxel & VoxelArray2D::getVoxel(int x, int y) const
+{
+    return _voxels[x + y * _width];
+}
 
-	// Set border from the clipping plane
-	std::queue<FFVoxel *> enqueuedBorder;
-	enqueuedBorder.push(firstBorderVoxel);
-	while (!enqueuedBorder.empty()) {
-		FFVoxel *currentVoxel = enqueuedBorder.front();
-		enqueuedBorder.pop();
+int VoxelArray2D::getVoxelValue(int x, int y) const
+{
+    return getVoxel(x, y).coords.z;
+}
 
-		if (currentVoxel->planePosition != UNKNOWN)
-			continue;
+void VoxelArray2D::setVoxelValue(int x, int y, int value)
+{
+    getVoxel(x, y).coords.z = value;
+}
 
-		Vec3f voxelVector(currentVoxel->coords.x, currentVoxel->coords.y, currentVoxel->coords.z);
+void VoxelArray2D::getSize(int &width, int &height) const
+{
+    width = _width;
+    height = _height;
+}
 
-		// Check if voxel is on the plane
-		float fPlane = plane(voxelVector);
-		bool isOnPlane = isBetween(fPlane, 1.0f, -epsilon);
+void VoxelArray2D::destroy()
+{
+    delete _voxels;
+    _voxels = nullptr;
+}
 
-		//TODO: Check if the value is not too big...
-		if (isOnPlane) {
-			currentVoxel->planePosition = ON_PLANE;
-		} else {
-			// Not border, so check exact relation
-			currentVoxel->planePosition = fPlane < 0.0f ? BEHIND_PLANE : IN_FRONT_OF_PLANE;
-		}
+bool VoxelArray2D::init(int width, int height)
+{
+    // To prevent any leaks, call destroy just in case
+    destroy();
 
-		// If on plane or near the negative end of the plane
-		if (isBetween(fPlane, 1.0f, -50.0f))
-			// On plane, so add all neighbours for analyze
-			for (int i = 0; i < currentVoxel->neighboursNumber; ++i) {
-				FFVoxel *neighbour = currentVoxel->neighbours[i];
-				if (neighbour->planePosition == UNKNOWN)
-					enqueuedBorder.push(neighbour);
-			}
+    _voxels = new FFVoxel[width*height];
+    if (_voxels == nullptr)
+        return false;
 
-	}
-	*/
-	FFVoxel *firstVoxel = &_voxelImage.getVoxel(startingPoint.x, startingPoint.y);
-	std::queue<FFVoxel *> enqueuedVoxel;
-	// Put first voxel to the queue and set is as analyzed;
-	enqueuedVoxel.push(firstVoxel);
-	while (!enqueuedVoxel.empty()) {
-		FFVoxel *currentVoxel = enqueuedVoxel.front();
-		enqueuedVoxel.pop();
-		if (currentVoxel->analyzed)
-			continue;
+    _width = width;
+    _height = height;
 
-		currentVoxel->analyzed = true;
-		object.putVoxel(currentVoxel);
-		// Analyze all neighbours
-		for (int i = 0; i < currentVoxel->neighboursNumber; ++i) {
-			FFVoxel *neighbour = currentVoxel->neighbours[i];
-			Vec3f neighbourCoords = Vec3f(static_cast<float>(neighbour->coords.x),
+    // Initialize every voxel in the structure
+    FFVoxel *voxel = _voxels;
+    for (int h = 0; h < height; ++h) {
+        for (int w = 0; w < width; ++w, ++voxel) {
+            *voxel = FFVoxel(w, h, 0);
+
+            // Fill neighbours array
+            voxel->neighboursNumber = 0;
+            for (int y = clampMin(h - 1, 0); y <= clampMax(h + 1, height - 1); ++y) {
+                for (int x = clampMin(w - 1, 0); x <= clampMax(w + 1, width - 1); ++x) {
+                    // Make sure it is not the same voxel
+                    if (y != h || x != w)
+                        voxel->neighbours[voxel->neighboursNumber++] = &getVoxel(x, y);
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+bool VoxelArray2D::fromImage(const cv::Mat &image, int tolerance)
+{
+    // Make sure that this is depth image.
+    assert(image.type() == CV_16UC1);
+
+    // To prevent any leaks, call destroy just in case
+    destroy();
+
+    _voxels = new FFVoxel[image.rows * image.cols];
+    if (_voxels == nullptr)
+        return false;
+
+    _width = image.cols;
+    _height = image.rows;
+
+    // Initialize every voxel in the structure
+    FFVoxel *voxel = _voxels;
+    // Access the image data as a raw data
+    const uint16_t *dataStart = reinterpret_cast<const uint16_t *>(image.data);
+    const uint16_t *pixel = reinterpret_cast<const uint16_t *>(image.data);
+    for (int h = 0; h < image.rows; ++h) {
+        for (int w = 0; w < image.cols; ++w, ++voxel, ++pixel) {
+            *voxel = FFVoxel(w, h, *pixel);
+
+            // Fill neighbours array
+            voxel->neighboursNumber = 0;
+            for (int y = clampMin(h - 1, 0); y <= clampMax(h + 1, image.rows - 1); ++y) {
+                for (int x = clampMin(w - 1, 0); x <= clampMax(w + 1, image.cols - 1); ++x) {
+                    // Make sure it is not the same voxel
+                    if (y != h || x != w) {
+                        // Get neigbour only if the diff of the value is lower
+                        // than the tolerance - that will reduce number of
+                        // neighbours to be checked
+                        const uint16_t *neighbour = dataStart + x + y*image.cols;
+                        int distance = static_cast<int>(*neighbour) - static_cast<int>(*pixel);
+                        if (absBetween(distance, tolerance))
+                            voxel->neighbours[voxel->neighboursNumber++] = &getVoxel(x, y);
+                    }
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+//////////////////////////////////////////////////
+// FloodFillClipped
+//////////////////////////////////////////////////
+
+void FloodFillClipped::init(int tolerance, const cv::Mat &source)
+{
+    _tolerance = tolerance;
+    _voxelImage.fromImage(source, tolerance);
+}
+
+bool FloodFillClipped::extractObject(Vec2i startingPoint, Plane plane, DepthObject &object)
+{
+    object.reset();
+
+    // Create queue for all voxels that must be analyzed
+    std::queue<FFVoxel *> enqueuedVoxels;
+    FFVoxel *firstVoxel = &_voxelImage.getVoxel(startingPoint.x, startingPoint.y);
+
+    // If the first voxel is behind the plane, skip extraction of the object
+    Vec3f voxelCoords = Vec3f(static_cast<float>(firstVoxel->coords.x),
+                                  static_cast<float>(firstVoxel->coords.y),
+                                  static_cast<float>(firstVoxel->coords.z));
+    if (plane(voxelCoords) < 0.0f)
+        return false;
+
+    // Put first voxel to the queue
+    enqueuedVoxels.push(firstVoxel);
+
+    // Check all voxels until final solution is found
+    while (!enqueuedVoxels.empty()) {
+        // Dequeue the first voxel in the queue
+        FFVoxel *currentVoxel = enqueuedVoxels.front();
+        enqueuedVoxels.pop();
+
+        // Sometimes, there could be a voxel that already was analyzed - for
+        // example from another object extraction or if the same neighbour was
+        // pushed to queue multiple times
+        if (currentVoxel->analyzed)
+            continue;
+
+        // As the analyzis begun, the voxel can be set that it was analyzed
+        // and added as a part of the object
+        currentVoxel->analyzed = true;
+        object.putVoxel(currentVoxel);
+
+        // Analyze all neighbours. As we know that the VoxelArray was
+        // initialized using image and a tolerance, we can be sure that it will
+        // contain only those neighbours that are part of the object as a whole
+        for (int i = 0; i < currentVoxel->neighboursNumber; ++i) {
+            FFVoxel *neighbour = currentVoxel->neighbours[i];
+            Vec3f neighbourCoords = Vec3f(static_cast<float>(neighbour->coords.x),
                                           static_cast<float>(neighbour->coords.y),
                                           static_cast<float>(neighbour->coords.z));
-			if (neighbour->analyzed || plane(neighbourCoords) < 0.0f)
-				continue;
+            // Push to queue only if the neigbour wasn't already analyzed and if
+            // the object is in front of or on the plane.
+            if (!neighbour->analyzed && plane(neighbourCoords) >= 0.0f)
+                enqueuedVoxels.push(neighbour);
+        }
+    }
 
-			enqueuedVoxel.push(neighbour);
-		}
-	}
-
-	return true;
+    return true;
 }
 
 }

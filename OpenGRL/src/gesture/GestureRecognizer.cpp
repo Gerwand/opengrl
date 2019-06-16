@@ -66,13 +66,8 @@ GestureRecognizer::update()
 
 	_extractor->extractHands(depthFrame, _skeleton, _leftHand, _rightHand);
 
-	if (_leftHand.accuracy == 0 && _rightHand.accuracy == 0)
+	if (_leftHand.getAccuracy() == 0 && _rightHand.getAccuracy() == 0)
 		return NoHands;
-
-	if (_leftHand.accuracy > 0)
-		_leftHand.generateImage();
-	if (_rightHand.accuracy > 0)
-		_rightHand.generateImage();
 
 	// Get objects from current frame
 	// _analyzer->extractObjects(depthFrame);
@@ -101,10 +96,10 @@ GestureRecognizer::getHandsImage(cv::Mat &destination)
 	cv::Mat tmp = cv::Mat::zeros(rows, cols, CV_16UC1);
 	destination = cv::Mat::zeros(rows, cols, CV_16UC1);
 
-	if (_leftHand.accuracy > 0)
-		_leftHand.image.copyTo(tmp(_leftHand.boundingBox));
-	if (_rightHand.accuracy > 0)
-		_rightHand.image.copyTo(destination(_rightHand.boundingBox));
+	if (_leftHand.getAccuracy() > 0)
+		_leftHand.getDepthImageOfObject().copyTo(tmp(_leftHand.getBoundingBox()));
+	if (_rightHand.getAccuracy() > 0)
+		_rightHand.getDepthImageOfObject().copyTo(destination(_rightHand.getBoundingBox()));
 
 	cv::max(tmp, destination, destination);
 

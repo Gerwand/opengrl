@@ -30,7 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
 	}
 
     grl::SkeletonExtractorConfig skeletonExtractorConfig;
-    skeletonExtractorConfig.tolerance = 20;
+    skeletonExtractorConfig.depthTolerance = 20;
 
 	SAFE_QT_NEW(_extractor, grl::SkeletonExtractor);
 	if (!_extractor->init(skeletonExtractorConfig)) {
@@ -116,7 +116,7 @@ void MainWindow::saveTrackButtonHandler()
 void MainWindow::exrButtonHandler()
 {
     std::string fileName = QFileDialog::getOpenFileName(this, "OpenEXR file select").toStdString();
-    
+
     if (!fileName.empty()) {
         cv::Mat img = cv::imread(fileName, cv::IMREAD_UNCHANGED);
         int type = img.type();
@@ -141,7 +141,7 @@ void MainWindow::recordTrack()
 {
     grl::RecognitionStatus status;
     status = _recognizer->update();
-    QTime currentTime = QTime::currentTime();        
+    QTime currentTime = QTime::currentTime();
     const grl::Skeleton &skeleton = _recognizer->getSkeleton();
 
     int width, height;
@@ -189,7 +189,7 @@ void MainWindow::recordTrack()
             // Add left hand if recording
             if (!_recordingLeftFinished) {
                 grl::TrackState state = _leftRecorder->addPoint(skeleton.joints[grl::LEFT_HAND].coordWorld);
-             
+
                 if (state == grl::grlRecorderPointBuffered || state == grl::grlRecorderPointSkipped) {
                     ++idleLeft;
                 } else if (state == grl::grlRecorderPointAdded) {
@@ -204,7 +204,7 @@ void MainWindow::recordTrack()
                     cvMatRGBToQImage(trackImage, qImage);
                     _ui.skeletonImageBox->setPixmap(QPixmap::fromImage(qImage));
                 }
-                
+
                 if (idleLeft >= maxIdleFrames) {
                     idleLeft = 0;
                     _recordingLeftFinished = true;
@@ -222,7 +222,7 @@ void MainWindow::recordTrack()
                     // Draw the track
                     grl::TrackPoints track;
                     grl::offsetsToPoints(_rightRecorder->getTrack(), track);
-                    
+
                     cv::Mat trackImage(height, width, CV_8UC3, cv::Scalar(0, 0, 0));
                     drawTrack(track.points, cv::Scalar(0, 255, 0), trackImage);
 
@@ -278,7 +278,7 @@ void MainWindow::recordTrack()
     }
 
 
-    
+
 }
 
 void MainWindow::updateVideoContext()
@@ -357,12 +357,12 @@ void MainWindow::updateVideoContext()
 	cvMatGrayToQImage(hands, image);
 	_ui.handImageBox->setPixmap(QPixmap::fromImage(image));
 
-    const grl::Object &leftHand = _recognizer->getLeftHand();
-    const grl::Object &rightHand = _recognizer->getRightHand();
+    const grl::DepthObject &leftHand = _recognizer->getLeftHand();
+    const grl::DepthObject &rightHand = _recognizer->getRightHand();
 
-    debugText += "width: " + std::to_string(rightHand.boundingBox.width) + '\n';
-    debugText += "max: " + std::to_string(rightHand.maxVal) + '\n';
-    debugText += "min: " + std::to_string(rightHand.minVal) + '\n';
+    debugText += "width: " + std::to_string(rightHand.getBoundingBox().width) + '\n';
+    debugText += "max: " + std::to_string(rightHand.getMaxDepthValue()) + '\n';
+    debugText += "min: " + std::to_string(rightHand.getMinDepthValue()) + '\n';
 
 	_ui.debugLog->clear();
 	_ui.debugLog->setText(QString::fromStdString(debugText));
@@ -419,7 +419,7 @@ void MainWindow::drawSimpleSkeleton(const grl::Skeleton &skeleton, cv::Mat &imag
     }
 }
 
-void 
+void
 MainWindow::drawTrack(const std::vector<grl::Vec3f> &track, cv::Scalar color, cv::Mat &image)
 {
     if (track.size() < 2)
@@ -431,14 +431,14 @@ MainWindow::drawTrack(const std::vector<grl::Vec3f> &track, cv::Scalar color, cv
             cv::line(image, cv::Point2f(itBefore->x, itBefore->y), cv::Point2f(it->x, it->y), color, 2);
 }
 
-void 
+void
 MainWindow::loadSampleTracks()
 {
     for (int i = 0; i < 2; ++i) {
         auto &sampleNames = i == 0 ? grlSampleRightTracksNames : grlSampleLeftTracksNames;
         auto &samplePointers = i == 0 ? grlSampleRightTracksPointers : grlSampleLeftTracksPointers;
         grl::TrackedHand trackedHand = i == 0 ? grl::grlTrackHandRight : grl::grlTrackHandLeft;
-        
+
         auto itNames = sampleNames.cbegin();
         auto itPointers = samplePointers.cbegin();
         for (; itPointers != samplePointers.cend(); ++itNames, ++itPointers) {

@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'SaveTrackDialog.ui'
 **
-** Created by: Qt User Interface Compiler version 5.10.1
+** Created by: Qt User Interface Compiler version 5.12.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -10,16 +10,13 @@
 #define UI_SAVETRACKDIALOG_H
 
 #include <QtCore/QVariant>
-#include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
-#include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QDialog>
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QFrame>
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QHBoxLayout>
-#include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QScrollArea>
@@ -87,36 +84,36 @@ public:
     void setupUi(QDialog *SaveTrackDialog)
     {
         if (SaveTrackDialog->objectName().isEmpty())
-            SaveTrackDialog->setObjectName(QStringLiteral("SaveTrackDialog"));
+            SaveTrackDialog->setObjectName(QString::fromUtf8("SaveTrackDialog"));
         SaveTrackDialog->resize(1360, 540);
         SaveTrackDialog->setMinimumSize(QSize(790, 540));
         SaveTrackDialog->setMaximumSize(QSize(1360, 540));
         SaveTrackDialog->setModal(true);
         verticalLayout = new QVBoxLayout(SaveTrackDialog);
-        verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
+        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
         horizontalLayout = new QHBoxLayout();
-        horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
+        horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
         frame_3 = new QFrame(SaveTrackDialog);
-        frame_3->setObjectName(QStringLiteral("frame_3"));
+        frame_3->setObjectName(QString::fromUtf8("frame_3"));
         frame_3->setMaximumSize(QSize(220, 16777215));
         frame_3->setFrameShape(QFrame::StyledPanel);
         frame_3->setFrameShadow(QFrame::Raised);
         verticalLayout_3 = new QVBoxLayout(frame_3);
-        verticalLayout_3->setObjectName(QStringLiteral("verticalLayout_3"));
+        verticalLayout_3->setObjectName(QString::fromUtf8("verticalLayout_3"));
         frame_4 = new QFrame(frame_3);
-        frame_4->setObjectName(QStringLiteral("frame_4"));
+        frame_4->setObjectName(QString::fromUtf8("frame_4"));
         frame_4->setMaximumSize(QSize(16777215, 16777215));
         frame_4->setFrameShape(QFrame::StyledPanel);
         frame_4->setFrameShadow(QFrame::Raised);
         formLayout_2 = new QFormLayout(frame_4);
-        formLayout_2->setObjectName(QStringLiteral("formLayout_2"));
+        formLayout_2->setObjectName(QString::fromUtf8("formLayout_2"));
         label = new QLabel(frame_4);
-        label->setObjectName(QStringLiteral("label"));
+        label->setObjectName(QString::fromUtf8("label"));
 
         formLayout_2->setWidget(0, QFormLayout::LabelRole, label);
 
         inTrackName = new QTextEdit(frame_4);
-        inTrackName->setObjectName(QStringLiteral("inTrackName"));
+        inTrackName->setObjectName(QString::fromUtf8("inTrackName"));
         QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         sizePolicy.setHorizontalStretch(0);
         sizePolicy.setVerticalStretch(0);
@@ -129,17 +126,17 @@ public:
         formLayout_2->setWidget(0, QFormLayout::FieldRole, inTrackName);
 
         checkSaveLeft = new QCheckBox(frame_4);
-        checkSaveLeft->setObjectName(QStringLiteral("checkSaveLeft"));
+        checkSaveLeft->setObjectName(QString::fromUtf8("checkSaveLeft"));
 
         formLayout_2->setWidget(2, QFormLayout::FieldRole, checkSaveLeft);
 
         checkSaveRight = new QCheckBox(frame_4);
-        checkSaveRight->setObjectName(QStringLiteral("checkSaveRight"));
+        checkSaveRight->setObjectName(QString::fromUtf8("checkSaveRight"));
 
         formLayout_2->setWidget(3, QFormLayout::FieldRole, checkSaveRight);
 
         label_6 = new QLabel(frame_4);
-        label_6->setObjectName(QStringLiteral("label_6"));
+        label_6->setObjectName(QString::fromUtf8("label_6"));
 
         formLayout_2->setWidget(2, QFormLayout::LabelRole, label_6);
 
@@ -151,22 +148,22 @@ public:
         verticalLayout_3->addWidget(frame_4);
 
         frame_2 = new QFrame(frame_3);
-        frame_2->setObjectName(QStringLiteral("frame_2"));
+        frame_2->setObjectName(QString::fromUtf8("frame_2"));
         frame_2->setFrameShape(QFrame::Box);
         frame_2->setFrameShadow(QFrame::Raised);
         formLayout = new QFormLayout(frame_2);
-        formLayout->setObjectName(QStringLiteral("formLayout"));
+        formLayout->setObjectName(QString::fromUtf8("formLayout"));
         formLayout->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
         formLayout->setFormAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
         formLayout->setVerticalSpacing(9);
         formLayout->setContentsMargins(-1, 9, -1, -1);
         label_2 = new QLabel(frame_2);
-        label_2->setObjectName(QStringLiteral("label_2"));
+        label_2->setObjectName(QString::fromUtf8("label_2"));
 
         formLayout->setWidget(0, QFormLayout::LabelRole, label_2);
 
         labLeftBegin = new QLabel(frame_2);
-        labLeftBegin->setObjectName(QStringLiteral("labLeftBegin"));
+        labLeftBegin->setObjectName(QString::fromUtf8("labLeftBegin"));
 
         formLayout->setWidget(0, QFormLayout::FieldRole, labLeftBegin);
 
@@ -179,12 +176,12 @@ public:
         formLayout->setItem(2, QFormLayout::LabelRole, horizontalSpacer_4);
 
         label_3 = new QLabel(frame_2);
-        label_3->setObjectName(QStringLiteral("label_3"));
+        label_3->setObjectName(QString::fromUtf8("label_3"));
 
         formLayout->setWidget(3, QFormLayout::LabelRole, label_3);
 
         labLeftEnd = new QLabel(frame_2);
-        labLeftEnd->setObjectName(QStringLiteral("labLeftEnd"));
+        labLeftEnd->setObjectName(QString::fromUtf8("labLeftEnd"));
 
         formLayout->setWidget(3, QFormLayout::FieldRole, labLeftEnd);
 
@@ -197,12 +194,12 @@ public:
         formLayout->setItem(5, QFormLayout::LabelRole, horizontalSpacer_5);
 
         label_4 = new QLabel(frame_2);
-        label_4->setObjectName(QStringLiteral("label_4"));
+        label_4->setObjectName(QString::fromUtf8("label_4"));
 
         formLayout->setWidget(6, QFormLayout::LabelRole, label_4);
 
         labLeftPoints = new QLabel(frame_2);
-        labLeftPoints->setObjectName(QStringLiteral("labLeftPoints"));
+        labLeftPoints->setObjectName(QString::fromUtf8("labLeftPoints"));
 
         formLayout->setWidget(6, QFormLayout::FieldRole, labLeftPoints);
 
@@ -215,12 +212,12 @@ public:
         formLayout->setItem(8, QFormLayout::LabelRole, horizontalSpacer_6);
 
         label_5 = new QLabel(frame_2);
-        label_5->setObjectName(QStringLiteral("label_5"));
+        label_5->setObjectName(QString::fromUtf8("label_5"));
 
         formLayout->setWidget(9, QFormLayout::LabelRole, label_5);
 
         labLeftLen = new QLabel(frame_2);
-        labLeftLen->setObjectName(QStringLiteral("labLeftLen"));
+        labLeftLen->setObjectName(QString::fromUtf8("labLeftLen"));
 
         formLayout->setWidget(9, QFormLayout::FieldRole, labLeftLen);
 
@@ -229,22 +226,22 @@ public:
         formLayout->setItem(10, QFormLayout::LabelRole, horizontalSpacer_7);
 
         labRightBegin = new QLabel(frame_2);
-        labRightBegin->setObjectName(QStringLiteral("labRightBegin"));
+        labRightBegin->setObjectName(QString::fromUtf8("labRightBegin"));
 
         formLayout->setWidget(1, QFormLayout::FieldRole, labRightBegin);
 
         labRightEnd = new QLabel(frame_2);
-        labRightEnd->setObjectName(QStringLiteral("labRightEnd"));
+        labRightEnd->setObjectName(QString::fromUtf8("labRightEnd"));
 
         formLayout->setWidget(4, QFormLayout::FieldRole, labRightEnd);
 
         labRightPoints = new QLabel(frame_2);
-        labRightPoints->setObjectName(QStringLiteral("labRightPoints"));
+        labRightPoints->setObjectName(QString::fromUtf8("labRightPoints"));
 
         formLayout->setWidget(7, QFormLayout::FieldRole, labRightPoints);
 
         labRightLen = new QLabel(frame_2);
-        labRightLen->setObjectName(QStringLiteral("labRightLen"));
+        labRightLen->setObjectName(QString::fromUtf8("labRightLen"));
 
         formLayout->setWidget(10, QFormLayout::FieldRole, labRightLen);
 
@@ -255,19 +252,19 @@ public:
         horizontalLayout->addWidget(frame_3);
 
         groupBox = new QGroupBox(SaveTrackDialog);
-        groupBox->setObjectName(QStringLiteral("groupBox"));
+        groupBox->setObjectName(QString::fromUtf8("groupBox"));
         verticalLayout_2 = new QVBoxLayout(groupBox);
-        verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
+        verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
         scrollArea = new QScrollArea(groupBox);
-        scrollArea->setObjectName(QStringLiteral("scrollArea"));
+        scrollArea->setObjectName(QString::fromUtf8("scrollArea"));
         scrollArea->setWidgetResizable(true);
         scrollAreaWidgetContents_2 = new QWidget();
-        scrollAreaWidgetContents_2->setObjectName(QStringLiteral("scrollAreaWidgetContents_2"));
+        scrollAreaWidgetContents_2->setObjectName(QString::fromUtf8("scrollAreaWidgetContents_2"));
         scrollAreaWidgetContents_2->setGeometry(QRect(0, 0, 532, 446));
         horizontalLayout_3 = new QHBoxLayout(scrollAreaWidgetContents_2);
-        horizontalLayout_3->setObjectName(QStringLiteral("horizontalLayout_3"));
+        horizontalLayout_3->setObjectName(QString::fromUtf8("horizontalLayout_3"));
         leftTrackPreview = new QLabel(scrollAreaWidgetContents_2);
-        leftTrackPreview->setObjectName(QStringLiteral("leftTrackPreview"));
+        leftTrackPreview->setObjectName(QString::fromUtf8("leftTrackPreview"));
         leftTrackPreview->setAlignment(Qt::AlignCenter);
 
         horizontalLayout_3->addWidget(leftTrackPreview);
@@ -280,19 +277,19 @@ public:
         horizontalLayout->addWidget(groupBox);
 
         groupBox_2 = new QGroupBox(SaveTrackDialog);
-        groupBox_2->setObjectName(QStringLiteral("groupBox_2"));
+        groupBox_2->setObjectName(QString::fromUtf8("groupBox_2"));
         verticalLayout_4 = new QVBoxLayout(groupBox_2);
-        verticalLayout_4->setObjectName(QStringLiteral("verticalLayout_4"));
+        verticalLayout_4->setObjectName(QString::fromUtf8("verticalLayout_4"));
         scrollArea_2 = new QScrollArea(groupBox_2);
-        scrollArea_2->setObjectName(QStringLiteral("scrollArea_2"));
+        scrollArea_2->setObjectName(QString::fromUtf8("scrollArea_2"));
         scrollArea_2->setWidgetResizable(true);
         scrollAreaWidgetContents_3 = new QWidget();
-        scrollAreaWidgetContents_3->setObjectName(QStringLiteral("scrollAreaWidgetContents_3"));
+        scrollAreaWidgetContents_3->setObjectName(QString::fromUtf8("scrollAreaWidgetContents_3"));
         scrollAreaWidgetContents_3->setGeometry(QRect(0, 0, 532, 446));
         horizontalLayout_2 = new QHBoxLayout(scrollAreaWidgetContents_3);
-        horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
+        horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
         rightTrackPreview = new QLabel(scrollAreaWidgetContents_3);
-        rightTrackPreview->setObjectName(QStringLiteral("rightTrackPreview"));
+        rightTrackPreview->setObjectName(QString::fromUtf8("rightTrackPreview"));
         rightTrackPreview->setAlignment(Qt::AlignCenter);
 
         horizontalLayout_2->addWidget(rightTrackPreview);
@@ -308,11 +305,11 @@ public:
         verticalLayout->addLayout(horizontalLayout);
 
         frame = new QFrame(SaveTrackDialog);
-        frame->setObjectName(QStringLiteral("frame"));
+        frame->setObjectName(QString::fromUtf8("frame"));
         frame->setMaximumSize(QSize(16777215, 40));
         _2 = new QHBoxLayout(frame);
         _2->setSpacing(6);
-        _2->setObjectName(QStringLiteral("_2"));
+        _2->setObjectName(QString::fromUtf8("_2"));
         _2->setSizeConstraint(QLayout::SetDefaultConstraint);
         _2->setContentsMargins(1, 1, 1, 1);
         spacerItem = new QSpacerItem(131, 31, QSizePolicy::Expanding, QSizePolicy::Minimum);
@@ -320,12 +317,12 @@ public:
         _2->addItem(spacerItem);
 
         okButton = new QPushButton(frame);
-        okButton->setObjectName(QStringLiteral("okButton"));
+        okButton->setObjectName(QString::fromUtf8("okButton"));
 
         _2->addWidget(okButton);
 
         cancelButton = new QPushButton(frame);
-        cancelButton->setObjectName(QStringLiteral("cancelButton"));
+        cancelButton->setObjectName(QString::fromUtf8("cancelButton"));
 
         _2->addWidget(cancelButton);
 
