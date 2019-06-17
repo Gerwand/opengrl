@@ -129,9 +129,9 @@ xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_imgproc345.dll" "$(TargetDir)" /R /Y</
       <QTDIR>$(QTDIR)</QTDIR>
     </QtRcc>
     <PostBuildEvent>
-      <Command>xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_core345.dll" "$(TargetDir)" /R /Y
-xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_imgcodecs345.dll" "$(TargetDir)" /R /Y
-xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_imgproc345.dll" "$(TargetDir)" /R /Y</Command>
+      <Command>xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_core345d.dll" "$(TargetDir)" /R /Y
+xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_imgcodecs345d.dll" "$(TargetDir)" /R /Y
+xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_imgproc345d.dll" "$(TargetDir)" /R /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
