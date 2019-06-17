@@ -6,14 +6,14 @@
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 
-TEST_MODULE_INITIALIZE(ModuleInitialize)
+TEST_MODULE_INITIALIZE(MathTestsInitialize)
 {
-    Logger::WriteMessage("Running MathUtils tests");
+    Logger::WriteMessage("Running grl tests");
 }
 
-TEST_MODULE_CLEANUP(ModuleCleanup)
+TEST_MODULE_CLEANUP(MathTestsCleanup)
 {
-    Logger::WriteMessage("MathUtils tests done");
+    Logger::WriteMessage("grl tests done");
 }
 
 namespace OpenGRL_UnitTests_Math

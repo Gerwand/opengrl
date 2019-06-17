@@ -108,7 +108,8 @@
     <PostBuildEvent>
       <Command>xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_core345.dll" "$(TargetDir)" /R /Y
 xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_imgcodecs345.dll" "$(TargetDir)" /R /Y
-xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_imgproc345.dll" "$(TargetDir)" /R /Y</Command>
+xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_imgproc345.dll" "$(TargetDir)" /R /Y
+xcopy  "$(ProjectDir)resources" "$(TargetDir)resources" /S /R /Y /I</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -142,7 +143,8 @@ xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_imgproc345.dll" "$(TargetDir)" /R /Y</
     <PostBuildEvent>
       <Command>xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_core345.dll" "$(TargetDir)" /R /Y
 xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_imgcodecs345.dll" "$(TargetDir)" /R /Y
-xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_imgproc345.dll" "$(TargetDir)" /R /Y</Command>
+xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_imgproc345.dll" "$(TargetDir)" /R /Y
+xcopy  "$(ProjectDir)resources" "$(TargetDir)resources" /S /R /Y /I</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -168,6 +170,7 @@ xcopy  "$(OPENCV_DIR)\x64\vc15\bin\opencv_imgproc345.dll" "$(TargetDir)" /R /Y</
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GestureExtractorTests.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
