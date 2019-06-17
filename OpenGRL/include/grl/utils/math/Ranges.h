@@ -16,7 +16,7 @@ template<typename T>
 inline bool absBetween(T val, T comp)
 {
     static_assert(std::is_signed<T>::value, "absBetween won't work with unsigned types");
-    assert(comp > static_cast<T>(0) && "absBetween Value defining range must be greater than 0");
+    assert(comp >= static_cast<T>(0) && "absBetween Value defining range must be greater than 0");
     return val <= comp && val >= -comp;
 }
 
