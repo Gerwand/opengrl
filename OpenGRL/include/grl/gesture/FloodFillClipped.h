@@ -16,8 +16,6 @@ namespace grl {
 constexpr size_t MaxFFVoxelNeighbours = 8;
 struct FFVoxel : public Voxel
 {
-    // Voxel was analyzed by the FloodFill
-    bool analyzed;
     // For faster access to the data, all neighbours are stored inside the
     // voxel.
     std::array<FFVoxel *, MaxFFVoxelNeighbours> neighbours;
@@ -175,8 +173,7 @@ public:
 private:
     int _tolerance;
     VoxelArray2D _voxelImage;
-
-    bool isAnalyzed(Vec2i point);
+    std::vector<bool> _usedMap;
 };
 
 }

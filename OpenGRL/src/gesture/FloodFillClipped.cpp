@@ -10,7 +10,6 @@ namespace grl {
 FFVoxel::FFVoxel(int x, int y, int z)
 {
     coords = Vec3i(x, y, z);
-    analyzed = false;
 }
 
 //////////////////////////////////////////////////
@@ -146,11 +145,17 @@ void FloodFillClipped::init(int tolerance, const cv::Mat &source)
 {
     _tolerance = tolerance;
     _voxelImage.fromImage(source, tolerance);
+    _usedMap.resize(source.rows*source.cols);
 }
 
 bool FloodFillClipped::extractObject(Vec2i startingPoint, Plane plane, DepthObject &object)
 {
     object.reset();
+
+    int width, height;
+    _voxelImage.getSize(width, height);
+
+    std::fill(_usedMap.begin(), _usedMap.end(), false);
 
     // Create queue for all voxels that must be analyzed
     std::queue<FFVoxel *> enqueuedVoxels;
@@ -172,15 +177,11 @@ bool FloodFillClipped::extractObject(Vec2i startingPoint, Plane plane, DepthObje
         FFVoxel *currentVoxel = enqueuedVoxels.front();
         enqueuedVoxels.pop();
 
-        // Sometimes, there could be a voxel that already was analyzed - for
-        // example from another object extraction or if the same neighbour was
-        // pushed to queue multiple times
-        if (currentVoxel->analyzed)
-            continue;
+        size_t voxelIndex = currentVoxel->coords.x + currentVoxel->coords.y*width;
 
         // As the analyzis begun, the voxel can be set that it was analyzed
         // and added as a part of the object
-        currentVoxel->analyzed = true;
+        _usedMap[voxelIndex] = true;
         object.putVoxel(currentVoxel);
 
         // Analyze all neighbours. As we know that the VoxelArray was
@@ -188,13 +189,16 @@ bool FloodFillClipped::extractObject(Vec2i startingPoint, Plane plane, DepthObje
         // contain only those neighbours that are part of the object as a whole
         for (int i = 0; i < currentVoxel->neighboursNumber; ++i) {
             FFVoxel *neighbour = currentVoxel->neighbours[i];
-            Vec3f neighbourCoords = Vec3f(static_cast<float>(neighbour->coords.x),
-                                          static_cast<float>(neighbour->coords.y),
-                                          static_cast<float>(neighbour->coords.z));
+            size_t neighbourIndex = neighbour->coords.x + neighbour->coords.y*width;
+            Vec3f neighbourCoords(static_cast<float>(neighbour->coords.x),
+                                  static_cast<float>(neighbour->coords.y),
+                                  static_cast<float>(neighbour->coords.z));
             // Push to queue only if the neigbour wasn't already analyzed and if
             // the object is in front of or on the plane.
-            if (!neighbour->analyzed && plane(neighbourCoords) >= 0.0f)
+            if (!_usedMap[neighbourIndex] && plane(neighbourCoords) >= 0.0f) {
+                _usedMap[neighbourIndex] = true;
                 enqueuedVoxels.push(neighbour);
+            }
         }
     }
 
