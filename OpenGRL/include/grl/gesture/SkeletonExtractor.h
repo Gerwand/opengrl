@@ -59,16 +59,9 @@ protected:
 private:
     // Configuration of the extractor.
     SkeletonExtractorConfig _config;
-    // Flood fill extracting the object on the image with possibility to use the
-    // plane for taking in only some voxels (in front of th plane).
-    // As the voxels are not persistent, they should be kept in the two distinct
-    // objects for both hands.
-    FloodFillClipped _floodFillRight;
-    // Flood fill extracting the object on the image with possibility to use the
-    // plane for taking in only some voxels (in front of th plane).
-    // As the voxels are not persistent, they should be kept in the two distinct
-    // objects for both hands.
-    FloodFillClipped _floodFillLeft;
+    // Flood fill which is extracting the object on the image with possibility
+    // to use the plane for taking in only some voxels (in front of the plane).
+    FloodFillClipped _ff;
 };
 
 inline bool

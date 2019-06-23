@@ -18,8 +18,7 @@ void SkeletonExtractor::extractHand(Side side,
                                     const Skeleton &skeleton,
                                     DepthObject &hand)
 {
-    FloodFillClipped &ff = side == Side::Right ? _floodFillRight : _floodFillLeft;
-    ff.init(_config.depthTolerance, depthImage);
+    _ff.init(_config.depthTolerance, depthImage);
 
     // Get elbow point in the 3D space
     const Joint &jElbow = skeleton.joints[side == Side::Right ? RIGHT_ELBOW : LEFT_ELBOW];
@@ -48,7 +47,7 @@ void SkeletonExtractor::extractHand(Side side,
     Plane plane(armOrientation, hookPoint);
 
     // Try to extract the object from the image
-    if (ff.extractObject(Vec2i((int)hookPoint.x, (int)hookPoint.y), plane, hand))
+    if (_ff.extractObject(Vec2i((int)hookPoint.x, (int)hookPoint.y), plane, hand))
         // Set accuracy to 255 to indicate that the object was extracted, as we
         // do not have any algorithm to check accuraccy other way than binary.
         hand.setAccuracy(UINT8_MAX);
