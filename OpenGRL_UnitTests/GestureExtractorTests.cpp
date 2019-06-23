@@ -64,15 +64,6 @@ public:
             Assert::AreEqual(5, va(width/2, lastY).neighboursNumber);
         }
 
-        // Checking random voxels if they are not analyzed
-        {
-            Assert::IsFalse(va(0, 0).analyzed);
-            Assert::IsFalse(va(3, 5).analyzed);
-            Assert::IsFalse(va(2, 12).analyzed);
-            Assert::IsFalse(va(8, 10).analyzed);
-            Assert::IsFalse(va(5, 1).analyzed);
-        }
-
         // Image with depth tolerance set to 50 should have neighbours with 100
         // depth and 150 depth.
         {
@@ -128,53 +119,53 @@ public:
 
         // No tolerance should have only neighbours which have the same depth
         {
-        Assert::AreEqual(0, vaImageUntolerant(0, 0).neighboursNumber);
-        Assert::AreEqual(4, vaImageUntolerant(2, 2).neighboursNumber);
-        // Check depths of some neighbours
-        {
-            Assert::AreEqual(100, vaImageUntolerant(2, 2).neighbours[0]->coords.z);
-            Assert::AreEqual(100, vaImageUntolerant(2, 2).neighbours[2]->coords.z);
-            Assert::AreEqual(100, vaImageUntolerant(2, 2).neighbours[3]->coords.z);
-        }
+            Assert::AreEqual(0, vaImageUntolerant(0, 0).neighboursNumber);
+            Assert::AreEqual(4, vaImageUntolerant(2, 2).neighboursNumber);
+            // Check depths of some neighbours
+            {
+                Assert::AreEqual(100, vaImageUntolerant(2, 2).neighbours[0]->coords.z);
+                Assert::AreEqual(100, vaImageUntolerant(2, 2).neighbours[2]->coords.z);
+                Assert::AreEqual(100, vaImageUntolerant(2, 2).neighbours[3]->coords.z);
+            }
 
-        Assert::AreEqual(4, vaImageUntolerant(2, 3).neighboursNumber);
-        // Check depths of some neighbours
-        {
-            Assert::AreEqual(150, vaImageUntolerant(2, 3).neighbours[0]->coords.z);
-            Assert::AreEqual(150, vaImageUntolerant(2, 3).neighbours[2]->coords.z);
-            Assert::AreEqual(150, vaImageUntolerant(2, 3).neighbours[3]->coords.z);
-        }
+            Assert::AreEqual(4, vaImageUntolerant(2, 3).neighboursNumber);
+            // Check depths of some neighbours
+            {
+                Assert::AreEqual(150, vaImageUntolerant(2, 3).neighbours[0]->coords.z);
+                Assert::AreEqual(150, vaImageUntolerant(2, 3).neighbours[2]->coords.z);
+                Assert::AreEqual(150, vaImageUntolerant(2, 3).neighbours[3]->coords.z);
+            }
 
-        Assert::AreEqual(3, vaImageUntolerant(2, 5).neighboursNumber);
-        // Check depths of some neighbours
-        {
-            Assert::AreEqual(150, vaImageUntolerant(2, 5).neighbours[0]->coords.z);
-            Assert::AreEqual(150, vaImageUntolerant(2, 5).neighbours[1]->coords.z);
-            Assert::AreEqual(150, vaImageUntolerant(2, 5).neighbours[2]->coords.z);
-        }
+            Assert::AreEqual(3, vaImageUntolerant(2, 5).neighboursNumber);
+            // Check depths of some neighbours
+            {
+                Assert::AreEqual(150, vaImageUntolerant(2, 5).neighbours[0]->coords.z);
+                Assert::AreEqual(150, vaImageUntolerant(2, 5).neighbours[1]->coords.z);
+                Assert::AreEqual(150, vaImageUntolerant(2, 5).neighbours[2]->coords.z);
+            }
 
-        Assert::AreEqual(3, vaImageUntolerant(5, 5).neighboursNumber);
-        // Check depths of some neighbours
-        {
-            Assert::AreEqual(100, vaImageUntolerant(5, 5).neighbours[0]->coords.z);
-            Assert::AreEqual(100, vaImageUntolerant(5, 5).neighbours[1]->coords.z);
-            Assert::AreEqual(100, vaImageUntolerant(5, 5).neighbours[2]->coords.z);
-        }
+            Assert::AreEqual(3, vaImageUntolerant(5, 5).neighboursNumber);
+            // Check depths of some neighbours
+            {
+                Assert::AreEqual(100, vaImageUntolerant(5, 5).neighbours[0]->coords.z);
+                Assert::AreEqual(100, vaImageUntolerant(5, 5).neighbours[1]->coords.z);
+                Assert::AreEqual(100, vaImageUntolerant(5, 5).neighbours[2]->coords.z);
+            }
 
-        Assert::AreEqual(5, vaImageUntolerant(6, 5).neighboursNumber);
-        // Check depths of some neighbours
-        {
-            Assert::AreEqual(250, vaImageUntolerant(6, 5).neighbours[0]->coords.z);
-            Assert::AreEqual(250, vaImageUntolerant(6, 5).neighbours[3]->coords.z);
-            Assert::AreEqual(250, vaImageUntolerant(6, 5).neighbours[4]->coords.z);
-        }
+            Assert::AreEqual(5, vaImageUntolerant(6, 5).neighboursNumber);
+            // Check depths of some neighbours
+            {
+                Assert::AreEqual(250, vaImageUntolerant(6, 5).neighbours[0]->coords.z);
+                Assert::AreEqual(250, vaImageUntolerant(6, 5).neighbours[3]->coords.z);
+                Assert::AreEqual(250, vaImageUntolerant(6, 5).neighbours[4]->coords.z);
+            }
 
-        Assert::AreEqual(2, vaImageUntolerant(5, 6).neighboursNumber);
-        // Check depths of some neighbours
-        {
-            Assert::AreEqual(0, vaImageUntolerant(5, 6).neighbours[0]->coords.z);
-            Assert::AreEqual(0, vaImageUntolerant(5, 6).neighbours[1]->coords.z);
-        }
+            Assert::AreEqual(2, vaImageUntolerant(5, 6).neighboursNumber);
+            // Check depths of some neighbours
+            {
+                Assert::AreEqual(0, vaImageUntolerant(5, 6).neighbours[0]->coords.z);
+                Assert::AreEqual(0, vaImageUntolerant(5, 6).neighbours[1]->coords.z);
+            }
         }
 
         Logger::WriteMessage("----initialization Done");
@@ -227,6 +218,251 @@ public:
         Assert::AreEqual(30, va.getVoxel(10, 5).coords.z);
 
         Logger::WriteMessage("----setters Done");
+    }
+};
+
+TEST_CLASS(FloodFillClippedTester)
+{
+private:
+    grl::FloodFillClipped ffTolerant;
+    grl::FloodFillClipped ffUntolerant;
+    cv::Mat image;
+
+    static constexpr int depthTolerance = 50;
+public:
+    FloodFillClippedTester()
+    {
+        image = cv::imread("resources/depthmap.png", cv::IMREAD_GRAYSCALE);
+        Assert::IsFalse(image.empty());
+        image.convertTo(image, CV_16UC1);
+
+        Logger::WriteMessage("--In FloodFillClippedTester");
+    }
+
+    ~FloodFillClippedTester()
+    {
+        Logger::WriteMessage("--FloodFillClippedTesterDone");
+    }
+
+    TEST_METHOD_INITIALIZE(prepareFloodFill)
+    {
+        ffTolerant.init(depthTolerance, image);
+        ffUntolerant.init(0, image);
+    }
+
+    TEST_METHOD(multipleExtraction)
+    {
+        grl::Plane notClippingPlane(grl::Vec3f(0.0f, 0.0f, 1.0f), grl::Vec3f(0.0f, 0.0f, 0.0f));
+        grl::DepthObject object;
+
+        // Check if the same object will be extracted twice
+        Assert::IsTrue(ffTolerant.extractObject(grl::Vec2i(0, 0), notClippingPlane, object));
+        Assert::AreEqual(static_cast<size_t>(1), object.getSize());
+        Assert::IsTrue(ffTolerant.extractObject(grl::Vec2i(0, 0), notClippingPlane, object));
+
+        // Check if the second object is extracted properly after the first one is extracted
+        {
+            Assert::IsTrue(ffTolerant.extractObject(grl::Vec2i(2, 3), notClippingPlane, object));
+            Assert::AreEqual(6, object.getBoundingBox().width);
+            Assert::AreEqual(6, object.getBoundingBox().height);
+            Assert::AreEqual(0, object.getBoundingBox().x);
+            Assert::AreEqual(0, object.getBoundingBox().y);
+            Assert::AreEqual(static_cast<size_t>(35), object.getSize());
+            Assert::AreEqual(150, object.getMaxDepthValue());
+            Assert::AreEqual(100, object.getMinDepthValue());
+
+            cv::Mat roi = image(object.getBoundingBox());
+            cv::Mat depth = object.getDepthImageOfObject();
+            for (int y = 0; y < depth.rows; ++y) {
+                for (int x = 0; x < depth.cols; ++x) {
+                    int expected = roi.at<uint16_t>(y, x);
+                    int value = depth.at<uint16_t>(y, x);
+                    Assert::AreEqual(expected, value);
+                }
+            }
+        }
+
+        // And another object
+        {
+            Assert::IsTrue(ffTolerant.extractObject(grl::Vec2i(6, 0), notClippingPlane, object));
+            Assert::AreEqual(3, object.getBoundingBox().width);
+            Assert::AreEqual(9, object.getBoundingBox().height);
+            Assert::AreEqual(6, object.getBoundingBox().x);
+            Assert::AreEqual(0, object.getBoundingBox().y);
+            Assert::AreEqual(static_cast<size_t>(27), object.getSize());
+            Assert::AreEqual(250, object.getMaxDepthValue());
+            Assert::AreEqual(250, object.getMinDepthValue());
+
+            cv::Mat roi = image(object.getBoundingBox());
+            cv::Mat depth = object.getDepthImageOfObject();
+            for (int y = 0; y < depth.rows; ++y) {
+                for (int x = 0; x < depth.cols; ++x) {
+                    int expected = roi.at<uint16_t>(y, x);
+                    int value = depth.at<uint16_t>(y, x);
+                    Assert::AreEqual(expected, value);
+                }
+            }
+        }
+
+        // And the last one
+        {
+            Assert::IsTrue(ffUntolerant.extractObject(grl::Vec2i(2, 2), notClippingPlane, object));
+            Assert::AreEqual(6, object.getBoundingBox().width);
+            Assert::AreEqual(6, object.getBoundingBox().height);
+            Assert::AreEqual(0, object.getBoundingBox().x);
+            Assert::AreEqual(0, object.getBoundingBox().y);
+            Assert::AreEqual(static_cast<size_t>(17), object.getSize());
+            Assert::AreEqual(100, object.getMaxDepthValue());
+            Assert::AreEqual(100, object.getMinDepthValue());
+        }
+    }
+
+    TEST_METHOD(clippedExtractionNegativeX)
+    {
+        grl::DepthObject object;
+
+        grl::Vec3f normal(-1.0f, 0.0f, 0.0f);
+
+        {
+            grl::Plane plane(normal, grl::Vec3f(2.0f, 0.0f, 0.0f));
+
+            Assert::IsTrue(ffTolerant.extractObject(grl::Vec2i(2, 2), plane, object));
+            Assert::AreEqual(3, object.getBoundingBox().width);
+            Assert::AreEqual(6, object.getBoundingBox().height);
+            Assert::AreEqual(0, object.getBoundingBox().x);
+            Assert::AreEqual(0, object.getBoundingBox().y);
+            Assert::AreEqual(static_cast<size_t>(17), object.getSize());
+            Assert::AreEqual(150, object.getMaxDepthValue());
+            Assert::AreEqual(100, object.getMinDepthValue());
+
+            Assert::IsTrue(ffUntolerant.extractObject(grl::Vec2i(2, 2), plane, object));
+            Assert::AreEqual(3, object.getBoundingBox().width);
+            Assert::AreEqual(3, object.getBoundingBox().height);
+            Assert::AreEqual(0, object.getBoundingBox().x);
+            Assert::AreEqual(0, object.getBoundingBox().y);
+            Assert::AreEqual(static_cast<size_t>(8), object.getSize());
+            Assert::AreEqual(100, object.getMaxDepthValue());
+            Assert::AreEqual(100, object.getMinDepthValue());
+
+            Assert::IsFalse(ffTolerant.extractObject(grl::Vec2i(3, 2), plane, object));
+            Assert::IsFalse(ffTolerant.extractObject(grl::Vec2i(6, 0), plane, object));
+            Assert::IsTrue(ffTolerant.extractObject(grl::Vec2i(0, 7), plane, object));
+            Assert::AreEqual(3, object.getBoundingBox().width);
+            Assert::AreEqual(3, object.getBoundingBox().height);
+            Assert::AreEqual(0, object.getBoundingBox().x);
+            Assert::AreEqual(7, object.getBoundingBox().y);
+            Assert::AreEqual(static_cast<size_t>(9), object.getSize());
+            Assert::AreEqual(200, object.getMaxDepthValue());
+            Assert::AreEqual(200, object.getMinDepthValue());
+        }
+
+        {
+            grl::Plane plane(normal, grl::Vec3f(7.0f, 5.0f, -2.0f));
+
+            Assert::IsTrue(ffTolerant.extractObject(grl::Vec2i(2, 2), plane, object));
+            Assert::AreEqual(6, object.getBoundingBox().width);
+            Assert::AreEqual(6, object.getBoundingBox().height);
+            Assert::AreEqual(0, object.getBoundingBox().x);
+            Assert::AreEqual(0, object.getBoundingBox().y);
+            Assert::AreEqual(static_cast<size_t>(35), object.getSize());
+            Assert::AreEqual(150, object.getMaxDepthValue());
+            Assert::AreEqual(100, object.getMinDepthValue());
+
+            Assert::IsTrue(ffUntolerant.extractObject(grl::Vec2i(2, 2), plane, object));
+            Assert::AreEqual(6, object.getBoundingBox().width);
+            Assert::AreEqual(6, object.getBoundingBox().height);
+            Assert::AreEqual(0, object.getBoundingBox().x);
+            Assert::AreEqual(0, object.getBoundingBox().y);
+            Assert::AreEqual(static_cast<size_t>(17), object.getSize());
+            Assert::AreEqual(100, object.getMaxDepthValue());
+            Assert::AreEqual(100, object.getMinDepthValue());
+
+            Assert::IsTrue(ffTolerant.extractObject(grl::Vec2i(6, 0), plane, object));
+            Assert::AreEqual(2, object.getBoundingBox().width);
+            Assert::AreEqual(9, object.getBoundingBox().height);
+            Assert::AreEqual(6, object.getBoundingBox().x);
+            Assert::AreEqual(0, object.getBoundingBox().y);
+            Assert::AreEqual(static_cast<size_t>(18), object.getSize());
+            Assert::AreEqual(250, object.getMaxDepthValue());
+            Assert::AreEqual(250, object.getMinDepthValue());
+        }
+    }
+
+    TEST_METHOD(clippedExtractionPositiveX)
+    {
+        grl::DepthObject object;
+
+        grl::Vec3f normal(1.0f, 0.0f, 0.0f);
+
+        {
+            grl::Plane plane(normal, grl::Vec3f(2.0f, 0.0f, 0.0f));
+
+            Assert::IsTrue(ffTolerant.extractObject(grl::Vec2i(2, 2), plane, object));
+            Assert::AreEqual(4, object.getBoundingBox().width);
+            Assert::AreEqual(6, object.getBoundingBox().height);
+            Assert::AreEqual(2, object.getBoundingBox().x);
+            Assert::AreEqual(0, object.getBoundingBox().y);
+            Assert::AreEqual(static_cast<size_t>(24), object.getSize());
+            Assert::AreEqual(150, object.getMaxDepthValue());
+            Assert::AreEqual(100, object.getMinDepthValue());
+
+            Assert::IsTrue(ffUntolerant.extractObject(grl::Vec2i(2, 2), plane, object));
+            Assert::AreEqual(4, object.getBoundingBox().width);
+            Assert::AreEqual(6, object.getBoundingBox().height);
+            Assert::AreEqual(2, object.getBoundingBox().x);
+            Assert::AreEqual(0, object.getBoundingBox().y);
+            Assert::AreEqual(static_cast<size_t>(12), object.getSize());
+            Assert::AreEqual(100, object.getMaxDepthValue());
+            Assert::AreEqual(100, object.getMinDepthValue());
+
+            Assert::IsFalse(ffTolerant.extractObject(grl::Vec2i(1, 2), plane, object));
+            Assert::IsTrue(ffTolerant.extractObject(grl::Vec2i(6, 0), plane, object));
+            Assert::IsFalse(ffTolerant.extractObject(grl::Vec2i(0, 7), plane, object));
+        }
+    }
+
+    TEST_METHOD(clippedExtractionNegativeY)
+    {
+        // Check if the second object is extracted properly after the first one is extracted
+        grl::DepthObject object;
+
+        grl::Vec3f normal(0.0f, -1.0f, 0.0f);
+
+        {
+            grl::Plane plane(normal, grl::Vec3f(0.0f, 2.0f, 0.0f));
+
+            Assert::IsTrue(ffTolerant.extractObject(grl::Vec2i(2, 2), plane, object));
+            Assert::AreEqual(6, object.getBoundingBox().width);
+            Assert::AreEqual(3, object.getBoundingBox().height);
+            Assert::AreEqual(0, object.getBoundingBox().x);
+            Assert::AreEqual(0, object.getBoundingBox().y);
+            Assert::AreEqual(static_cast<size_t>(17), object.getSize());
+            Assert::AreEqual(150, object.getMaxDepthValue());
+            Assert::AreEqual(100, object.getMinDepthValue());
+            Assert::IsFalse(ffTolerant.extractObject(grl::Vec2i(2, 3), plane, object));
+        }
+    }
+
+    TEST_METHOD(clippedExtractionPositiveZ)
+    {
+        // Check if the second object is extracted properly after the first one is extracted
+        grl::DepthObject object;
+
+        grl::Vec3f normal(0.0f, 0.0f, 1.0f);
+
+        {
+            grl::Plane plane(normal, grl::Vec3f(0.0f, 0.0f, 150.0f));
+
+            Assert::IsTrue(ffTolerant.extractObject(grl::Vec2i(3, 2), plane, object));
+            Assert::AreEqual(6, object.getBoundingBox().width);
+            Assert::AreEqual(6, object.getBoundingBox().height);
+            Assert::AreEqual(0, object.getBoundingBox().x);
+            Assert::AreEqual(0, object.getBoundingBox().y);
+            Assert::AreEqual(static_cast<size_t>(18), object.getSize());
+            Assert::AreEqual(150, object.getMaxDepthValue());
+            Assert::AreEqual(150, object.getMinDepthValue());
+            Assert::IsFalse(ffTolerant.extractObject(grl::Vec2i(2, 2), plane, object));
+        }
     }
 };
 
