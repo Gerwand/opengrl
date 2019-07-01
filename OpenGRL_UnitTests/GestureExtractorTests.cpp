@@ -241,7 +241,7 @@ public:
 
     ~FloodFillClippedTester()
     {
-        Logger::WriteMessage("--FloodFillClippedTesterDone");
+        Logger::WriteMessage("--FloodFillClippedTester Done");
     }
 
     TEST_METHOD_INITIALIZE(prepareFloodFill)
@@ -463,6 +463,81 @@ public:
             Assert::AreEqual(150, object.getMinDepthValue());
             Assert::IsFalse(ffTolerant.extractObject(grl::Vec2i(2, 2), plane, object));
         }
+    }
+};
+
+
+TEST_CLASS(SkeletonExtractorTester)
+{
+private:
+    grl::SkeletonExtractor extractor;
+    grl::Skeleton skeleton;
+    cv::Mat image;
+
+    static constexpr int depthTolerance = 50;
+public:
+    SkeletonExtractorTester()
+    {
+        image = cv::imread("resources/depthmap.png", cv::IMREAD_GRAYSCALE);
+        Assert::IsFalse(image.empty());
+        image.convertTo(image, CV_16UC1);
+
+        Logger::WriteMessage("--In SkeletonExtractorTester");
+    }
+
+    ~SkeletonExtractorTester()
+    {
+        Logger::WriteMessage("--SkeletonExtractorTester Done");
+    }
+
+    TEST_METHOD_INITIALIZE(prepareSkeletonExtractor)
+    {
+        grl::SkeletonExtractorConfig config;
+        config.depthTolerance = depthTolerance;
+
+        extractor.init(config);
+
+        grl::Joint &lw = skeleton.joints[grl::LEFT_WRIST];
+        lw.tracked = true;
+        lw.coordDepthImage = grl::Vec2i(0, 8);
+
+        grl::Joint &le = skeleton.joints[grl::LEFT_ELBOW];
+        le.tracked = true;
+        le.coordDepthImage = grl::Vec2i(4, 8);
+
+        grl::Joint &rw = skeleton.joints[grl::RIGHT_WRIST];
+        rw.tracked = true;
+        rw.coordDepthImage = grl::Vec2i(7, 0);
+        grl::Joint &re = skeleton.joints[grl::RIGHT_ELBOW];
+        re.tracked = true;
+        re.coordDepthImage = grl::Vec2i(7, 8);
+    }
+
+    TEST_METHOD(extract)
+    {
+        grl::DepthObject leftHand, rightHand;
+
+        extractor.extractHands(image, skeleton, leftHand, rightHand);
+
+        // Left hand verification
+        Assert::AreEqual(std::numeric_limits<uint8_t>::max(), leftHand.getAccuracy());
+        Assert::AreEqual(3, leftHand.getBoundingBox().width);
+        Assert::AreEqual(3, leftHand.getBoundingBox().height);
+        Assert::AreEqual(0, leftHand.getBoundingBox().x);
+        Assert::AreEqual(7, leftHand .getBoundingBox().y);
+        Assert::AreEqual(static_cast<size_t>(9), leftHand.getSize());
+        Assert::AreEqual(200, leftHand.getMaxDepthValue());
+        Assert::AreEqual(200, leftHand.getMinDepthValue());
+
+        // Left hand verification
+        Assert::AreEqual(std::numeric_limits<uint8_t>::max(), rightHand.getAccuracy());
+        Assert::AreEqual(3, rightHand.getBoundingBox().width);
+        Assert::AreEqual(5, rightHand.getBoundingBox().height);
+        Assert::AreEqual(6, rightHand.getBoundingBox().x);
+        Assert::AreEqual(0, rightHand.getBoundingBox().y);
+        Assert::AreEqual(static_cast<size_t>(15), rightHand.getSize());
+        Assert::AreEqual(250, rightHand.getMaxDepthValue());
+        Assert::AreEqual(250, rightHand.getMinDepthValue());
     }
 };
 
