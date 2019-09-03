@@ -11,7 +11,17 @@ void GestureTracker::init(const TrackerConfig &config)
                                    config.trackingLength);
     memset(&_lastOnline , 0, sizeof(_lastOnline));
     _idleFramesCount = 0;
+    _lastTrack.clear();
 }
+
+void GestureTracker::clear()
+{
+    _recorder.clear();
+    _idleFramesCount = 0;
+    memset(&_lastOnline, 0, sizeof(_lastOnline));
+    _lastTrack.clear();
+}
+
 
 GestureTracker::UpdateState GestureTracker::update(const Joint &hand)
 {
@@ -26,6 +36,7 @@ GestureTracker::UpdateState GestureTracker::update(const Joint &hand)
     if (updateState == TrackRecorder::grlRecorderPointSkipped) {
         if (++_idleFramesCount == _config.framesIdleReset) {
             // Reset the track if it was idle for too long
+            _recorder.getTrack(_lastTrack);
             _recorder.clear();
             _idleFramesCount = 0;
             return grlTrackerReset;
@@ -38,9 +49,14 @@ GestureTracker::UpdateState GestureTracker::update(const Joint &hand)
     return grlTrackerBuffered;
 }
 
-void GestureTracker::getCapturedTrack(TrackPoints &points)
+void GestureTracker::getCurrentTrack(TrackPoints &points)
 {
     _recorder.getTrack(points);
+}
+
+const TrackPoints & GestureTracker::getLastTrack() const
+{
+    return _lastTrack;
 }
 
 OnlineGestureDescriptor GestureTracker::getOnlineDescriptor() const

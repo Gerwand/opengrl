@@ -24,14 +24,16 @@
     <ClInclude Include="include\grl\classification\Classificator.h" />
     <ClInclude Include="include\grl\classification\Features.h" />
     <ClInclude Include="include\grl\gesture\FloodFillClipped.h" />
+    <ClInclude Include="include\grl\gesture\GestureClassificator.h" />
     <ClInclude Include="include\grl\gesture\GestureExtractor.h" />
-    <ClInclude Include="include\grl\gesture\GestureMatcher.h" />
     <ClInclude Include="include\grl\gesture\GestureRecognizer.h" />
-    <ClInclude Include="include\grl\gesture\ORBMatcher.h" />
+    <ClInclude Include="include\grl\gesture\HandSkeleton.h" />
+    <ClInclude Include="include\grl\gesture\HandSkeletonExtractor.h" />
+    <ClInclude Include="include\grl\gesture\RDFHandSkeletonExtractor.h" />
     <ClInclude Include="include\grl\gesture\SkeletonExtractor.h" />
     <ClInclude Include="include\grl\rdf\DecisionTree.h" />
     <ClInclude Include="include\grl\rdf\RandomDecisionForest.h" />
-    <ClInclude Include="include\grl\rdf\SegmentedDepthUtils.h" />
+    <ClInclude Include="include\grl\rdf\RDFUtils.h" />
     <ClInclude Include="include\grl\track\GestureTracker.h" />
     <ClInclude Include="include\grl\track\Track.h" />
     <ClInclude Include="include\grl\track\TrackClassificator.h" />
@@ -53,17 +55,21 @@
     <ClInclude Include="include\grl\utils\math\Plane.h" />
     <ClInclude Include="include\grl\utils\math\Ranges.h" />
     <ClInclude Include="include\grl\utils\math\Vectors.h" />
+    <ClInclude Include="include\grl\utils\Profiler.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\camera\KinectCamera.cpp" />
     <ClCompile Include="src\gesture\FloodFillClipped.cpp" />
+    <ClCompile Include="src\gesture\GestureClassificator.cpp" />
     <ClCompile Include="src\gesture\GestureExtractor.cpp" />
     <ClCompile Include="src\gesture\GestureRecognizer.cpp" />
-    <ClCompile Include="src\gesture\ORBMatcher.cpp" />
+    <ClCompile Include="src\gesture\HandSkeleton.cpp" />
+    <ClCompile Include="src\gesture\HandSkeletonExtractor.cpp" />
+    <ClCompile Include="src\gesture\RDFHandSkeletonExtractor.cpp" />
     <ClCompile Include="src\gesture\SkeletonExtractor.cpp" />
     <ClCompile Include="src\rdf\DecisionTree.cpp" />
     <ClCompile Include="src\rdf\RandomDecisionForest.cpp" />
-    <ClCompile Include="src\rdf\SegmentedDepthUtils.cpp" />
+    <ClCompile Include="src\rdf\RDFUtils.cpp" />
     <ClCompile Include="src\track\GestureTracker.cpp" />
     <ClCompile Include="src\track\TrackOffsets.cpp" />
     <ClCompile Include="src\track\TrackPoints.cpp" />
@@ -72,6 +78,7 @@
     <ClCompile Include="src\track\TrackTools.cpp" />
     <ClCompile Include="src\utils\Histogram.cpp" />
     <ClCompile Include="src\utils\HistogramGray.cpp" />
+    <ClCompile Include="src\utils\ImageToolkit.cpp" />
     <ClCompile Include="src\utils\math\GaussianKernel.cpp" />
     <ClCompile Include="src\utils\math\Plane.cpp" />
   </ItemGroup>

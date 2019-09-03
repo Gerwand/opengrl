@@ -14,6 +14,10 @@ public:
                                           bool excludeStart = false);
     static void trackPointsToTrackOffsets(const TrackPoints &sourcePoints,
                                           TrackOffsets &destinationOffsets);
+    static bool saveTrackToFile(const TrackPoints &track,
+                                const std::string &fileName);
+    static bool loadTrackFromFile(TrackPoints &track,
+                                  const std::string &fileName);
 };
 
 }

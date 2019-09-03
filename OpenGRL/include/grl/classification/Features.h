@@ -99,7 +99,7 @@ void Feature<T>::set(const T &feature)
 }
 
 template <>
-float Feature<Vec3f>::getSquareDistance(const Feature<Vec3f> &other) const
+inline float Feature<Vec3f>::getSquareDistance(const Feature<Vec3f> &other) const
 {
     Vec3f difference = _feature - other.get();
     return difference.x * difference.x +

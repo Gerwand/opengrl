@@ -74,6 +74,8 @@ public:
      */
     void init(const TrackerConfig &config);
 
+    void clear();
+
     /**
      * When the new frame from depth camera arrives, the joint representing hand
      * should be passed to this function. Depending on the action taken inside,
@@ -84,7 +86,12 @@ public:
     /**
      * Get the recorded track and save it in the object provided by the user.
      */
-    void getCapturedTrack(TrackPoints &points);
+    void getCurrentTrack(TrackPoints &points);
+
+    /**
+    * Get the last saved track before the reset.
+    */
+    const TrackPoints & getLastTrack() const;
 
     /**
      * Get online descriptor for the track.
@@ -92,6 +99,7 @@ public:
     OnlineGestureDescriptor getOnlineDescriptor() const;
 
 private:
+    TrackPoints _lastTrack;
     TrackerConfig _config;
     TrackRecorderQueue _recorder;
     OnlineGestureDescriptor _lastOnline;

@@ -91,7 +91,10 @@ inline
 OrientedTransformation::OrientedTransformation(Vec3f vector)
 {
     _distance = vector.length();
-    _unitVector = Vec3f::normalize(vector);
+    if (_distance < grl::epsilon)
+        _unitVector = Vec3f(0.0f, 0.0f, 0.0f);
+    else
+        _unitVector = Vec3f::normalize(vector);
 }
 
 inline float

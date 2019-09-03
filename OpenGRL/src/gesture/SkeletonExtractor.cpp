@@ -13,13 +13,17 @@ bool SkeletonExtractor::isHandValid(Side side, const cv::Mat &depthImage, const 
     return isValid;
 }
 
+
+void SkeletonExtractor::prepareExtraction(const cv::Mat &depthImage, const Skeleton &skeleton)
+{
+    _ff.init(_config.depthTolerance, depthImage);
+}
+
 void SkeletonExtractor::extractHand(Side side,
                                     const cv::Mat &depthImage,
                                     const Skeleton &skeleton,
                                     DepthObject &hand)
 {
-    _ff.init(_config.depthTolerance, depthImage);
-
     // Get elbow point in the 3D space
     const Joint &jElbow = skeleton.joints[side == Side::Right ? RIGHT_ELBOW : LEFT_ELBOW];
     Vec2i elbow2D = jElbow.coordDepthImage;
@@ -41,13 +45,14 @@ void SkeletonExtractor::extractHand(Side side,
     Vec3f armOrientation = Vec3f::normalize(armVector);
 
     // Plane should be placed in the middle between the wrist and the elbow
-    Vec3f hookPoint = elbow3D + armVector/2.0f;
+    Vec3f hookPoint = elbow3D + armVector*3.0f/4.0f;
 
     // Create plane which will be extracting points being in front of it
     Plane plane(armOrientation, hookPoint);
 
+    // Starting point should be in the middle between the elbow and the wrist
     // Try to extract the object from the image
-    if (_ff.extractObject(Vec2i((int)hookPoint.x, (int)hookPoint.y), plane, hand))
+    if (_ff.extractObject(wrist2D, plane, hand))
         // Set accuracy to 255 to indicate that the object was extracted, as we
         // do not have any algorithm to check accuraccy other way than binary.
         hand.setAccuracy(UINT8_MAX);

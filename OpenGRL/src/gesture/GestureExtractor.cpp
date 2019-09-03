@@ -80,7 +80,7 @@ void DepthObject::reset()
 }
 
 void
-DepthObject::generateImage()
+DepthObject::generateImage() const
 {
     _depthImage = cv::Mat::zeros(_boundingBox.height, _boundingBox.width, CV_16UC1);
     uint16_t *imgData = reinterpret_cast<uint16_t *>(_depthImage.data);
@@ -131,11 +131,12 @@ const cv::Rect & DepthObject::getBoundingBox() const
     return _boundingBox;
 }
 
-const cv::Mat & DepthObject::getDepthImageOfObject()
+const cv::Mat & DepthObject::getDepthImageOfObject() const
 {
     if (_objectChanged)
         generateImage();
 
+    _objectChanged = false;
     return _depthImage;
 }
 
@@ -157,10 +158,16 @@ void GestureExtractor::extractHands(const cv::Mat &depthImage,
     leftHand.reset();
     rightHand.reset();
 
-    if (isHandValid(Side::Right, depthImage, skeleton))
+    bool leftValid = isHandValid(Side::Left, depthImage, skeleton);
+    bool rightValid = isHandValid(Side::Right, depthImage, skeleton);
+
+    if (leftValid || rightValid)
+        prepareExtraction(depthImage, skeleton);
+
+    if (rightValid)
         extractHand(Side::Right, depthImage, skeleton, rightHand);
 
-    if (isHandValid(Side::Left, depthImage, skeleton))
+    if (leftValid)
         extractHand(Side::Left, depthImage, skeleton, leftHand);
 }
 

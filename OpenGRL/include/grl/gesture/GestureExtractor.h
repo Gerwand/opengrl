@@ -120,16 +120,16 @@ public:
      *
      * @returns depth image with the object.
      */
-    const cv::Mat & getDepthImageOfObject();
+    const cv::Mat & getDepthImageOfObject() const;
 
 private:
     // Voxels, which are creating object
     std::vector<const Voxel *> _voxels;
 
     // Depth image of the object
-    cv::Mat _depthImage;
+    mutable cv::Mat _depthImage;
     // Indicates, that object changed since last image was generated
-    bool _objectChanged;
+    mutable bool _objectChanged;
 
     // Minimum depth value of the object
     int _minDepth = INT_MAX;
@@ -149,7 +149,7 @@ private:
     // Recalculate both bounding box and the depth with the given input voxel.
     void recalculate3DBoundingBox(const Voxel *voxel);
     // Generate
-    void generateImage();
+    void generateImage() const;
 };
 
 /**
@@ -224,6 +224,8 @@ protected:
                              const cv::Mat &depthImage,
                              const Skeleton &skeleton,
                              DepthObject &hand) = 0;
+
+    virtual void prepareExtraction(const cv::Mat &depthImage, const Skeleton &skeleton) = 0;
 };
 
 }

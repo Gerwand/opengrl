@@ -32,7 +32,7 @@ inline bool absBetween(T val, T comp)
 template<typename T>
 inline bool isBetween(T val, T max, T min)
 {
-    assert(max > min && "isBetween max must be greater than min");
+    assert(max >= min && "isBetween max must be greater than min");
     return val <= max && val >= min;
 }
 
@@ -48,7 +48,7 @@ inline bool isBetween(T val, T max, T min)
 template<typename T>
 inline T clamp(T val, T min, T max)
 {
-    assert(max > min && "clamp max must be greated than min");
+    assert(max >= min && "clamp max must be greated than min");
     return val < min ? min : (val > max ? max : val);
 }
 

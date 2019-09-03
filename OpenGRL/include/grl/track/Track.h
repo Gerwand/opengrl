@@ -132,6 +132,8 @@ public:
      */
     typename std::vector<T>::iterator end();
 
+    typename const std::vector<T> & getVectorOfElements() const { return _trackElements; }
+
 protected:
     /**
      * The track is represented by the vector of T elements and their

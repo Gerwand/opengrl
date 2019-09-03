@@ -72,22 +72,13 @@
     <ClInclude Include="include\grl\gesture\GestureExtractor.h">
       <Filter>Pliki nagłówkowe\grl\gesture</Filter>
     </ClInclude>
-    <ClInclude Include="include\grl\gesture\GestureMatcher.h">
-      <Filter>Pliki nagłówkowe\grl\gesture</Filter>
-    </ClInclude>
     <ClInclude Include="include\grl\gesture\GestureRecognizer.h">
-      <Filter>Pliki nagłówkowe\grl\gesture</Filter>
-    </ClInclude>
-    <ClInclude Include="include\grl\gesture\ORBMatcher.h">
       <Filter>Pliki nagłówkowe\grl\gesture</Filter>
     </ClInclude>
     <ClInclude Include="include\grl\gesture\SkeletonExtractor.h">
       <Filter>Pliki nagłówkowe\grl\gesture</Filter>
     </ClInclude>
     <ClInclude Include="include\grl\rdf\DecisionTree.h">
-      <Filter>Pliki nagłówkowe\grl\rdf</Filter>
-    </ClInclude>
-    <ClInclude Include="include\grl\rdf\SegmentedDepthUtils.h">
       <Filter>Pliki nagłówkowe\grl\rdf</Filter>
     </ClInclude>
     <ClInclude Include="include\grl\rdf\RandomDecisionForest.h">
@@ -162,15 +153,30 @@
     <ClInclude Include="include\grl\utils\Catalogue.h">
       <Filter>Pliki nagłówkowe\grl\utils</Filter>
     </ClInclude>
+    <ClInclude Include="include\grl\gesture\HandSkeleton.h">
+      <Filter>Pliki nagłówkowe\grl\gesture</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\gesture\HandSkeletonExtractor.h">
+      <Filter>Pliki nagłówkowe\grl\gesture</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\gesture\RDFHandSkeletonExtractor.h">
+      <Filter>Pliki nagłówkowe\grl\gesture</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\rdf\RDFUtils.h">
+      <Filter>Pliki nagłówkowe\grl\rdf</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\gesture\GestureClassificator.h">
+      <Filter>Pliki nagłówkowe\grl\gesture</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\utils\Profiler.h">
+      <Filter>Pliki nagłówkowe\grl\utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\rdf\DecisionTree.cpp">
       <Filter>Pliki źródłowe\grl\rdf</Filter>
     </ClCompile>
     <ClCompile Include="src\rdf\RandomDecisionForest.cpp">
-      <Filter>Pliki źródłowe\grl\rdf</Filter>
-    </ClCompile>
-    <ClCompile Include="src\rdf\SegmentedDepthUtils.cpp">
       <Filter>Pliki źródłowe\grl\rdf</Filter>
     </ClCompile>
     <ClCompile Include="src\track\GestureTracker.cpp">
@@ -197,9 +203,6 @@
     <ClCompile Include="src\gesture\FloodFillClipped.cpp">
       <Filter>Pliki źródłowe\grl\gesture</Filter>
     </ClCompile>
-    <ClCompile Include="src\gesture\ORBMatcher.cpp">
-      <Filter>Pliki źródłowe\grl\gesture</Filter>
-    </ClCompile>
     <ClCompile Include="src\gesture\SkeletonExtractor.cpp">
       <Filter>Pliki źródłowe\grl\gesture</Filter>
     </ClCompile>
@@ -220,6 +223,24 @@
     </ClCompile>
     <ClCompile Include="src\track\TrackTools.cpp">
       <Filter>Pliki źródłowe\grl\track</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gesture\HandSkeleton.cpp">
+      <Filter>Pliki źródłowe\grl\gesture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gesture\HandSkeletonExtractor.cpp">
+      <Filter>Pliki źródłowe\grl\gesture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gesture\RDFHandSkeletonExtractor.cpp">
+      <Filter>Pliki źródłowe\grl\gesture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rdf\RDFUtils.cpp">
+      <Filter>Pliki źródłowe\grl\rdf</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gesture\GestureClassificator.cpp">
+      <Filter>Pliki źródłowe\grl\gesture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utils\ImageToolkit.cpp">
+      <Filter>Pliki źródłowe\grl\utils</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

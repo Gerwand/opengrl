@@ -30,46 +30,43 @@ uint8_t
 Node::evaluateFeature(const cv::Mat &depthImage, const Pixel &p) const
 {
     assert(!_isLeaf);
-    bool isInf;
+    bool backgroundHit;
 
     // Offset u
-    Vec2i tu = Vec2i{p.coords.x + static_cast<int>(std::round(_decision.u.x/p.depth)),
-        p.coords.y + static_cast<int>(std::round(_decision.u.y/p.depth))};
+    Vec2i tu = Vec2i{
+        p.coords.x + static_cast<int>(std::round(_decision.u.x/p.depth)),
+        p.coords.y + static_cast<int>(std::round(_decision.u.y/p.depth))
+    };
     // Check if on border
-    isInf = !isBetween(tu.x, depthImage.cols-1, 0) || !isBetween(tu.y, depthImage.rows-1, 0);
-    if (isInf) {
+    backgroundHit = !isBetween(tu.x, depthImage.cols-1, 0) ||
+                    !isBetween(tu.y, depthImage.rows-1, 0);
+    if (backgroundHit)
         return grlNodeGoRight;
-    }
+
     // Check is depth is background
     float udepth = depthImage.at<float>(tu.y, tu.x);
-    isInf = udepth >= 8.0f;
-    if (isInf) {
+    backgroundHit = udepth > grlDepthMaxDist || udepth < epsilon;
+    if (backgroundHit)
         return grlNodeGoRight;
-    }
 
     // Offset v
-    Vec2i tv = Vec2i{p.coords.x + static_cast<int>(std::round(_decision.v.x/p.depth)),
-        p.coords.y + static_cast<int>(std::round(_decision.v.y/p.depth))};
+    Vec2i tv = Vec2i{
+        p.coords.x + static_cast<int>(std::round(_decision.v.x/p.depth)),
+        p.coords.y + static_cast<int>(std::round(_decision.v.y/p.depth))
+    };
     // Check if on border
-    isInf = !isBetween(tv.x, depthImage.cols-1, 0) || !isBetween(tv.y, depthImage.rows-1, 0);
-    if (isInf) {
+    backgroundHit = !isBetween(tv.x, depthImage.cols-1, 0) ||
+                    !isBetween(tv.y, depthImage.rows-1, 0);
+    if (backgroundHit)
         return grlNodeGoRight;
-    }
+
     // Check is depth is background
     float vdepth = depthImage.at<float>(tv.y, tv.x);
-    isInf = vdepth >= 8.0f;
-    if (isInf) {
+    backgroundHit = vdepth > grlDepthMaxDist || vdepth < epsilon;
+    if (backgroundHit)
         return grlNodeGoRight;
-    }
 
-    if ((udepth - vdepth) < _decision.t) {
-        return grlNodeGoLeft;
-    } else {
-        return grlNodeGoRight;
-    }
-
-    // Assuming that pixel is not the background pixel
-    //return ? grlNodeGoLeft : grlNodeGoRight;
+    return ((udepth - vdepth) < _decision.t) ? grlNodeGoLeft : grlNodeGoRight;
 }
 
 void
@@ -109,9 +106,10 @@ Node::getLeafForPixel(const cv::Mat &depthImage, const Pixel &p)
 {
     const Node *node = this;
 
+    // Go to the bottom
     while (!node->isLeaf()) {
         uint8_t way = node->evaluateFeature(depthImage, p);
-        node = way == grlNodeGoLeft ? node->getLeft() : node->getRight();
+        node = (way == grlNodeGoLeft) ? node->getLeft() : node->getRight();
     }
 
     return node;

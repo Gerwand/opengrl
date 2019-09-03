@@ -156,6 +156,7 @@ bool FloodFillClipped::extractObject(Vec2i startingPoint, Plane plane, DepthObje
     _voxelImage.getSize(width, height);
 
     std::fill(_usedMap.begin(), _usedMap.end(), false);
+    //std::vector<size_t> toFalse;
 
     // Create queue for all voxels that must be analyzed
     std::queue<FFVoxel *> enqueuedVoxels;
@@ -182,6 +183,7 @@ bool FloodFillClipped::extractObject(Vec2i startingPoint, Plane plane, DepthObje
         // As the analyzis begun, the voxel can be set that it was analyzed
         // and added as a part of the object
         _usedMap[voxelIndex] = true;
+        //toFalse.push_back(voxelIndex);
         object.putVoxel(currentVoxel);
 
         // Analyze all neighbours. As we know that the VoxelArray was
@@ -197,9 +199,15 @@ bool FloodFillClipped::extractObject(Vec2i startingPoint, Plane plane, DepthObje
             // the object is in front of or on the plane.
             if (!_usedMap[neighbourIndex] && plane(neighbourCoords) >= 0.0f) {
                 _usedMap[neighbourIndex] = true;
+                //toFalse.push_back(neighbourIndex);
                 enqueuedVoxels.push(neighbour);
             }
         }
+    }
+
+    //for (auto it = toFalse.begin(); it != toFalse.end(); ++it)
+    {
+      //  _usedMap[*it] = false;
     }
 
     return true;

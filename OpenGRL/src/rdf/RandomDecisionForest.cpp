@@ -1,4 +1,4 @@
-#include <grl/rdf/SegmentedDepthUtils.h>
+#include <grl/rdf/RDFUtils.h>
 #include <grl/rdf/RandomDecisionForest.h>
 
 namespace grl {
@@ -89,77 +89,94 @@ RandomDecisionForest::classifyImage(const cv::Mat &depthImage, cv::Mat &classIma
 
     classImage = cv::Mat(height, width, CV_8SC1, cv::Scalar(grlBackgroundIndex));
 
+    // Initialize weights map for each class with 0
     for (auto it = weights.begin(); it != weights.end(); ++it)
         *it = cv::Mat::zeros(cv::Size(width, height), CV_32FC1);
 
-
-    ClassesValues bestValues;
-    auto itv = bestValues.begin();
-    for (auto itp = bestPoints.begin(); itp != bestPoints.end(); ++itp, ++itv) {
-        itp->resize(5, Vec2i{ -1, -1 });
-        itv->resize(5, 0.0f);
-    }
+    // Initialize array with list of the best points
+    for (auto it = bestPoints.begin(); it != bestPoints.end(); ++it, ++it)
+        it->clear();
 
     auto itd = depthImage.begin<float>();
     for (short y = 0; y < height; ++y) {
         for (short x = 0; x < width; ++x, ++itd) {
-            if (*itd > 10.0f)
+            // Check if the pixel is background. It is background if it's value
+            // is very close to 0 or higher than max allowed distance.
+            if (*itd > grlDepthMaxDist || *itd < grl::epsilon)
                 continue;
 
-            Pixel p = { { x, y }, *itd, 0, grlUnknownIndex };
+            // Create abstraction of the pixel
+            Pixel p = { { x, y },   // Coordinates in the image
+                         *itd,      // Depth value of the pixel
+                         0,         // Irrelevant, only needed for learning
+                         grlUnknownIndex }; // Default value, will be overriden
 
-            ProbabilitiesVector probabilitiesVotes;
-            for (auto itTree = _trees.begin(); itTree != _trees.cend(); ++itTree)
-                probabilitiesVotes.push_back(&itTree->classifyPixel(depthImage, p));
+            // Calculate probabilities and get the best fitting class
+            std::vector<float> probabilities;
+            std::pair<float, int8_t> bestClassScore = getClassForPixel(
+                depthImage,
+                p,
+                probabilities
+            );
+            classImage.at<char>(cv::Point(x, y)) = bestClassScore.second;
 
-            std::vector<float> probabilitiesSum(grlHandIndexNum);
-            size_t n = 0;
-            for (auto itSum = probabilitiesSum.begin(); itSum != probabilitiesSum.cend(); ++itSum, ++n) {
-                *itSum = 0;
-                for (auto itVote = probabilitiesVotes.cbegin(); itVote != probabilitiesVotes.cend(); ++itVote)
-                    *itSum += (*itVote)->at(n);
-                *itSum /= _trees.size();
-            }
+            // Copy the probability vector inside the image holding the weights.
+            // The weight is calculated as: P(c)*d(x)^2 for being depth invariant
+            auto its = probabilities.begin();
+            for (auto itw = weights.begin(); itw != weights.end(); ++itw, ++its)
+                itw->at<float>(cv::Point(x, y)) = (*its) * p.depth*p.depth;
 
-            std::pair<float, char> maxProb(-std::numeric_limits<float>::infinity(), 0);
-            char i = 0;
-            for (auto itSum = probabilitiesSum.cbegin(); itSum != probabilitiesSum.cend(); ++itSum, ++i) {
-                if (maxProb.first < *itSum)
-                    maxProb = std::pair<float, char>(*itSum, i);
-            }
-
-            classImage.at<char>(cv::Point(x, y)) = maxProb.second;
-
-            auto its = probabilitiesSum.begin();
-            for (auto itcp = weights.begin(); itcp != weights.end(); ++itcp, ++its)
-                itcp->at<float>(cv::Point(x, y)) = (*its) * p.depth*p.depth;
-
-            // Get best points list for current class
-            std::list<float> &classValues = bestValues[maxProb.second];
-            std::list<Vec2i> &classPoints = bestPoints[maxProb.second];
-            auto itv = classValues.begin();
-            auto itp = classPoints.begin();
-            auto itvBest = itv;
-            auto itpBest = itp;
-            for (; itv != classValues.end(); ++itv, ++itp) {
-                if (maxProb.first > *itv) {
-                    itvBest = itv;
-                    itpBest = itp;
-                    // To insert element inside list, the iterator must be indicating next element
-                    ++itvBest;
-                    ++itpBest;
+            // Update best points list. Points with the best probability in their
+            // class will be considered as the starting search point for the
+            // joint. Mutlimap is sorting its element by its keys, so it takes
+            // the sorting problem on its own.
+            std::multimap<float, Vec2i> &classBestPoints = bestPoints[bestClassScore.second];
+            if (classBestPoints.size() < grlBestPointsNum) {
+                classBestPoints.insert(std::make_pair(bestClassScore.first, Vec2i(x, y)));
+            } else {
+                auto smallestScoreElement = classBestPoints.begin();
+                if (bestClassScore.first > smallestScoreElement->first) {
+                    classBestPoints.erase(smallestScoreElement);
+                    classBestPoints.insert(std::make_pair(bestClassScore.first, Vec2i(x, y)));
                 }
-            }
-            if (itvBest != classValues.begin()) {
-                // Insert best elementes before the iterator
-                classValues.insert(itvBest, maxProb.first);
-                classPoints.insert(itpBest, Vec2i{ x, y });
-                // Remove worst values
-                classValues.pop_front();
-                classPoints.pop_front();
             }
         }
     }
+}
+
+std::pair<float, int8_t> RandomDecisionForest::getClassForPixel(
+    const cv::Mat &depthImage,
+    const Pixel &pixel,
+    std::vector<float> &probabilitiesSum)
+{
+    probabilitiesSum.clear();
+
+    // Let all of the trees vote. We will receive probabilites of the
+    // classes for each pixel.
+    ProbabilitiesVector probabilitiesVotes;
+    for (auto itTree = _trees.begin(); itTree != _trees.cend(); ++itTree)
+        probabilitiesVotes.push_back(&itTree->classifyPixel(depthImage, pixel));
+
+    // Let's calculate average probability taking into consideration
+    // results from each tree.
+    size_t n = 0;
+    for (size_t n = 0; n < grlHandIndexNum; ++n) {
+        float sum = 0;
+        for (auto itVote = probabilitiesVotes.cbegin(); itVote != probabilitiesVotes.cend(); ++itVote)
+            sum += (*itVote)->at(n);
+        probabilitiesSum.push_back(sum / _trees.size());
+    }
+
+    // Get maximum probability - it will be assigned to the pixels as
+    // its class.
+    std::pair<float, int8_t> maxProb(-std::numeric_limits<float>::infinity(), 0);
+    int8_t i = 0;
+    for (auto itSum = probabilitiesSum.cbegin(); itSum != probabilitiesSum.cend(); ++itSum, ++i) {
+        if (maxProb.first < *itSum)
+            maxProb = std::make_pair(*itSum, i);
+    }
+
+    return maxProb;
 }
 
 void

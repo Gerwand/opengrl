@@ -7,30 +7,35 @@
 
 namespace grl {
 
+class TrackClassificator
+{
+public:
+    struct TrackMatchDescriptor
+    {
+        const std::string *trackCategory;
+        float score1;
+        size_t score2;
+    };
+
+    virtual TrackMatchDescriptor recognize(const TrackPoints &track) const = 0;
+};
 
 template <size_t _Segments>
-class DiscretizedTrackClassification
+class DiscretizedTrackClassification : public TrackClassificator
 {
     using KNN = KNNClassificator<TrackPoints, Vec3f, _Segments>;
 public:
     using Features = VectorOfFeatures<Vec3f, _Segments>;
     using TrackWithFeatures = typename KNN::ObjectWithFeatures;
 
-    struct TrackMatchDescriptor {
-        const std::string *trackCategory;
-        std::vector<TrackWithFeatures *> categoryElements;
-        float score;
-    };
-
     void init(size_t knn);
 
-    TrackMatchDescriptor recognize(const TrackPoints &track) const;
+    TrackMatchDescriptor recognize(const TrackPoints &track) const override;
 
     void updateDatabase(const std::string &name, const TrackPoints &track);
     void removeTrack(const std::string &name);
 
     void extractFeatures(const TrackPoints &track, Features &features) const;
-
 private:
     static constexpr float SegmentLength = 1.0f / _Segments;
 
@@ -52,11 +57,12 @@ DiscretizedTrackClassification<_s>::recognize(const TrackPoints &track) const
 
     Features features;
     extractFeatures(track, features);
-    KNN::KNNDescriptor knnDescriptor = _classificator.classify(features, _knn);
+    typename KNN::KNNDescriptor knnDescriptor = _classificator.classify(features, _knn);
 
     descriptor.trackCategory = knnDescriptor.matchName;
-    _classificator.getClass(*knnDescriptor.matchName, descriptor.categoryElements);
-    descriptor.score = knnDescriptor.matchAverageDistance;
+    descriptor.score1 = knnDescriptor.matchAverageDistance;
+    descriptor.score2 = knnDescriptor.matchNumber;
+
 
     return descriptor;
 }

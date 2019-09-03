@@ -5,12 +5,14 @@
 
 namespace grl {
 
-bool
-GestureRecognizer::init(DepthCamera *camera,
-                        GestureExtractor *extractor,
-                        GestureTracker *leftTracker,
-                        GestureTracker *rightTracker,
-                        GestureMatcher *matcher)
+Profiler profiler;
+
+bool GestureRecognizer::init(DepthCamera *camera,
+                             GestureExtractor *extractor,
+                             GestureTracker *rightTracker,
+                             TrackClassificator *trackClassificator,
+                             HandSkeletonExtractor *handSkeletonExtractor,
+                             GestureClassificator *gestureClassificator)
 {
 	if (_valid) {
 		DEBUG_ERR("Recognizer already initialized!");
@@ -19,76 +21,104 @@ GestureRecognizer::init(DepthCamera *camera,
 
 	_depthCamera = camera;
 	_extractor = extractor;
-    _leftTracker = leftTracker;
     _rightTracker = rightTracker;
-	_matcher = matcher;
+    _trackClassificator = trackClassificator;
+    _handSkeletonExtractor = handSkeletonExtractor;
+    _gestureClassificator = gestureClassificator;
 
 	_valid = true;
 
 	return true;
 }
 
-RecognitionStatus
-GestureRecognizer::update()
+uint64_t
+GestureRecognizer::update(RecognitionMode mode)
 {
-	cv::Mat depthFrame;
-	if (!_depthCamera->getFrame(&depthFrame))
-		return NoInput;
+    uint64_t ret = GotNothing;
+    cv::Mat depthFrame;
 
-	// Enahnce image before editing
-	EnhanceDepthFrame(depthFrame);
+    if (mode & grlDepth) {
+        TimeInterval t;
+	    if (!_depthCamera->getFrame(&depthFrame))
+		    return ret;
+        ret |= GotDepth;
+        // Enahnce image before editing
+        EnhanceDepthFrame(depthFrame);
+        
+        t.finish();
+        profiler.addTime("depth", t);
 
-	// Visualise depth map
-	_normalizedDepth = DepthToColor(depthFrame);
+        // Visualise depth map
+        _normalizedDepth = DepthToColor(depthFrame, 1000, 2000);
+    }
 
-	// Get skeletons
-	Skeletons skeletons;
-	if (!_depthCamera->getSkeletons(&skeletons))
-		return NoSkeleton;
 
-	if (skeletons.empty())
-		return NoSkeleton;
+    if (mode & grlSkeleton) {
+        // Get skeletons
+        Skeletons skeletons;
+        if (!_depthCamera->getSkeletons(&skeletons))
+            return ret;
 
-	// Check if there is skeleton with valid lean
+        if (skeletons.empty())
+            return ret;
 
-	std::vector<Skeleton *> validSkeletons;
-	for (auto it = skeletons.begin(); it != skeletons.end(); ++it)
-		if (it->lean <= maxLeanAngle) validSkeletons.push_back(&(*it));
+        // Check if there is skeleton with valid lean
+        std::vector<Skeleton *> validSkeletons;
+        for (auto it = skeletons.begin(); it != skeletons.end(); ++it)
+            if (it->lean <= maxLeanAngle) validSkeletons.push_back(&(*it));
 
-	if (validSkeletons.empty())
-		return NoSkeleton;
+        if (validSkeletons.empty())
+            return ret;
+        ret |= GotSkeleton;
 
-	Skeleton *closestSkeleton = *validSkeletons.begin();
-	for (auto it = validSkeletons.begin() + 1; it != validSkeletons.end(); ++it)
-		if (closestSkeleton->distance > (*it)->distance) closestSkeleton = *it;
+        Skeleton *closestSkeleton = *validSkeletons.begin();
+        for (auto it = validSkeletons.begin() + 1; it != validSkeletons.end(); ++it)
+            if (closestSkeleton->distance > (*it)->distance) closestSkeleton = *it;
 
-	_skeleton = *closestSkeleton;
+        _skeleton = *closestSkeleton;
+    }
 
-    _leftTracker->update(_skeleton.joints[LEFT_HAND]);
-    _rightTracker->update(_skeleton.joints[RIGHT_HAND]);
+    if (mode & grlTrack) {
+        TimeInterval t;
+        _lastTrackerState = _rightTracker->update(_skeleton.joints[RIGHT_HAND]);
+        t.finish();
+        profiler.addTime("track", t);
+        if (_lastTrackerState == GestureTracker::grlTrackerReset)
+            ret |= GotFinishedTrack;
+    }
 
-	_extractor->extractHands(depthFrame, _skeleton, _leftHand, _rightHand);
+    if (mode & grlTrackClassification) {
+        if (_lastTrackerState == GestureTracker::grlTrackerReset) {
+            TimeInterval t;
+            _trackDesc = _trackClassificator->recognize(_rightTracker->getLastTrack());
+            t.finish();
+            profiler.addTime("track classify", t);
+        }
+    }
 
-	if (_leftHand.getAccuracy() == 0 && _rightHand.getAccuracy() == 0)
-		return NoHands;
+    if (mode & grlHandExtraction) {
+        TimeInterval t;
+	    _extractor->extractHands(depthFrame, _skeleton, _leftHand, _rightHand);        t.finish();
+        profiler.addTime("hand extract", t);
+    	if (_leftHand.getAccuracy() > 0 || _rightHand.getAccuracy() > 0)
+		    ret |= GotHands;
+    }
 
-	// Get objects from current frame
-	// _analyzer->extractObjects(depthFrame);
+    if (mode & grlGesture) {
+        TimeInterval t;
+        _handSkeletonExtractor->extractSkeleton(_rightHand, _rightHandSkeleton);        t.finish();
+        profiler.addTime("skeleton extract", t);
+        ret |= GotGesture;
+    }
 
-	// _handFound = _analyzer->findHands(_extractedHand);
+    if (mode & grlGestureClassification) {
+        TimeInterval t;
+        _gestureDesc = _gestureClassificator->recognize(_rightHandSkeleton);        t.finish();
+        profiler.addTime("gesture recognize", t);
+        ret |= GotGestureClassification;
+    }
 
-	// If there was no collisions and any object was found
-	// Try to recognize the gesture and write info about object
-	// if (_handFound) {
-		// Enhance Image
-		// EnhanceExtractedHand(_extractedHand);
-
-		// Skip matching for now
-		// _lastMatch = _matcher->matchBestGesture(_extractedHand);
-
-		// return Recognized;
-	// };
-	return NoGesture;
+	return ret;
 }
 
 void

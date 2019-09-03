@@ -4,7 +4,7 @@
 #include <CL/cl.hpp>
 #endif
 
-#include <grl/rdf/SegmentedDepthUtils.h>
+#include <grl/rdf/RDFUtils.h>
 
 #include <cassert>
 #include <vector>
@@ -69,6 +69,11 @@ constexpr float learnThresholdDistr = 0.2f; // Depth - 20cm can be assumed as ma
 
 constexpr uint8_t grlNodeGoLeft = 0;
 constexpr uint8_t grlNodeGoRight = 1;
+
+// What is the max distance that the object captured by the depth camera can
+// measure. Everything higher than that can be background, but also
+// values very close to 0 are considered as background.
+constexpr float grlDepthMaxDist = 8.0f;
 
 class Node
 {

@@ -159,7 +159,7 @@ KNNClassificator<_ObjectType, _FeatureType, _FeatureSize>::classify(
     // Find the N nearest negihbours
     getNearestNeighbours(features, numberOfNeighbours, knn);
 
-    // Now, as the neighborus were found, fill the descriptor...
+    // Now, as the neighborus were found, fill out the descriptor...
 
     // First, calculate entries for all of the classes
     std::vector<size_t> classHistogram(classCounter);
@@ -171,9 +171,39 @@ KNNClassificator<_ObjectType, _FeatureType, _FeatureSize>::classify(
 
     // Get the element with highest matches. In case of multiple ones, the one
     // with smaller class ID is being taken.
-    auto result = std::max_element(classHistogram.cbegin(), classHistogram.cend());
-    size_t matchedClass = std::distance(classHistogram.cbegin(), result) + 1;
-    size_t matches = *result;
+    std::vector<std::vector<size_t>::const_iterator> maxElements;
+    std::vector<size_t>::const_iterator result = classHistogram.cbegin();
+    while (true) {
+        result = std::max_element(result, classHistogram.cend());
+        if (result == classHistogram.cend())
+            break;
+        maxElements.push_back(result);
+        ++result;
+    };
+ 
+    size_t matches;
+    size_t matchedClass;
+    if (maxElements.empty()) {
+        matches = 0;
+    } else if (maxElements.size() == 1) {
+        matchedClass = std::distance(classHistogram.cbegin(), maxElements[0]) + 1;
+        matches = *maxElements[0];
+    } else {
+        bool found = false;
+        for (auto it = knn.crbegin(); it != knn.crend(); ++it) {
+        // If there are more max elements, get the one with best distance...
+            for (auto el = maxElements.cbegin(); el != maxElements.cend(); ++el) {
+                matchedClass = std::distance(classHistogram.cbegin(), *el) + 1;
+                if (it->second == matchedClass) {
+                    matches = **el;
+                    found = true;
+                    break;
+                }
+            }
+            if (found)
+                break;
+        }
+    }
 
     // Now, fill out the descriptor
     descriptor.matchName = &(_classWithName.at(matchedClass));

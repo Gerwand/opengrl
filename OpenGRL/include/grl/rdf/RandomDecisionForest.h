@@ -4,6 +4,7 @@
 
 #include <thread>
 #include <list>
+#include <map>
 
 namespace grl {
 
@@ -31,9 +32,10 @@ struct ForestTrainContext
     std::vector<cv::Mat> depthImages;
 };
 
+constexpr int grlBestPointsNum = 5;
+
 using ClassesWeights = std::array<cv::Mat, grlHandIndexNum>;
-using ClassesPoints = std::array<std::list<Vec2i>, grlHandIndexNum>;
-using ClassesValues = std::array<std::list<float>, grlHandIndexNum>;
+using ClassesPoints = std::array<std::multimap<float, Vec2i>, grlHandIndexNum>;
 
 class RandomDecisionForest
 {
@@ -59,6 +61,10 @@ private:
     std::vector<std::thread> _threads;
 
     static void trainTree(DecisionTree *tree, const ForestTrainContext *context);
+
+    std::pair<float, int8_t> getClassForPixel(const cv::Mat &depthImage,
+                                              const Pixel &pixel,
+                                              std::vector<float> &probabilitiesSum);
 };
 
 inline

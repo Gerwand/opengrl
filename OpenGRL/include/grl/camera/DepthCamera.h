@@ -48,6 +48,8 @@ public:
 
     virtual bool worldToImage(const std::vector<Vec3f> &world, std::vector<Vec2f> &image) const = 0;
     virtual bool worldToImage(Vec3f world, Vec2f &image) const = 0;
+    virtual bool imageToWorld(const std::vector<Vec2f> &image, const std::vector<uint16_t> &depths, std::vector<Vec3f> &world) const = 0;
+    virtual bool imageToWorld(Vec3f &world, uint16_t depth, Vec2f image) const = 0;
 
 	void getSize(int &width, int &height) const;
 
@@ -77,7 +79,7 @@ DepthCamera::setValid(bool valid)
 	_valid = valid;
 }
 
-inline void 
+inline void
 DepthCamera::getSize(int &width, int &height) const
 {
 	width = _depthWidth;

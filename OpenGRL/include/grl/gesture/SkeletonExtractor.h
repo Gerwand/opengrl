@@ -56,6 +56,8 @@ protected:
      */
     virtual void extractHand(Side side, const cv::Mat &depthImage, const Skeleton &skeleton, DepthObject     &hand) override;
 
+    virtual void prepareExtraction(const cv::Mat &depthImage, const Skeleton &skeleton) override;
+
 private:
     // Configuration of the extractor.
     SkeletonExtractorConfig _config;
