@@ -487,6 +487,8 @@ void KinectCamera::colorizeDepth(cv::Mat &depthWithColor)
     depthWithColor = cv::Mat::zeros(_depthHeight, _depthWidth, CV_8UC4);
     auto itColorized = depthWithColor.begin<cv::Vec4b>();
     for (auto it = colorPoints.begin(); it != colorPoints.end(); ++it, ++itColorized) {
+        // If the point coordinates cannot be converted to other space,
+        // they can be -inf or just smaller than 0
         if (it->X != -std::numeric_limits<float>::infinity() &&
             it->Y != -std::numeric_limits<float>::infinity() &&
             it->X > 0 &&

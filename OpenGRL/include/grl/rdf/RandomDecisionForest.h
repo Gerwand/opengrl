@@ -34,6 +34,7 @@ struct ForestTrainContext
 
 constexpr int grlBestPointsNum = 5;
 
+// Weights for all pixels and all classes, can be used
 using ClassesWeights = std::array<cv::Mat, grlHandIndexNum>;
 using ClassesPoints = std::array<std::multimap<float, Vec2i>, grlHandIndexNum>;
 

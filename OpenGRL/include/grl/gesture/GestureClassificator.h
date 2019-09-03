@@ -11,16 +11,22 @@ public:
     struct GestureMatchDescriptor
     {
         const std::string *gestureCategory;
-        float score1;
-        size_t score2;
+        // Some classificators can return multiple scores, for example for knn:
+        float score1;  // it is average distance from all matching niegbours
+        size_t score2; // it is a number of neighbours that were matched
     };
 
+    // Try to match the gesture using the HandSkeleton
     virtual GestureMatchDescriptor recognize(const HandSkeleton &skeleton) const = 0;
 };
 
+// Class which is implementing classification of the HandSkeleton using the KNN
+// algorithm as a classificator and the features are the orientation
 class BoneOrientationClassificator : public GestureClassificator
 {
 public:
+    // The joints are going to be converted to bones, it is a constant number
+    // for the bones
     static constexpr size_t grlHandBonesNumber = 20;
 
 private:
@@ -30,13 +36,23 @@ public:
     using Features = VectorOfFeatures<Vec3f, grlHandBonesNumber>;
     using SkeletonWithFeature = typename KNN::ObjectWithFeatures;
 
+    // Initialize classificator
+    // knn - number of neighbours
+    // certaintyThreshold - all joints that has certainty value below this threshold,
+    // will be treated as not present. In that case any bone basing on this joint
+    // is treated as unseen and:
+    // the distance between 2 bones is 1 if only one is unseen
+    // the distance between 2 bones is 0 is both are unseen.
     void init(size_t knn, float certaintyThreshold);
 
     GestureMatchDescriptor recognize(const HandSkeleton &skeleton) const override;
 
+    // Add new gesture for the classificator
     void updateDatabase(const std::string &name, const HandSkeleton &gesture);
     void removeGesture(const std::string &name);
 
+    // This function is public only for verification - if one wants to check
+    // the features of the skeleton, he can use this.
     void extractFeatures(const HandSkeleton &gesture, Features &features) const;
 private:
     enum HandBoneType {

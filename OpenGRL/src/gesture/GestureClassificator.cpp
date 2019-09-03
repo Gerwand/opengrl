@@ -84,7 +84,7 @@ void BoneOrientationClassificator::generateBones(
         wristLocation.y /= knuckles.size();
         wristLocation.z /= knuckles.size();
         // Push the wrist back
-        wristLocation.z -= 0.09f;
+        wristLocation.z -= grlHandMidDepth;
     } else {
         wristLocation = skeleton[grlHandJointWrist].location;
     }
@@ -114,7 +114,6 @@ void BoneOrientationClassificator::generateBones(
 
         bones.push_back(bone);
     }
-
 
     // Rest of the bones without the connection ones
     static constexpr std::array<HandBoneType, grlHandBoneNum - 5> restOfBones = {

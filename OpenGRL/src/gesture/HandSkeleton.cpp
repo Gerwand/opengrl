@@ -97,7 +97,7 @@ bool saveHandSkeletonToFile(const HandSkeleton &skeleton,
     for (size_t i = 0; i < grlHandJointNum; ++i) {
         const HandJoint &joint = skeleton[i];
         file << joint.location.x << ' '
-             << joint.location.y << ' ' 
+             << joint.location.y << ' '
              << joint.location.z << ';'
              << joint.certainty << ';'
              << joint.locationImage.x << ' '

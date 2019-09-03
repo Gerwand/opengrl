@@ -180,7 +180,7 @@ KNNClassificator<_ObjectType, _FeatureType, _FeatureSize>::classify(
         maxElements.push_back(result);
         ++result;
     };
- 
+
     size_t matches;
     size_t matchedClass;
     if (maxElements.empty()) {
@@ -191,7 +191,7 @@ KNNClassificator<_ObjectType, _FeatureType, _FeatureSize>::classify(
     } else {
         bool found = false;
         for (auto it = knn.crbegin(); it != knn.crend(); ++it) {
-        // If there are more max elements, get the one with best distance...
+            // If there are more max elements, get the one with best distance...
             for (auto el = maxElements.cbegin(); el != maxElements.cend(); ++el) {
                 matchedClass = std::distance(classHistogram.cbegin(), *el) + 1;
                 if (it->second == matchedClass) {

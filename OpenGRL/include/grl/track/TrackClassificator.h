@@ -7,19 +7,28 @@
 
 namespace grl {
 
+// The documentation of this class is the same as for GestureClassificator.
+
 class TrackClassificator
 {
 public:
     struct TrackMatchDescriptor
     {
         const std::string *trackCategory;
-        float score1;
-        size_t score2;
+        // Score1 and score2 can have different meaning. For KNN it is:
+        float score1; // average distance from the best points from the matched class
+        size_t score2; // number of matches with the matched class
     };
 
     virtual TrackMatchDescriptor recognize(const TrackPoints &track) const = 0;
 };
 
+// This classifier is using KNN for classification. As the features, it is
+// discretizing the input track. It is dividing the length of the track by using
+// the _Segments template argument. As a result, each new point is created in
+// the same distance interval as the original track. But the length of this
+// new track can be smaller than the original. Because of that, the orientation
+// of the next transformations is taken as a feature of the track.
 template <size_t _Segments>
 class DiscretizedTrackClassification : public TrackClassificator
 {
@@ -37,8 +46,6 @@ public:
 
     void extractFeatures(const TrackPoints &track, Features &features) const;
 private:
-    static constexpr float SegmentLength = 1.0f / _Segments;
-
     KNN _classificator;
     size_t _knn;
 };

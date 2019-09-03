@@ -160,6 +160,9 @@ DecisionTree::evaluateNode(Node *node, NodeTrainingData &data, const std::vector
     data.rightProbabilities.clear();
 
 #ifdef _OPENMP
+    // Determine if OpenMP should be used. If the number of pixels is not big,
+    // it may be faster do skip the SMP part because of the cost of creating
+    // the threads.
     if (data.allPixels->size() > pixelSizeSP) {
         std::vector<uint8_t> directions(data.allPixels->size());
 
@@ -170,6 +173,7 @@ DecisionTree::evaluateNode(Node *node, NodeTrainingData &data, const std::vector
             directions[i] = node->evaluateFeature(depthImage, p);
         }
 
+        // Distribute the pixels for right and left node
         auto itPix = data.allPixels->cbegin();
         for (auto it = directions.begin(); it != directions.end(); ++it, ++itPix) {
             if (*it == grlNodeGoLeft)
@@ -179,9 +183,12 @@ DecisionTree::evaluateNode(Node *node, NodeTrainingData &data, const std::vector
         }
     } else
 #endif // _OPENMP
+        // Do that in single process if the OpenMP is not being used or the
+        // number of pixels is not big
         for (size_t i = 0; i < data.allPixels->size(); ++i) {
             const Pixel &p = (*data.allPixels)[i];
             const cv::Mat &depthImage = depthImages[p.imgID];
+            // Distribute the pixels for right and left node
             if (node->evaluateFeature(depthImage, p) == grlNodeGoLeft)
                 data.leftPixels->push_back(p);
             else
@@ -189,19 +196,23 @@ DecisionTree::evaluateNode(Node *node, NodeTrainingData &data, const std::vector
         }
 
     if (data.leftPixels->empty() || data.rightPixels->empty()) {
+        // This means, that this node should be treated as a leaf the nodes
+        // cannot be further divided.
         return -std::numeric_limits<float>::infinity();
     }
 
+    // Get the probabilities of each distributions
     getProbabilities(data.leftPixels, data.leftProbabilities);
     getProbabilities(data.rightPixels, data.rightProbabilities);
 
+    // Calculate the entropy for the distribution
     float allShanon = getShannonEntropy(data.allProbabilities);
     float leftEntropy = static_cast<float>(data.leftPixels->size())/data.allPixels->size() *
         getShannonEntropy(data.leftProbabilities);
     float rightEntropy = static_cast<float>(data.rightPixels->size())/data.allPixels->size() *
         getShannonEntropy(data.rightProbabilities);
 
-
+    // And return the score
     return allShanon - leftEntropy - rightEntropy;
 }
 
@@ -209,8 +220,9 @@ void
 DecisionTree::train(std::vector<Pixel> *pixels, const std::vector<cv::Mat> &depthImages,
                     int nodeTrainLimit, int maxDepth, std::mt19937 &gen, TreeTrainGPUContext *gpuContext)
 {
-    // For offsets
+    // Offsets u and v
     std::uniform_int_distribution<> offsetDistribution(-learnOffsetDistr, learnOffsetDistr);
+    // Threshold parameter (determines if the pixels should go left or right)
     std::uniform_real_distribution<float> thresholdDistribution(-learnThresholdDistr, learnThresholdDistr);
 
     NodeTrainingData data;
@@ -228,11 +240,15 @@ DecisionTree::train(std::vector<Pixel> *pixels, const std::vector<cv::Mat> &dept
         _root.release();
     _root = std::make_unique<Node>(data.allPixels, data.allProbabilities);
     Node *node = _root.get();
+    // Values for debug, depth and trained nodes
     int depth = 1;
     int good = 0;
     while (node != nullptr) {
         // Determine if we should stay at this node, go up or go right
         if (node->getPixels() == nullptr) {
+            // This is a case when the node was already trained. The, it must
+            // be checked if it is leaf or the right children has a pixel.
+            // If so, it means we must go deeper.
             if (!node->isLeaf() && node->getRight()->getPixels() != nullptr) {
                 node = node->getRight();
                 ++depth;
@@ -250,6 +266,7 @@ DecisionTree::train(std::vector<Pixel> *pixels, const std::vector<cv::Mat> &dept
         data.allProbabilities = node->getProbabilities();
 
         printf("Training node %d at depth %d with %ju\n", good, depth, data.allPixels->size());
+        // Flush for SMP
         fflush(stdout);
         // Set the node as leaf if max depth is achieved or the all pixels are from
         // only one class
@@ -280,6 +297,7 @@ DecisionTree::train(std::vector<Pixel> *pixels, const std::vector<cv::Mat> &dept
         const clock_t begin_time = clock();
 #endif
 #ifdef USE_GPU
+        // If the GPU is used, the image data must be prepared
         if (useGPU) {
             err = gpuContext->queue.enqueueWriteBuffer(gpuContext->bufferAllPix, CL_TRUE, 0,
                                                        sizeof(Pixel)*data.allPixels->size(), data.allPixels->data());
@@ -307,6 +325,7 @@ DecisionTree::train(std::vector<Pixel> *pixels, const std::vector<cv::Mat> &dept
             }
         }
 #endif
+        // Try to train the node, each time randomly choosing another feature.
         for (int i = 0; i < nodeTrainLimit; ++i) {
             Decision decision = {
                 {offsetDistribution(gen), offsetDistribution(gen)}, // u
@@ -328,11 +347,13 @@ DecisionTree::train(std::vector<Pixel> *pixels, const std::vector<cv::Mat> &dept
 #ifdef USE_GPU
             }
 #endif
+            // Save the feature with the best score.
             if (score > bestScore) {
                 bestScore = score;
                 bestDecision = decision;
                 delete bestLeftPixels;
                 delete bestRightPixels;
+                // It is used to save a bit of RAM
                 data.leftPixels->shrink_to_fit();
                 data.rightPixels->shrink_to_fit();
                 bestLeftPixels = data.leftPixels;
@@ -368,6 +389,7 @@ DecisionTree::train(std::vector<Pixel> *pixels, const std::vector<cv::Mat> &dept
             node->setPixels(nullptr);
             node->setDecision(bestDecision);
 
+            // Distribute the pixels to left and right node.
             node->setLeft(std::move(std::make_unique<Node>(bestLeftPixels, bestLeftProbabilities, node)));
             node->setRight(std::move(std::make_unique<Node>(bestRightPixels, bestRightProbabilities, node)));
             node = node->getLeft();
@@ -379,7 +401,6 @@ DecisionTree::train(std::vector<Pixel> *pixels, const std::vector<cv::Mat> &dept
         delete data.rightPixels;
     }
 }
-
 
 void
 DecisionTree::readFromFile(std::ifstream & file)

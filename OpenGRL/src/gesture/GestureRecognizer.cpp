@@ -5,6 +5,7 @@
 
 namespace grl {
 
+// The object that can be used for profiling if PROFILE is defined
 Profiler profiler;
 
 bool GestureRecognizer::init(DepthCamera *camera,
@@ -37,6 +38,7 @@ GestureRecognizer::update(RecognitionMode mode)
     uint64_t ret = GotNothing;
     cv::Mat depthFrame;
 
+    // Depth frame extraction
     if (mode & grlDepth) {
         TimeInterval t;
 	    if (!_depthCamera->getFrame(&depthFrame))
@@ -44,7 +46,7 @@ GestureRecognizer::update(RecognitionMode mode)
         ret |= GotDepth;
         // Enahnce image before editing
         EnhanceDepthFrame(depthFrame);
-        
+
         t.finish();
         profiler.addTime("depth", t);
 
@@ -52,7 +54,7 @@ GestureRecognizer::update(RecognitionMode mode)
         _normalizedDepth = DepthToColor(depthFrame, 1000, 2000);
     }
 
-
+    // Skeleton extraction
     if (mode & grlSkeleton) {
         // Get skeletons
         Skeletons skeletons;
@@ -78,6 +80,7 @@ GestureRecognizer::update(RecognitionMode mode)
         _skeleton = *closestSkeleton;
     }
 
+    // Track update
     if (mode & grlTrack) {
         TimeInterval t;
         _lastTrackerState = _rightTracker->update(_skeleton.joints[RIGHT_HAND]);
@@ -87,6 +90,7 @@ GestureRecognizer::update(RecognitionMode mode)
             ret |= GotFinishedTrack;
     }
 
+    // Track classification
     if (mode & grlTrackClassification) {
         if (_lastTrackerState == GestureTracker::grlTrackerReset) {
             TimeInterval t;
@@ -96,24 +100,30 @@ GestureRecognizer::update(RecognitionMode mode)
         }
     }
 
+    // Hand extraction
     if (mode & grlHandExtraction) {
         TimeInterval t;
-	    _extractor->extractHands(depthFrame, _skeleton, _leftHand, _rightHand);        t.finish();
+	    _extractor->extractHands(depthFrame, _skeleton, _leftHand, _rightHand);
+        t.finish();
         profiler.addTime("hand extract", t);
     	if (_leftHand.getAccuracy() > 0 || _rightHand.getAccuracy() > 0)
 		    ret |= GotHands;
     }
 
+    // Gesture extraction
     if (mode & grlGesture) {
         TimeInterval t;
-        _handSkeletonExtractor->extractSkeleton(_rightHand, _rightHandSkeleton);        t.finish();
+        _handSkeletonExtractor->extractSkeleton(_rightHand, _rightHandSkeleton);
+        t.finish();
         profiler.addTime("skeleton extract", t);
         ret |= GotGesture;
     }
 
+    // Gesture classification
     if (mode & grlGestureClassification) {
         TimeInterval t;
-        _gestureDesc = _gestureClassificator->recognize(_rightHandSkeleton);        t.finish();
+        _gestureDesc = _gestureClassificator->recognize(_rightHandSkeleton);
+        t.finish();
         profiler.addTime("gesture recognize", t);
         ret |= GotGestureClassification;
     }

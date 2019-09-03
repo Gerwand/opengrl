@@ -38,7 +38,9 @@ bool RDFHandSkeletonExtractor::init(const std::string &fileWithRDF, const DepthC
 
 void RDFHandSkeletonExtractor::extractSkeleton(const grl::DepthObject &hand, grl::HandSkeleton &handSkeleton)
 {
+    // Weights for all pixels of all classes
     grl::ClassesWeights weights;
+    // 5 best points that had the best probability of being part of each class
     grl::ClassesPoints bestProbabilities;
     cv::Mat depthForRDF;
     convertDepthForRDF(hand, depthForRDF);
@@ -159,7 +161,7 @@ void RDFHandSkeletonExtractor::approximateJoints(
 
             float depth = depthImage.at<float>(densityResult.first);
             if (_camera != nullptr) {
-                Vec2f image(static_cast<float>(densityResult.first.x), 
+                Vec2f image(static_cast<float>(densityResult.first.x),
                             static_cast<float>(densityResult.first.y));
                 _camera->imageToWorld(joint.location, static_cast<uint16_t>(depth*1000), image);
             } else {

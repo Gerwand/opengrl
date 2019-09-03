@@ -21,6 +21,7 @@ public:
 	virtual bool getFrame(cv::Mat *image) override;
 	virtual bool getSkeletons(Skeletons *skeletons) override;
 
+    // Get the last RGB frame from the camera
     const cv::Mat & getLastColor() { return _lastColorFrame; }
 
     virtual bool worldToImage(const std::vector<Vec3f> &world, std::vector<Vec2f> &image) const override;
@@ -28,8 +29,10 @@ public:
     virtual bool imageToWorld(const std::vector<Vec2f> &image, const std::vector<uint16_t> &depths, std::vector<Vec3f> &world) const;
     virtual bool imageToWorld(Vec3f &world, uint16_t depth, Vec2f image) const;
 
+    // Dump device features to the STDOUT
     void dumpStats();
 
+    // Try to colorize the last depth frame andd save it in the depthWithColor
     void colorizeDepth(cv::Mat &depthWithColor);
 
 private:

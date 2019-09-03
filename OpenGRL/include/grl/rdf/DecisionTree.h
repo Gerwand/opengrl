@@ -37,7 +37,7 @@ struct TreeTrainGPUContext
 #pragma pack(push, 1)
 struct Decision
 {
-    // Offsets (feature)
+    // Offsets
     cl_int2 u;
     cl_int2 v;
     // Threshold
@@ -49,7 +49,7 @@ typedef void * TreeTrainGPUContext;
 
 struct Decision
 {
-    // Offsets (feature)
+    // Offsets
     Vec2i u;
     Vec2i v;
     // Threshold
@@ -75,6 +75,7 @@ constexpr uint8_t grlNodeGoRight = 1;
 // values very close to 0 are considered as background.
 constexpr float grlDepthMaxDist = 8.0f;
 
+// Node of the DecisionTree
 class Node
 {
 public:
@@ -115,10 +116,10 @@ public:
 private:
     bool _isLeaf = false;
     Node *_parent;
+    // Used for training
     std::vector<Pixel> *_pixels = nullptr;
     std::unique_ptr<Node> _left;
     std::unique_ptr<Node> _right;
-    // Used for training
 
     Decision _decision;
     std::vector<float> _probabilities;
@@ -166,9 +167,17 @@ Node::setProbabilities(const std::vector<float> &probabilities)
     _probabilities = probabilities;
 }
 
+
+// Decision tree, part of the decision forest
 class DecisionTree
 {
 public:
+    // Train the decision tree using the pixels. The depth images must be
+    // passed as a reference to check the relative depth depending on the
+    // random feature.
+    // nodeTrainLimit - how many times the feature will be extracted to find the best one
+    // gen - random number generator for generating random decisions
+    // gpuContext - if not using GPU can be null.
     void train(std::vector<Pixel> *pixels, const std::vector<cv::Mat> &depthImages,
                int nodeTrainLimit, int maxDepth, std::mt19937 &gen, TreeTrainGPUContext *gpuContext);
 
@@ -178,6 +187,7 @@ public:
     void saveToFile(std::ofstream &file);
     void readFromFile(std::ifstream & file);
 
+    // Get the probabilities vector for the pixel p of begin part of each class.
     const std::vector<float> & classifyPixel(const cv::Mat &depthImage, const Pixel &p);
 
 private:
@@ -209,6 +219,8 @@ private:
                        TreeTrainGPUContext *gpuContext);
 #endif
 
+    // Check if the probabilities vector is having only 100% probability for
+    // one entry only.
     bool isSingleClass(const std::vector<float> &probabilities);
 
     float getShannonEntropy(const std::vector<float> &probabilities);

@@ -19,6 +19,8 @@ extern Profiler profiler;
 // Maximum lean angle for the skeletons
 constexpr float maxLeanAngle = 50.0f;
 
+// Bitmap which is being returned from the GestureRecognizer.
+// It indicates what resources are available after the update() call.
 enum RecognitionStatus
 {
     GotNothing               = 0x00,
@@ -31,6 +33,8 @@ enum RecognitionStatus
     GotGesture               = 0x40
 };
 
+// Options for recognition, cannot be used directly, instead the RecognitionMode
+// is used.
 enum RecognitionOptions
 {
     grlDepth                 = 0x01,
@@ -65,17 +69,23 @@ public:
               HandSkeletonExtractor *handSkeletonExtractor,
               GestureClassificator *gestureClassificator);
 
+    // Should be called in the main loop of the program. It is reading all of
+    // the data from camera, filling out the internal variables and this data
+    // can be accessed from this class or the objects that were passed in init.
+    // By default, All recognition steps are taken.
 	uint64_t update(RecognitionMode mode = All);
 
     bool isValid() { return _valid; }
 	void destroy();
 
+    // Getters for all objects used for recognition
     DepthCamera * getCamera() { return _depthCamera; }
 	GestureExtractor * getExtractor() { return _extractor; }
     GestureTracker * getRightTracker() { return _rightTracker; }
 	TrackClassificator * getTrackClassificator() { return _trackClassificator; }
     HandSkeletonExtractor * getHandSkeletonExtractor() { return _handSkeletonExtractor; }
 
+    // Getters for resources extracted in the update().
     const DepthObject & getRightHand() { return _rightHand; }
     const DepthObject & getLeftHand() { return _leftHand; }
 	const cv::Mat & getNormalizedDepth() { return _normalizedDepth; }
@@ -85,7 +95,7 @@ public:
     const TrackClassificator::TrackMatchDescriptor & getTrackMatch() { return _trackDesc; }
     const HandSkeleton & getHandSkeleton() { return _rightHandSkeleton; }
     const GestureClassificator::GestureMatchDescriptor & getGestureMatch() { return _gestureDesc; }
-
+    // What GestureTracker returned last time the update() was called.
     GestureTracker::UpdateState getLastTrackerState() const { return _lastTrackerState; };
 
 private:
@@ -93,26 +103,25 @@ private:
 	cv::Mat _normalizedDepth;
 	cv::Mat _extractedHand;
 
+    // Objects for extraction
 	DepthCamera *_depthCamera;
 	GestureExtractor *_extractor;
     GestureTracker *_rightTracker;
     TrackClassificator *_trackClassificator;
     HandSkeletonExtractor *_handSkeletonExtractor;
     GestureClassificator *_gestureClassificator;
-
+    // Skeletons
 	Skeleton _skeleton;
     HandSkeleton _rightHandSkeleton;
-
+    // Extracted hands
 	DepthObject _leftHand;
 	DepthObject _rightHand;
-
+    // Classification descriptors
     TrackClassificator::TrackMatchDescriptor _trackDesc;
     GestureClassificator::GestureMatchDescriptor _gestureDesc;
 
-	bool _valid = false;
-	bool _handFound = false;
-
     GestureTracker::UpdateState _lastTrackerState;
+	bool _valid = false;
 };
 
 }

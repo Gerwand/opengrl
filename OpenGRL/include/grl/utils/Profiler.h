@@ -51,7 +51,7 @@ public:
             for (auto it2 = it1->second.begin(); it2 != it1->second.end(); ++it2) {
                 out << "\t" << *it2 << std::endl;
             }
-        }  
+        }
         out << "Done" << std::endl;
     }
 
@@ -63,7 +63,7 @@ public:
             auto el = std::minmax_element(it1->second.begin(), it1->second.end());
             out << "\tmin: " << *el.first << std::endl;
             out << "\tmax: " << *el.second << std::endl;
-            out << "\tavg: " << its->second/it1->second.size() << std::endl << std::endl;           
+            out << "\tavg: " << its->second/it1->second.size() << std::endl << std::endl;
             out << "\tprobes: " << it1->second.size() << std::endl << std::endl;
         }
         out << "Done" << std::endl;
