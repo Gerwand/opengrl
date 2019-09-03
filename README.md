@@ -43,9 +43,9 @@ from the depth image.
 2. Tracks recording
     - *Discretizing track* - the data is organized into the queue, and it is
       being pushed out and in every next frame with the limited buffer size.
-      The track is being discretized and into equal length segments.
-      The every point of the track is being compared with other track to
-      determine similarity.
+      The track is being discretized creating always the same number of segments.
+      The every segment orientation is being compared with each other to compare
+      similarity. The KNN classifier is used.
 3. Hand tracing
     - *Use hand center from step 1. to detect hand movement* - it is returning
       raw dx, dy every frame, like mouse coursor movement.
@@ -53,15 +53,16 @@ from the depth image.
     - *Extract the hand skeleton using the RDF with classified hand zones* - the
       3D model was used for learning Random Decision Forest model in various
       poses and rotations. The skeleton is being extracted, by calculating
-      mass center of each zone taking into consideration weight for each class
+      density mode of each zone taking into consideration weight for each class
       for every pixel.
 5. Gesture comparison
-    - *WIP*
+    - The orientation of each bone is being calculated. It is being compared to
+      other gesture orientation and distance from each other is used to get the
+      unsimilarit. Then, the KNN is being used for classification.
 
 ## Dependencies
 
 Please install and build below libraries:
-Alternatively, they can be downloaded as a zip from: [not working](127.0.0.1)
 * OpenCV (tested with v)
 * QT (tested with v)
 * OpenCL
@@ -123,8 +124,18 @@ Kinect setup
 
 ## List and description of all subprojects
 
-TODO
+**OpenGRL** - this is the main library. It contains all of the algorithms and
+main code. It is being built to the library file, so it can be exported and
+headers can be copied from the include directory of the subproject to use it
+in the separate app standalone.
 
-## Usage guide (for now, overview only)
+**OpenGRL_UnitTests** - all unit tests were written there. It checks if the
+basic algorithms works by testing different scenarios.
 
-TODO
+**OpenGRL_GUI** - GUI implementing track and gesture extraction + recognition
+using the sample database. It can be also used to capture and save the gesture
+or the track.
+
+**OpenGRL_RDF_Tester** - standalone app, at first used to test if the RDF is
+working fine. Then, it's behavior was extended to check the efficiency of the
+RDF classification and the KNN classification for both the tracks and the hands.
