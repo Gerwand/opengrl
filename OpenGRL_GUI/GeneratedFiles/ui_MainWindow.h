@@ -47,8 +47,8 @@ public:
     QPushButton *recordButton;
     QGroupBox *groupBox_3;
     QVBoxLayout *verticalLayout_12;
+    QFrame *frame_3;
     QPushButton *saveGestureButton;
-    QPushButton *exrButton;
     QLabel *label;
     QSlider *certainty;
     QLabel *certaintyValue;
@@ -159,19 +159,17 @@ public:
         verticalLayout_12->setSpacing(6);
         verticalLayout_12->setContentsMargins(11, 11, 11, 11);
         verticalLayout_12->setObjectName(QString::fromUtf8("verticalLayout_12"));
-        saveGestureButton = new QPushButton(groupBox_3);
+        frame_3 = new QFrame(groupBox_3);
+        frame_3->setObjectName(QString::fromUtf8("frame_3"));
+        frame_3->setFrameShape(QFrame::StyledPanel);
+        frame_3->setFrameShadow(QFrame::Raised);
+        saveGestureButton = new QPushButton(frame_3);
         saveGestureButton->setObjectName(QString::fromUtf8("saveGestureButton"));
+        saveGestureButton->setGeometry(QRect(80, 0, 93, 28));
         sizePolicy.setHeightForWidth(saveGestureButton->sizePolicy().hasHeightForWidth());
         saveGestureButton->setSizePolicy(sizePolicy);
 
-        verticalLayout_12->addWidget(saveGestureButton);
-
-        exrButton = new QPushButton(groupBox_3);
-        exrButton->setObjectName(QString::fromUtf8("exrButton"));
-        sizePolicy.setHeightForWidth(exrButton->sizePolicy().hasHeightForWidth());
-        exrButton->setSizePolicy(sizePolicy);
-
-        verticalLayout_12->addWidget(exrButton);
+        verticalLayout_12->addWidget(frame_3);
 
         label = new QLabel(groupBox_3);
         label->setObjectName(QString::fromUtf8("label"));
@@ -375,25 +373,24 @@ public:
         comboBox->setItemText(0, QApplication::translate("MainWindowClass", "Microsoft Kinect - One", nullptr));
         comboBox->setItemText(1, QApplication::translate("MainWindowClass", "Microsoft Kinect - 360", nullptr));
 
-        groupBox_4->setTitle(QApplication::translate("MainWindowClass", "Ekstrakcja", nullptr));
+        groupBox_4->setTitle(QApplication::translate("MainWindowClass", "Narz\304\231dzia", nullptr));
         saveProfileButton->setText(QApplication::translate("MainWindowClass", "Zapisz profilowanie", nullptr));
         trackBox->setTitle(QApplication::translate("MainWindowClass", "\305\232cie\305\274ka", nullptr));
         recordButton->setText(QApplication::translate("MainWindowClass", "Nagrywaj", nullptr));
         groupBox_3->setTitle(QApplication::translate("MainWindowClass", "Gesty", nullptr));
         saveGestureButton->setText(QApplication::translate("MainWindowClass", "Nagrywaj", nullptr));
-        exrButton->setText(QApplication::translate("MainWindowClass", "OpenEXR", nullptr));
         label->setText(QApplication::translate("MainWindowClass", "Certainty setup:", nullptr));
         certaintyValue->setText(QString());
         groupBox_8->setTitle(QApplication::translate("MainWindowClass", "Logger", nullptr));
         debugLog->setText(QString());
         groupBox_5->setTitle(QApplication::translate("MainWindowClass", "GroupBox", nullptr));
-        depthImageBox->setText(QApplication::translate("MainWindowClass", "TextLabel", nullptr));
+        depthImageBox->setText(QString());
         groupBox_6->setTitle(QApplication::translate("MainWindowClass", "GroupBox", nullptr));
-        handImageBox->setText(QApplication::translate("MainWindowClass", "TextLabel", nullptr));
+        handImageBox->setText(QString());
         groupBox->setTitle(QApplication::translate("MainWindowClass", "GroupBox", nullptr));
-        skeletonImageBox->setText(QApplication::translate("MainWindowClass", "TextLabel", nullptr));
+        skeletonImageBox->setText(QString());
         groupBox_7->setTitle(QApplication::translate("MainWindowClass", "GroupBox", nullptr));
-        matchedImageBox->setText(QApplication::translate("MainWindowClass", "TextLabel", nullptr));
+        matchedImageBox->setText(QString());
     } // retranslateUi
 
 };

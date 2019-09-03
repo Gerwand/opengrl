@@ -42,7 +42,6 @@ private slots:
 
     void recordButtonHandler();
     void recordGestureButtonHandler();
-    void exrButtonHandler();
     void saveProfileButtonHandler();
 
     void updateSliderHandler(int value);

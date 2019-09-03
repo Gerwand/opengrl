@@ -2,8 +2,6 @@
 
 #include <grl/rdf/RandomDecisionForest.h>
 
-// Temporary solution TODO: load database from file
-#include "../OpenGRL_RDF_Tester/SampleTracks.h"
 #include <grl/utils/ImageToolkit.h>
 #include "QTUtils.h"
 
@@ -47,7 +45,7 @@ MainWindow::MainWindow(QWidget *parent)
     _trackKNN->init(5);
 
     SAFE_QT_NEW(_rdfExtractor, grl::RDFHandSkeletonExtractor);
-    if (!_rdfExtractor->init("E:\\Magisterka\\OpenGRL\\resources\\rdf.txt", _kinect)) {
+    if (!_rdfExtractor->init("../resources/rdf.txt", _kinect)) {
         std::cout << "Invalid forest" << std::endl;
         QCoreApplication::exit(EFAULT);
     }
@@ -72,7 +70,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(_ui.recordButton, SIGNAL(clicked()), this, SLOT(recordButtonHandler()));
     connect(_ui.saveGestureButton, SIGNAL(clicked()), this, SLOT(recordGestureButtonHandler()));
-    connect(_ui.exrButton, SIGNAL(clicked()), this, SLOT(exrButtonHandler()));
     connect(_ui.saveProfileButton, SIGNAL(clicked()), this, SLOT(saveProfileButtonHandler()));
     connect(_ui.certainty, &QSlider::valueChanged, 
             this, &MainWindow::updateSliderHandler);
@@ -94,7 +91,6 @@ MainWindow::~MainWindow()
     delete _trackKNN;
     delete _rdfExtractor;
 }
-
 
 void MainWindow::saveProfileButtonHandler()
 {
@@ -130,30 +126,6 @@ void MainWindow::recordGestureButtonHandler()
 
     _endTime = QTime::currentTime().addSecs(recordDelay);
     connect(_captureTimer, SIGNAL(timeout()), this, SLOT(recordGesture()));
-}
-
-void MainWindow::exrButtonHandler()
-{
-    std::string fileName = QFileDialog::getOpenFileName(this, "OpenEXR file select").toStdString();
-
-    if (!fileName.empty()) {
-        cv::Mat img = cv::imread(fileName, cv::IMREAD_UNCHANGED);
-        int type = img.type();
-        int channels = img.channels();
-        cv::MatIterator_<cv::Vec3f> it, end;
-        float r, g, b;
-        for (it = img.begin<cv::Vec3f>(), end = img.end<cv::Vec3f>(); it != end; ++it) {
-            b = (*it)[0];
-            g = (*it)[1];
-            r = (*it)[2];
-            if (b != 1.0f || g != 1.0f || r != 1.0f)
-                continue;
-        }
-        cv::Mat_<cv::Vec3f> fimg = img;
-        b = fimg(80, 80)[0];
-        g = fimg(80, 80)[1];
-        r = fimg(80, 80)[2];
-    }
 }
 
 void MainWindow::drawDepthWithSkeleton()
@@ -340,6 +312,134 @@ void MainWindow::recordTrack()
     }
 }
 
+void MainWindow::all()
+{
+    std::ostringstream debugText;
+    QImage image;
+
+
+	_lastStatus = _recognizer->update(grl::All);
+    if (_lastStatus == grl::GotNothing)
+        return;
+
+    drawDepthWithSkeleton();
+
+    grl::TrackPoints rightTrack;
+    _rightTracker->getCurrentTrack(rightTrack);
+
+    int width, height;
+    _kinect->getSize(width, height);
+    // Draw track for right hand
+    cv::Mat mat = cv::Mat::zeros(height, width, CV_8UC3);
+    grl::drawTrack(rightTrack, mat, *_kinect);
+    cvMatRGBToQImage(mat, image);
+    _ui.skeletonImageBox->setPixmap(QPixmap::fromImage(image));
+
+    if (_lastStatus & grl::GotGesture) {
+        cv::Mat hands = _rdfExtractor->getLastClasses();
+        cv::Mat calculatedClassesRGB;
+        grl::RDFTools::convertHandClassesToRGB(hands, calculatedClassesRGB);
+        grl::drawJointsOnImage(_recognizer->getHandSkeleton(), calculatedClassesRGB, _certaintyValue);
+        cvMatRGBToQImage(calculatedClassesRGB, image);
+        _ui.handImageBox->setPixmap(QPixmap::fromImage(image));
+    }
+    auto tmatch = _recognizer->getTrackMatch();
+    debugText << "Track: " << *tmatch.trackCategory << " " << tmatch.score1 << std::endl;
+
+    auto gmatch = _recognizer->getGestureMatch();
+    debugText << "Gesture: " << *gmatch.gestureCategory << " " << gmatch.score1 << std::endl;
+    
+    _ui.debugLog->clear();
+	_ui.debugLog->setText(QString::fromStdString(debugText.str()));
+}
+
+void MainWindow::updateVideoContext()
+{
+    //testDepthAndColorize();
+    //testDepthRanges();
+    //testDepthMedian();
+    //testTrackCapturing();
+    //testHandExtract();
+    //testHandClassify();
+
+    // Perform all steps - extraction and classification of all gestures.
+    all();
+}
+
+
+template<size_t s>
+bool learnTrackClassificator(grl::DiscretizedTrackClassification<s> &classificator)
+{
+    static const std::string baseFolderLearn("tracks-learn");
+    static constexpr std::array<const char *, 7> baseNames = {
+        "a",
+        "c",
+        "m",
+        "machanie",
+        "zamach",
+        "n",
+        "notu",
+    };
+    static constexpr size_t learnSamples = 6;
+    for (auto it = baseNames.cbegin(); it != baseNames.cend(); ++it) {
+        for (size_t i = 1; i <= learnSamples; ++i) {
+            std::ostringstream file;
+            file << baseFolderLearn << "/" << *it << i << ".dat";
+
+            grl::TrackPoints track;
+            if (!grl::TrackTools::loadTrackFromFile(track, file.str())) {
+                std::cerr << "Cannot load file " << file.str() << std::endl;
+                return false;
+            }
+
+            classificator.updateDatabase(*it, track);
+        }
+    }
+
+    return true;
+}
+
+bool learnGestureClassificator(grl::BoneOrientationClassificator &classificator)
+{
+    static const std::string basegFolderLearn("gestures-learn");
+    static constexpr std::array<const char *, 8> basegNames = {
+        "nie",
+        "ok",
+        "tak",
+        "piesc",
+        "pokoj",
+        "relaks",
+        "tyl",
+        "stop",
+    };
+    static constexpr size_t learngSamples = 6;
+
+    for (auto it = basegNames.cbegin(); it != basegNames.cend(); ++it) {
+        for (size_t i = 1; i <= learngSamples; ++i) {
+            std::ostringstream file;
+            file << basegFolderLearn << "/" << *it << i << ".dat";
+
+            grl::HandSkeleton skeleton;
+            if (!grl::loadHandSkeletonFromFile(skeleton, file.str())) {
+                std::cerr << "Cannot load file " << file.str() << std::endl;
+                return false;
+            }
+
+            classificator.updateDatabase(*it, skeleton);
+        }
+    }
+
+    return true;
+}
+
+void
+MainWindow::loadSampleTracks()
+{
+    learnTrackClassificator(*_trackKNN);
+    learnGestureClassificator(*_gestureKNN);
+}
+
+// Below we can find the testing functions that were using for acquring sample images etc.
 void MainWindow::testDepthAndColorize()
 {
     cv::Mat depthFrame;
@@ -374,7 +474,6 @@ void MainWindow::testDepthRanges()
     cvMatGrayToQImage(depthLow, image);
     _ui.handImageBox->setPixmap(QPixmap::fromImage(image));
 }
-
 
 void MainWindow::testDepthMedian()
 {
@@ -475,7 +574,7 @@ void MainWindow::testHandExtract()
     for (auto it = validSkeletons.begin() + 1; it != validSkeletons.end(); ++it)
         if (closestSkeleton->distance > (*it)->distance) closestSkeleton = *it;
 
-	cv::cvtColor(depth, depth, CV_GRAY2RGB);
+    cv::cvtColor(depth, depth, CV_GRAY2RGB);
     drawSimpleSkeleton(*closestSkeleton, depth);
     cvMatRGBToQImage(depth, image);
     _ui.skeletonImageBox->setPixmap(QPixmap::fromImage(image));
@@ -574,217 +673,4 @@ void MainWindow::testHandClassify()
     grl::drawJointsOnImage(handSkeleton, calculatedClassesRGB, _certaintyValue);
     cvMatRGBToQImage(calculatedClassesRGB, image);
     _ui.matchedImageBox->setPixmap(QPixmap::fromImage(image));
-}
-
-void MainWindow::all()
-{
-    std::ostringstream debugText;
-    QImage image;
-
-
-	_lastStatus = _recognizer->update(grl::All);
-    if (_lastStatus == grl::GotNothing)
-        return;
-
-    drawDepthWithSkeleton();
-
-    grl::TrackPoints rightTrack;
-    _rightTracker->getCurrentTrack(rightTrack);
-
-    int width, height;
-    _kinect->getSize(width, height);
-    // Draw track for right hand
-    cv::Mat mat = cv::Mat::zeros(height, width, CV_8UC3);
-    grl::drawTrack(rightTrack, mat, *_kinect);
-    cvMatRGBToQImage(mat, image);
-    _ui.skeletonImageBox->setPixmap(QPixmap::fromImage(image));
-
-    if (_lastStatus & grl::GotGesture) {
-        cv::Mat hands = _rdfExtractor->getLastClasses();
-        cv::Mat calculatedClassesRGB;
-        grl::RDFTools::convertHandClassesToRGB(hands, calculatedClassesRGB);
-        grl::drawJointsOnImage(_recognizer->getHandSkeleton(), calculatedClassesRGB, _certaintyValue);
-        cvMatRGBToQImage(calculatedClassesRGB, image);
-        _ui.handImageBox->setPixmap(QPixmap::fromImage(image));
-    }
-    auto tmatch = _recognizer->getTrackMatch();
-    debugText << "Track: " << *tmatch.trackCategory << " " << tmatch.score1 << std::endl;
-
-    auto gmatch = _recognizer->getGestureMatch();
-    debugText << "Gesture: " << *gmatch.gestureCategory << " " << gmatch.score1 << std::endl;
-    
-    _ui.debugLog->clear();
-	_ui.debugLog->setText(QString::fromStdString(debugText.str()));
-}
-
-void MainWindow::updateVideoContext()
-{
-    testDepthAndColorize();
-    //testDepthRanges();
-    //testDepthMedian();
-    //testTrackCapturing();
-    //testHandExtract();
-    //testHandClassify();
-    //all();
-
-    //	grl::RecognitionStatus status;
-//
-//	status = _recognizer->update();
-//	if (status == grl::NoInput)
-//		return;
-//
-//	QImage image;
-//	cv::Mat depthImage = _recognizer->getNormalizedDepth();
-//	cvMatGrayToQImage(depthImage, image);
-//	_ui.depthImageBox->setPixmap(QPixmap::fromImage(image));
-//
-//	if (status == grl::NoSkeleton)
-//		return;
-//
-//	const grl::Skeleton &skeleton = _recognizer->getSkeleton();
-//
-//	cv::cvtColor(depthImage, depthImage, CV_GRAY2RGB);
-//
-//    drawSimpleSkeleton(skeleton, depthImage);
-//
-//	std::string debugText;
-//	debugText += std::string("skeleton_lean: ") + std::to_string(skeleton.lean) + '\n';
-//
-//    // Analyze track
-//    const grl::OnlineGestureDescriptor &rightOnline = _rightTracker->getOnlineDescriptor();
-//
-//    debugText += std::string("Right-on: ") + static_cast<std::string>(rightOnline.position) + '\n';
-//
-//#if 0
-//    debugText += std::string("Left-joint: ") + static_cast<std::string>(skeleton.joints[grl::LEFT_HAND].coordWorld) + '\n';
-//    debugText += std::string("Right-joint: ") + static_cast<std::string>(skeleton.joints[grl::RIGHT_HAND].coordWorld) + '\n';
-//#endif
-//    grl::TrackPoints rightTrack;
-//    _rightTracker->getCurrentTrack(rightTrack);
-//
-//    // Draw track for right hand
-//    drawTrack(rightTrack, cv::Scalar(0, 255, 0), depthImage);
-//
-//    cvMatRGBToQImage(depthImage, image);
-//    _ui.skeletonImageBox->setPixmap(QPixmap::fromImage(image));
-//
-//	if (status == grl::NoHands) {
-//		_ui.debugLog->clear();
-//		_ui.debugLog->setText(QString::fromStdString(debugText));
-//		return;
-//	}
-//
-//	cv::Mat hands;
-//	_recognizer->getHandsImage(hands);
-//	cvMatGrayToQImage(hands, image);
-//	_ui.handImageBox->setPixmap(QPixmap::fromImage(image));
-//
-//    const grl::DepthObject &leftHand = _recognizer->getLeftHand();
-//    const grl::DepthObject &rightHand = _recognizer->getRightHand();
-//
-//    debugText += "width: " + std::to_string(rightHand.getBoundingBox().width) + '\n';
-//    debugText += "max: " + std::to_string(rightHand.getMaxDepthValue()) + '\n';
-//    debugText += "min: " + std::to_string(rightHand.getMinDepthValue()) + '\n';
-//
-//	_ui.debugLog->clear();
-//	_ui.debugLog->setText(QString::fromStdString(debugText));
-}
-
-
-template<size_t s>
-bool learnTrackClassificator(grl::DiscretizedTrackClassification<s> &classificator)
-{
-    static const std::string baseFolderLearn("tracks-learn");
-    static constexpr std::array<const char *, 7> baseNames = {
-        "a",
-        "c",
-        "m",
-        "machanie",
-        "zamach",
-        "n",
-        "notu",
-    };
-    static constexpr size_t learnSamples = 6;
-    for (auto it = baseNames.cbegin(); it != baseNames.cend(); ++it) {
-        for (size_t i = 1; i <= learnSamples; ++i) {
-            std::ostringstream file;
-            file << baseFolderLearn << "/" << *it << i << ".dat";
-
-            grl::TrackPoints track;
-            if (!grl::TrackTools::loadTrackFromFile(track, file.str())) {
-                std::cerr << "Cannot load file " << file.str() << std::endl;
-                return false;
-            }
-
-            classificator.updateDatabase(*it, track);
-        }
-    }
-
-    return true;
-}
-
-bool learnGestureClassificator(grl::BoneOrientationClassificator &classificator)
-{
-    static const std::string basegFolderLearn("gestures-learn");
-    static constexpr std::array<const char *, 8> basegNames = {
-        "nie",
-        "ok",
-        "tak",
-        "piesc",
-        "pokoj",
-        "relaks",
-        "tyl",
-        "stop",
-    };
-    static constexpr size_t learngSamples = 6;
-
-    for (auto it = basegNames.cbegin(); it != basegNames.cend(); ++it) {
-        for (size_t i = 1; i <= learngSamples; ++i) {
-            std::ostringstream file;
-            file << basegFolderLearn << "/" << *it << i << ".dat";
-
-            grl::HandSkeleton skeleton;
-            if (!grl::loadHandSkeletonFromFile(skeleton, file.str())) {
-                std::cerr << "Cannot load file " << file.str() << std::endl;
-                return false;
-            }
-
-            classificator.updateDatabase(*it, skeleton);
-        }
-    }
-
-    return true;
-}
-
-void
-MainWindow::loadSampleTracks()
-{
-    learnTrackClassificator(*_trackKNN);
-    learnGestureClassificator(*_gestureKNN);
-
-    //grl::TrackPoints sample;
-    //grl::TrackTools::loadTrackFromFile(sample, "tracks/a1.dat");
-    /*
-    for (int i = 0; i < 2; ++i) {
-        auto &sampleNames = i == 0 ? grlSampleRightTracksNames : grlSampleLeftTracksNames;
-        auto &samplePointers = i == 0 ? grlSampleRightTracksPointers : grlSampleLeftTracksPointers;
-        grl::TrackedHand trackedHand = i == 0 ? grl::grlTrackHandRight : grl::grlTrackHandLeft;
-
-        auto itNames = sampleNames.cbegin();
-        auto itPointers = samplePointers.cbegin();
-        for (; itPointers != samplePointers.cend(); ++itNames, ++itPointers) {
-            auto itSubTrack = (**itPointers).cbegin();
-            for (; itSubTrack != (**itPointers).cend(); ++itSubTrack) {
-                grl::ProcessedOfflineGestureDescriptor desc = {
-                    &(*itNames),
-                    std::make_unique<grl::TrackPoints>(),
-                    trackedHand
-                };
-                desc.track->points = *itSubTrack;
-
-                _discreteTracker->addTrack(desc);
-            }
-        }
-    }
-    */
 }
