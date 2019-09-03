@@ -579,7 +579,7 @@ public:
             Assert::IsTrue(tracker.update(_inactive) == grl::GestureTracker::grlTrackerSkipped);
 
         grl::TrackPoints points;
-        tracker.getCapturedTrack(points);
+        tracker.getCurrentTrack(points);
 
         Assert::AreEqual(points.getPointsCount(), (size_t)_config.trackingLength);
 
@@ -596,7 +596,7 @@ public:
             tracker.update(_inputPoints[i]);
 
         grl::TrackPoints points;
-        tracker.getCapturedTrack(points);
+        tracker.getCurrentTrack(points);
 
         grl::Joint lastJoint;
         lastJoint.coordWorld = points.getLastPoint();
@@ -607,7 +607,7 @@ public:
         Assert::IsTrue(tracker.update(lastJoint) == grl::GestureTracker::grlTrackerBuffered);
         Assert::IsTrue(tracker.update(lastJoint) == grl::GestureTracker::grlTrackerReset);
 
-        tracker.getCapturedTrack(points);
+        tracker.getCurrentTrack(points);
 
         Assert::AreEqual(0ULL, points.getPointsCount());
 
@@ -625,7 +625,7 @@ public:
             tracker.update(_inputPoints[i]);
 
         grl::TrackPoints points;
-        tracker.getCapturedTrack(points);
+        tracker.getCurrentTrack(points);
 
         size_t startIndex = (_numPoints/(_config.frameSkip+1) - 5)  * (_config.frameSkip+1) - 1;
         for (size_t i = 0; i < points.getPointsCount(); ++i) {
