@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1360</width>
+    <width>878</width>
     <height>540</height>
    </rect>
   </property>
@@ -88,30 +88,20 @@
                <height>25</height>
               </size>
              </property>
+             <property name="acceptDrops">
+              <bool>true</bool>
+             </property>
+             <property name="inputMethodHints">
+              <set>Qt::ImhNone</set>
+             </property>
+             <property name="verticalScrollBarPolicy">
+              <enum>Qt::ScrollBarAlwaysOff</enum>
+             </property>
+             <property name="horizontalScrollBarPolicy">
+              <enum>Qt::ScrollBarAlwaysOff</enum>
+             </property>
              <property name="acceptRichText">
               <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QCheckBox" name="checkSaveLeft">
-             <property name="text">
-              <string>Lewa trasa</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="1">
-            <widget class="QCheckBox" name="checkSaveRight">
-             <property name="text">
-              <string>Prawa trasa</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_6">
-             <property name="text">
-              <string>Zapis do
-bazy</string>
              </property>
             </widget>
            </item>
@@ -162,13 +152,6 @@ bazy</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="1">
-            <widget class="QLabel" name="labLeftBegin">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
            <item row="1" column="0">
             <spacer name="horizontalSpacer">
              <property name="orientation">
@@ -199,13 +182,6 @@ bazy</string>
             <widget class="QLabel" name="label_3">
              <property name="text">
               <string>Koniec(L/P):</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="1">
-            <widget class="QLabel" name="labLeftEnd">
-             <property name="text">
-              <string/>
              </property>
             </widget>
            </item>
@@ -242,13 +218,6 @@ bazy</string>
              </property>
             </widget>
            </item>
-           <item row="6" column="1">
-            <widget class="QLabel" name="labLeftPoints">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
            <item row="7" column="0">
             <spacer name="horizontalSpacer_3">
              <property name="orientation">
@@ -282,13 +251,6 @@ bazy</string>
              </property>
             </widget>
            </item>
-           <item row="9" column="1">
-            <widget class="QLabel" name="labLeftLen">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
            <item row="10" column="0">
             <spacer name="horizontalSpacer_7">
              <property name="orientation">
@@ -303,28 +265,28 @@ bazy</string>
             </spacer>
            </item>
            <item row="1" column="1">
-            <widget class="QLabel" name="labRightBegin">
+            <widget class="QLabel" name="labBegin">
              <property name="text">
               <string/>
              </property>
             </widget>
            </item>
            <item row="4" column="1">
-            <widget class="QLabel" name="labRightEnd">
+            <widget class="QLabel" name="labEnd">
              <property name="text">
               <string/>
              </property>
             </widget>
            </item>
            <item row="7" column="1">
-            <widget class="QLabel" name="labRightPoints">
+            <widget class="QLabel" name="labPoints">
              <property name="text">
               <string/>
              </property>
             </widget>
            </item>
            <item row="10" column="1">
-            <widget class="QLabel" name="labRightLen">
+            <widget class="QLabel" name="labLen">
              <property name="text">
               <string/>
              </property>
@@ -339,7 +301,7 @@ bazy</string>
      <item>
       <widget class="QGroupBox" name="groupBox">
        <property name="title">
-        <string>Lewa ściezka</string>
+        <string>Ścieżka</string>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
@@ -352,51 +314,13 @@ bazy</string>
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>532</width>
-             <height>446</height>
+             <width>601</width>
+             <height>434</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item>
-             <widget class="QLabel" name="leftTrackPreview">
-              <property name="text">
-               <string/>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
-      <widget class="QGroupBox" name="groupBox_2">
-       <property name="title">
-        <string>Prawa ścieżka</string>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout_4">
-        <item>
-         <widget class="QScrollArea" name="scrollArea_2">
-          <property name="widgetResizable">
-           <bool>true</bool>
-          </property>
-          <widget class="QWidget" name="scrollAreaWidgetContents_3">
-           <property name="geometry">
-            <rect>
-             <x>0</x>
-             <y>0</y>
-             <width>532</width>
-             <height>446</height>
-            </rect>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
-            <item>
-             <widget class="QLabel" name="rightTrackPreview">
+             <widget class="QLabel" name="trackPreview">
               <property name="text">
                <string/>
               </property>

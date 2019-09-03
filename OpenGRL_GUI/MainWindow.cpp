@@ -4,6 +4,7 @@
 
 // Temporary solution TODO: load database from file
 #include "../OpenGRL_RDF_Tester/SampleTracks.h"
+#include <grl/utils/ImageToolkit.h>
 #include "QTUtils.h"
 
 #include <QTimer>
@@ -23,12 +24,6 @@ MainWindow::MainWindow(QWidget *parent)
 		QCoreApplication::exit(rc);
 	}
 
-	SAFE_QT_NEW(_orbMatcher, grl::ORBMatcher);
-	if (!_orbMatcher->init()) {
-		QMessageBox::critical(this, "Fatal error", "Error when intitializing matcher");
-		QCoreApplication::exit(EFAULT);
-	}
-
     grl::SkeletonExtractorConfig skeletonExtractorConfig;
     skeletonExtractorConfig.depthTolerance = 20;
 
@@ -39,18 +34,30 @@ MainWindow::MainWindow(QWidget *parent)
 	}
 
     grl::TrackerConfig trackerConfig;
-    trackerConfig.filterPoints = 5;
-    trackerConfig.framesIdleReset = 2;
-    trackerConfig.frameSkip = 1;
-    trackerConfig.minDistance = 0.01f;
-    trackerConfig.trackingLength = 25;
+    trackerConfig.filterPoints = 3;
+    trackerConfig.framesIdleReset = 10;
+    trackerConfig.frameSkip = 2;
+    trackerConfig.minDistance = 0.03f;
+    trackerConfig.trackingLength = 50;
 
-    SAFE_QT_NEW(_leftTracker, grl::GestureTracker);
-    _leftTracker->init(trackerConfig);
+    SAFE_QT_NEW(_rightTracker, grl::GestureTracker);
     _rightTracker->init(trackerConfig);
 
-	SAFE_QT_NEW(_recognizer, grl::GestureRecognizer);
-	if (!_recognizer->init(_kinect, _extractor, _leftTracker, _rightTracker, _orbMatcher)) {
+    SAFE_QT_NEW(_trackKNN, grl::DiscretizedTrackClassification<14>);
+    _trackKNN->init(5);
+
+    SAFE_QT_NEW(_rdfExtractor, grl::RDFHandSkeletonExtractor);
+    if (!_rdfExtractor->init("E:\\Magisterka\\OpenGRL\\resources\\rdf.txt", _kinect)) {
+        std::cout << "Invalid forest" << std::endl;
+        QCoreApplication::exit(EFAULT);
+    }
+
+    SAFE_QT_NEW(_gestureKNN, grl::BoneOrientationClassificator);
+    _gestureKNN->init(3, 37);
+
+    SAFE_QT_NEW(_recognizer, grl::GestureRecognizer);
+
+	if (!_recognizer->init(_kinect, _extractor, _rightTracker, _trackKNN, _rdfExtractor, _gestureKNN)) {
 		QMessageBox::critical(this, "Fatal error", "Error when intitializing recognizer");
 		QCoreApplication::exit(EFAULT);
 	}
@@ -59,12 +66,17 @@ MainWindow::MainWindow(QWidget *parent)
 
     _ui.setupUi(this);
 
-    //SAFE_QT_NEW(_trackSaver, TrackSaver(this, *_kinect, *_discreteTracker));
+    SAFE_QT_NEW(_trackSaver, TrackSaver(this, *_kinect));
+    SAFE_QT_NEW(_gestureSaver, GestureSaver(this));
     SAFE_QT_NEW(_captureTimer, QTimer(this));
 
     connect(_ui.recordButton, SIGNAL(clicked()), this, SLOT(recordButtonHandler()));
-    connect(_ui.saveTrackButton, SIGNAL(clicked()), this, SLOT(saveTrackButtonHandler()));
+    connect(_ui.saveGestureButton, SIGNAL(clicked()), this, SLOT(recordGestureButtonHandler()));
     connect(_ui.exrButton, SIGNAL(clicked()), this, SLOT(exrButtonHandler()));
+    connect(_ui.saveProfileButton, SIGNAL(clicked()), this, SLOT(saveProfileButtonHandler()));
+    connect(_ui.certainty, &QSlider::valueChanged, 
+            this, &MainWindow::updateSliderHandler);
+    updateSliderHandler(_ui.certainty->value());
 
     connect(_captureTimer, SIGNAL(timeout()), this, SLOT(updateVideoContext()));
 	_captureTimer->start(20);
@@ -73,39 +85,51 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
 	delete _kinect;
-	delete _orbMatcher;
 	delete _extractor;
 	delete _recognizer;
     delete _trackSaver;
+    delete _gestureSaver;
     delete _captureTimer;
-    delete _leftRecorder;
-    delete _rightRecorder;
+    delete _rightTracker;
+    delete _trackKNN;
+    delete _rdfExtractor;
+}
+
+
+void MainWindow::saveProfileButtonHandler()
+{
+    std::ofstream file("profile.log", std::ofstream::trunc | std::ofstream::out);
+    grl::profiler.reportShort(file);
+}
+
+void MainWindow::updateSliderHandler(int value)
+{
+    _certaintyValue = value / 5.0f; // / (5.0f*_ui.certainty->maximum());
+    _ui.certaintyValue->setText(QString::fromStdString(std::to_string(_certaintyValue)));
 }
 
 void MainWindow::recordButtonHandler()
 {
     disconnect(_captureTimer, SIGNAL(timeout()), this, SLOT(updateVideoContext()));
 
-    if (_leftRecorder != nullptr || _rightRecorder != nullptr) {
-        delete _leftRecorder;
-        delete _rightRecorder;
-    }
+    _rightTracker->clear();
 
-    _leftRecorder = new grl::TrackRecorder(0.02f, 1, 5, 25);
-    _rightRecorder = new grl::TrackRecorder(0.02f, 1, 5, 25);
-
-    _recordingLeftFinished = false;
-    _recordingRightFinished = false;
+    _recordingFinished = false;
 
     _endTime = QTime::currentTime().addSecs(recordDelay);
-    _idleDeadline = _endTime.addSecs(idleDelay);
     connect(_captureTimer, SIGNAL(timeout()), this, SLOT(recordTrack()));
 }
 
-void MainWindow::saveTrackButtonHandler()
+void MainWindow::recordGestureButtonHandler()
 {
-    //QString fileName = QFileDialog::getSaveFileName(this, "Track database file selector");
-    //_discreteTracker->writeDatabaseToFile(fileName.toStdString());
+    disconnect(_captureTimer, SIGNAL(timeout()), this, SLOT(updateVideoContext()));
+
+    _recordingFinished = false;
+    _handImages.clear();
+    _handSkeletons.clear();
+
+    _endTime = QTime::currentTime().addSecs(recordDelay);
+    connect(_captureTimer, SIGNAL(timeout()), this, SLOT(recordGesture()));
 }
 
 void MainWindow::exrButtonHandler()
@@ -132,305 +156,614 @@ void MainWindow::exrButtonHandler()
     }
 }
 
-void MainWindow::recordTrack()
+void MainWindow::drawDepthWithSkeleton()
 {
-    /*
-    grl::RecognitionStatus status;
-    status = _recognizer->update();
+    QImage image;
+    if (_lastStatus & grl::GotDepth) {
+        cv::Mat depthImage = _recognizer->getNormalizedDepth();
+        const grl::Skeleton &skeleton = _recognizer->getSkeleton();
+
+        if (_lastStatus & grl::GotSkeleton) {
+            cv::cvtColor(depthImage, depthImage, CV_GRAY2RGB);
+            drawSimpleSkeleton(skeleton, depthImage);
+            cvMatRGBToQImage(depthImage, image);
+        } else {
+            cvMatGrayToQImage(depthImage, image);
+        }
+
+        _ui.depthImageBox->setPixmap(QPixmap::fromImage(image));
+    }
+}
+
+void MainWindow::recordGesture()
+{
+    QImage image;
+    static bool recordingStarted = false;
+
+    _lastStatus = _recognizer->update(recordingStarted ?
+                                      grl::RecognitionMode::CaptureGesture :
+                                      grl::RecognitionMode::GetSkeleton
+    );
+    if (_lastStatus == grl::GotNothing)
+        return;
+
     QTime currentTime = QTime::currentTime();
     const grl::Skeleton &skeleton = _recognizer->getSkeleton();
 
     int width, height;
     _kinect->getSize(width, height);
 
-    cv::Mat infoimage(height, width, CV_8UC3, cv::Scalar(0, 0, 0));
-    QImage qImage;
+    cv::Mat infoImage(height, width, CV_8UC3, cv::Scalar(0, 0, 0));
 
-    bool canRecord = status != grl::NoInput && status != grl::NoSkeleton;
+    bool canRecord = (_lastStatus & grl::GotGesture) != 0;
 
-    if (status != grl::NoInput) {
-        cv::Mat depthImage = _recognizer->getNormalizedDepth();
-
-        if (status != grl::NoSkeleton) {
-            cv::cvtColor(depthImage, depthImage, CV_GRAY2RGB);
-            drawSimpleSkeleton(skeleton, depthImage);
-            cvMatRGBToQImage(depthImage, qImage);
-        } else {
-            cvMatGrayToQImage(depthImage, qImage);
-        }
-
-        _ui.depthImageBox->setPixmap(QPixmap::fromImage(qImage));
-    }
+    drawDepthWithSkeleton();
 
     // Print info on the right side
-    static int idleLeft, idleRight;
     if (currentTime <= _endTime) {
-        float countdown = currentTime.msecsTo(_endTime)/1000.0f;
-        std::stringstream s;
-        s << std::fixed << std::setprecision(1) << countdown;
-        cv::String number(s.str());
-        cv::putText(infoimage, number, cv::Point(width/4, height/2),
-                    CV_FONT_HERSHEY_SIMPLEX, 5, cv::Scalar(255, 0, 0), 4);
+        drawCountdown(currentTime, _endTime, infoImage);
         if (!canRecord)
-            cv::putText(infoimage, cv::String("Ustaw sie"), cv::Point(20, height/2 + 100),
+            cv::putText(infoImage, cv::String("Ustaw sie"), cv::Point(20, height/2 + 100),
                         CV_FONT_HERSHEY_SIMPLEX, 3, cv::Scalar(255, 0, 0), 4);
         else
-            cv::putText(infoimage, cv::String("OK!"), cv::Point(width/3, height/2 + 100),
+            cv::putText(infoImage, cv::String("OK!"), cv::Point(width/3, height/2 + 100),
                         CV_FONT_HERSHEY_SIMPLEX, 3, cv::Scalar(0, 255, 0), 4);
     } else {
+        if (!recordingStarted) {
+            recordingStarted = true;
+            return;
+        }
         if (canRecord) {
-            cv::putText(infoimage, cv::String("Nagrywam"), cv::Point(20, height/2),
+            cv::putText(infoImage, cv::String("Nagrywam"), cv::Point(20, height/2),
                         CV_FONT_HERSHEY_SIMPLEX, 3, cv::Scalar(0, 255, 0), 4);
 
             // Add left hand if recording
-            if (!_recordingLeftFinished) {
-                grl::TrackState state = _leftRecorder->addPoint(skeleton.joints[grl::LEFT_HAND].coordWorld);
+            if (!_recordingFinished) {
+                static int n;
+                grl::HandSkeleton handSkeleton = _recognizer->getHandSkeleton();
+                cv::Mat calculatedClassesRGB;
+                cv::Mat &assignedClasses = _rdfExtractor->getLastClasses();
+                grl::RDFTools::convertHandClassesToRGB(assignedClasses, calculatedClassesRGB);
+                grl::drawJointsOnImage(handSkeleton, calculatedClassesRGB, _certaintyValue);
+                cvMatRGBToQImage(calculatedClassesRGB, image);
+                _ui.skeletonImageBox->setPixmap(QPixmap::fromImage(image));
+                // Save only every 5 frame, to give the user more control
+                if (++n == 5) {
+                    n = 0;
+                    _handImages.push_back(calculatedClassesRGB);
+                    _handSkeletons.push_back(handSkeleton);
 
-                if (state == grl::grlRecorderPointBuffered || state == grl::grlRecorderPointSkipped) {
-                    ++idleLeft;
-                } else if (state == grl::grlRecorderPointAdded) {
-                    idleLeft = 0;
-                    // Draw the track
-                    grl::TrackPoints track;
-                    grl::offsetsToPoints(_leftRecorder->getTrack(), track);
-
-                    cv::Mat trackImage(height, width, CV_8UC3, cv::Scalar(0, 0, 0));
-                    drawTrack(track.points, cv::Scalar(0, 255, 0), trackImage);
-
-                    cvMatRGBToQImage(trackImage, qImage);
-                    _ui.skeletonImageBox->setPixmap(QPixmap::fromImage(qImage));
-                }
-
-                if (idleLeft >= maxIdleFrames) {
-                    idleLeft = 0;
-                    _recordingLeftFinished = true;
+                    if (_handImages.size() == 9)
+                        _recordingFinished = true;
                 }
             }
-
-            // Add right hand if recording
-            if (!_recordingRightFinished) {
-                grl::TrackState state = _rightRecorder->addPoint(skeleton.joints[grl::RIGHT_HAND].coordWorld);
-
-                if (state == grl::grlRecorderPointBuffered || state == grl::grlRecorderPointSkipped) {
-                    ++idleRight;
-                } else if (state == grl::grlRecorderPointAdded) {
-                    idleRight = 0;
-                    // Draw the track
-                    grl::TrackPoints track;
-                    grl::offsetsToPoints(_rightRecorder->getTrack(), track);
-
-                    cv::Mat trackImage(height, width, CV_8UC3, cv::Scalar(0, 0, 0));
-                    drawTrack(track.points, cv::Scalar(0, 255, 0), trackImage);
-
-                    cvMatRGBToQImage(trackImage, qImage);
-                    _ui.matchedImageBox->setPixmap(QPixmap::fromImage(qImage));
-                }
-
-                if (idleRight >= maxIdleFrames) {
-                    idleRight = 0;
-                    _recordingRightFinished = true;
-                }
-            }
-
-            _idleDeadline = QTime::currentTime().addSecs(idleDelay);
         } else {
-            // If hand was idle for too long, simply end recording
-            if (currentTime >= _idleDeadline) {
-                idleLeft = 0;
-                idleRight = 0;
-                _recordingLeftFinished = true;
-                _recordingRightFinished = true;
-            } else {
-                float countdown = currentTime.msecsTo(_idleDeadline)/1000.0f;
-                std::stringstream s;
-                s << std::fixed << std::setprecision(1) << countdown;
-                cv::String number(s.str());
-                cv::putText(infoimage, number, cv::Point(width/4, height/2),
-                            CV_FONT_HERSHEY_SIMPLEX, 5, cv::Scalar(255, 0, 0), 4);
-                cv::putText(infoimage, cv::String("Brak szkieletu"), cv::Point(20, height/2 + 100),
-                            CV_FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(255, 0, 0), 4);
-            }
+            cv::putText(infoImage, cv::String("Brak szkieletu"), cv::Point(20, height/2 + 100),
+                        CV_FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(255, 0, 0), 4);
         }
     }
 
-    // Debug logs
-    std::string debugText;
-    debugText += std::string("Left points: ") + std::to_string(_leftRecorder->getLength()) + '\n';
-    debugText += std::string("Left idle: ") + std::to_string(idleLeft) + '\n';
-    debugText += std::string("Right points: ") + std::to_string(_rightRecorder->getLength()) + '\n';
-    debugText += std::string("Right idle: ") + std::to_string(idleRight) + '\n';
+    _ui.debugLog->clear();
+
+    cvMatRGBToQImage(infoImage, image);
+    _ui.matchedImageBox->setPixmap(QPixmap::fromImage(image));
+    if (_recordingFinished) {
+        recordingStarted = false;
+        
+        _gestureSaver->setGestures(&_handImages, &_handSkeletons);
+        _gestureSaver->exec();
+
+        disconnect(_captureTimer, SIGNAL(timeout()), this, SLOT(recordGesture()));
+        connect(_captureTimer, SIGNAL(timeout()), this, SLOT(updateVideoContext()));
+    }
+}
+
+void MainWindow::recordTrack()
+{
+    QImage image;
+    static bool recordingStarted = false;
+
+    _lastStatus = _recognizer->update(recordingStarted ? 
+                                      grl::RecognitionMode::CaptureTrack : 
+                                      grl::RecognitionMode::GetSkeleton
+    );
+    if (_lastStatus == grl::GotNothing)
+        return;
+
+    QTime currentTime = QTime::currentTime();
+    const grl::Skeleton &skeleton = _recognizer->getSkeleton();
+
+    int width, height;
+    _kinect->getSize(width, height);
+
+    cv::Mat infoImage(height, width, CV_8UC3, cv::Scalar(0, 0, 0));
+
+    bool canRecord = (_lastStatus & grl::GotSkeleton) != 0;
+
+    drawDepthWithSkeleton();
+
+    // Print info on the right side
+    if (currentTime <= _endTime) {
+        drawCountdown(currentTime, _endTime, infoImage);
+        if (!canRecord)
+            cv::putText(infoImage, cv::String("Ustaw sie"), cv::Point(20, height/2 + 100),
+                        CV_FONT_HERSHEY_SIMPLEX, 3, cv::Scalar(255, 0, 0), 4);
+        else
+            cv::putText(infoImage, cv::String("OK!"), cv::Point(width/3, height/2 + 100),
+                        CV_FONT_HERSHEY_SIMPLEX, 3, cv::Scalar(0, 255, 0), 4);
+    } else {
+        if (!recordingStarted) {
+            _rightTracker->clear();
+            recordingStarted = true;
+            return;
+        }
+        if (canRecord) {
+            cv::putText(infoImage, cv::String("Nagrywam"), cv::Point(20, height/2),
+                        CV_FONT_HERSHEY_SIMPLEX, 3, cv::Scalar(0, 255, 0), 4);
+
+            // Add left hand if recording
+            if (!_recordingFinished) {
+                grl::TrackPoints track;
+                cv::Mat trackImage;
+                switch (_recognizer->getLastTrackerState()) {
+                case(grl::GestureTracker::grlTrackerAdded):
+                    _rightTracker->getCurrentTrack(track);
+                    trackImage = cv::Mat(height, width, CV_8UC3, cv::Scalar(0, 0, 0));
+                    drawTrack(track, trackImage, *_kinect);
+                    cvMatRGBToQImage(trackImage, image);
+                    _ui.handImageBox->setPixmap(QPixmap::fromImage(image));
+                    break;
+                case(grl::GestureTracker::grlTrackerReset):
+                    // Stop recording if have at least 2 points
+                    if (_rightTracker->getLastTrack().getPointsCount() > 1)
+                        _recordingFinished = true;
+                    break;
+                }
+            }
+        } else {
+            cv::putText(infoImage, cv::String("Brak szkieletu"), cv::Point(20, height/2 + 100),
+                        CV_FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(255, 0, 0), 4);
+        }
+    }
 
     _ui.debugLog->clear();
-    _ui.debugLog->setText(QString::fromStdString(debugText));
 
-    cvMatRGBToQImage(infoimage, qImage);
-    _ui.handImageBox->setPixmap(QPixmap::fromImage(qImage));
-    if (_recordingLeftFinished && _recordingRightFinished) {
-        _trackSaver->setTracks(&_leftRecorder->getTrack(), &_rightRecorder->getTrack());
+    cvMatRGBToQImage(infoImage, image);
+    _ui.matchedImageBox->setPixmap(QPixmap::fromImage(image));
+    if (_recordingFinished) {
+        recordingStarted = false;
+        _trackSaver->setTrack(&_rightTracker->getLastTrack());
         _trackSaver->exec();
 
         disconnect(_captureTimer, SIGNAL(timeout()), this, SLOT(recordTrack()));
         connect(_captureTimer, SIGNAL(timeout()), this, SLOT(updateVideoContext()));
     }
+}
 
-    */
+void MainWindow::testDepthAndColorize()
+{
+    cv::Mat depthFrame;
+    QImage image;
+
+    if (!_kinect->getFrame(&depthFrame))
+        return;
+
+    depthFrame = grl::DepthToColor(depthFrame, 500, 3000);
+    cvMatGrayToQImage(depthFrame, image);
+    _ui.depthImageBox->setPixmap(QPixmap::fromImage(image));
+
+    cv::Mat colorized;
+    _kinect->colorizeDepth(colorized);
+    cvMatRGBaToQImage(colorized, image);
+    _ui.handImageBox->setPixmap(QPixmap::fromImage(image));
+}
+
+void MainWindow::testDepthRanges()
+{
+    cv::Mat depthFrame;
+    QImage image;
+
+    if (!_kinect->getFrame(&depthFrame))
+        return;
+
+    cv::Mat depthHigh = grl::DepthToColor(depthFrame, 500, 4500);
+    cvMatGrayToQImage(depthHigh, image);
+    _ui.depthImageBox->setPixmap(QPixmap::fromImage(image));
+
+    cv::Mat depthLow = grl::DepthToColor(depthFrame, 800, 1100);
+    cvMatGrayToQImage(depthLow, image);
+    _ui.handImageBox->setPixmap(QPixmap::fromImage(image));
+}
+
+
+void MainWindow::testDepthMedian()
+{
+    cv::Mat depthFrame;
+    QImage image;
+
+    if (!_kinect->getFrame(&depthFrame))
+        return;
+
+    cv::Mat depth = grl::DepthToColor(depthFrame, 800, 1100);
+    cvMatGrayToQImage(depth, image);
+    _ui.depthImageBox->setPixmap(QPixmap::fromImage(image));
+
+    grl::EnhanceDepthFrame(depthFrame);
+    cv::Mat depthMedian = grl::DepthToColor(depthFrame, 800, 1100);
+    cvMatGrayToQImage(depthMedian, image);
+    _ui.handImageBox->setPixmap(QPixmap::fromImage(image));
+}
+
+void MainWindow::testTrackCapturing()
+{
+    cv::Mat depthFrame;
+    QImage image;
+
+    if (!_kinect->getFrame(&depthFrame))
+        return;
+
+    grl::EnhanceDepthFrame(depthFrame);
+
+    cv::Mat depth = grl::DepthToColor(depthFrame, 500, 4500);
+    cvMatGrayToQImage(depth, image);
+    _ui.depthImageBox->setPixmap(QPixmap::fromImage(image));
+
+    grl::Skeletons skeletons;
+    if (!_kinect->getSkeletons(&skeletons))
+        return;
+
+    if (skeletons.empty())
+        return;
+
+    std::vector<grl::Skeleton *> validSkeletons;
+    for (auto it = skeletons.begin(); it != skeletons.end(); ++it)
+        if (it->lean <= 50.0f) validSkeletons.push_back(&(*it));
+
+    if (validSkeletons.empty())
+        return;
+
+    grl::Skeleton *closestSkeleton = *validSkeletons.begin();
+    for (auto it = validSkeletons.begin() + 1; it != validSkeletons.end(); ++it)
+        if (closestSkeleton->distance > (*it)->distance) closestSkeleton = *it;
+
+    if (_rightTracker->update(closestSkeleton->joints[grl::RIGHT_HAND]) == grl::GestureTracker::grlTrackerAdded) {
+        grl::TrackPoints track;
+        _rightTracker->getCurrentTrack(track);
+
+        cv::Mat depthTrack;
+        cv::cvtColor(depth, depthTrack, CV_GRAY2RGB);
+        drawTrack(track, depthTrack, *_kinect);
+        cvMatRGBToQImage(depthTrack, image);
+        _ui.handImageBox->setPixmap(QPixmap::fromImage(image));
+
+        cv::Mat onlyTrack = cv::Mat::zeros(depth.rows, depth.cols, CV_8UC3);
+        drawTrack(track, onlyTrack, *_kinect);
+        cvMatRGBToQImage(onlyTrack, image);
+        _ui.skeletonImageBox->setPixmap(QPixmap::fromImage(image));
+    }
+}
+
+void MainWindow::testHandExtract()
+{
+    cv::Mat depthFrame;
+    QImage image;
+
+    if (!_kinect->getFrame(&depthFrame))
+        return;
+
+    grl::EnhanceDepthFrame(depthFrame);
+
+    cv::Mat depth = grl::DepthToColor(depthFrame, 500, 4500);
+    cvMatGrayToQImage(depth, image);
+    _ui.depthImageBox->setPixmap(QPixmap::fromImage(image));
+
+    grl::Skeletons skeletons;
+    if (!_kinect->getSkeletons(&skeletons))
+        return;
+
+    if (skeletons.empty())
+        return;
+
+    std::vector<grl::Skeleton *> validSkeletons;
+    for (auto it = skeletons.begin(); it != skeletons.end(); ++it)
+        if (it->lean <= 50.0f) validSkeletons.push_back(&(*it));
+
+    if (validSkeletons.empty())
+        return;
+
+    grl::Skeleton *closestSkeleton = *validSkeletons.begin();
+    for (auto it = validSkeletons.begin() + 1; it != validSkeletons.end(); ++it)
+        if (closestSkeleton->distance > (*it)->distance) closestSkeleton = *it;
+
+	cv::cvtColor(depth, depth, CV_GRAY2RGB);
+    drawSimpleSkeleton(*closestSkeleton, depth);
+    cvMatRGBToQImage(depth, image);
+    _ui.skeletonImageBox->setPixmap(QPixmap::fromImage(image));
+
+    grl::DepthObject leftHand, rightHand;
+    _extractor->extractHands(depthFrame, *closestSkeleton, leftHand, rightHand);
+
+    cv::Mat destination;
+    int rows, cols;
+    _kinect->getSize(cols, rows);
+    cv::Mat tmp = cv::Mat::zeros(rows, cols, CV_16UC1);
+    destination = cv::Mat::zeros(rows, cols, CV_16UC1);
+
+    if (leftHand.getAccuracy() > 0)
+        leftHand.getDepthImageOfObject().copyTo(tmp(leftHand.getBoundingBox()));
+    if (rightHand.getAccuracy() > 0)
+        rightHand.getDepthImageOfObject().copyTo(destination(rightHand.getBoundingBox()));
+
+    cv::Mat result = tmp + destination;
+
+    cv::normalize(result, result, 0, UINT8_MAX, cv::NORM_MINMAX, CV_8UC1);
+
+    result = UINT8_MAX - result;
+
+    cvMatGrayToQImage(result, image);
+    _ui.handImageBox->setPixmap(QPixmap::fromImage(image));
+}
+
+void MainWindow::testHandClassify()
+{
+    cv::Mat depthFrame;
+    QImage image;
+
+    if (!_kinect->getFrame(&depthFrame))
+        return;
+
+    grl::EnhanceDepthFrame(depthFrame);
+
+    cv::Mat depth = grl::DepthToColor(depthFrame, 500, 4500);
+    cvMatGrayToQImage(depth, image);
+    _ui.depthImageBox->setPixmap(QPixmap::fromImage(image));
+
+    grl::Skeletons skeletons;
+    if (!_kinect->getSkeletons(&skeletons))
+        return;
+
+    if (skeletons.empty())
+        return;
+
+    std::vector<grl::Skeleton *> validSkeletons;
+    for (auto it = skeletons.begin(); it != skeletons.end(); ++it)
+        if (it->lean <= 50.0f) validSkeletons.push_back(&(*it));
+
+    if (validSkeletons.empty())
+        return;
+
+    grl::Skeleton *closestSkeleton = *validSkeletons.begin();
+    for (auto it = validSkeletons.begin() + 1; it != validSkeletons.end(); ++it)
+        if (closestSkeleton->distance > (*it)->distance) closestSkeleton = *it;
+
+
+    cv::cvtColor(depth, depth, CV_GRAY2RGB);
+    drawSimpleSkeleton(*closestSkeleton, depth);
+    cvMatRGBToQImage(depth, image);
+    _ui.skeletonImageBox->setPixmap(QPixmap::fromImage(image));
+
+    grl::DepthObject leftHand, rightHand;
+    _extractor->extractHands(depthFrame, *closestSkeleton, leftHand, rightHand);
+
+    cv::Mat destination;
+    int rows, cols;
+    _kinect->getSize(cols, rows);
+    cv::Mat tmp = cv::Mat::zeros(rows, cols, CV_16UC1);
+    destination = cv::Mat::zeros(rows, cols, CV_16UC1);
+
+    if (rightHand.getAccuracy() == 0)
+        return;
+
+    rightHand.getDepthImageOfObject().copyTo(destination(rightHand.getBoundingBox()));
+
+    cv::Mat result = tmp + destination;
+
+    cv::normalize(result, result, 0, UINT8_MAX, cv::NORM_MINMAX, CV_8UC1);
+
+    result = UINT8_MAX - result;
+
+    cvMatGrayToQImage(result, image);
+    _ui.handImageBox->setPixmap(QPixmap::fromImage(image));
+
+    grl::HandSkeleton handSkeleton;
+    _rdfExtractor->extractSkeleton(rightHand, handSkeleton);
+
+    cv::Mat calculatedClassesRGB;
+    cv::Mat assignedClasses = _rdfExtractor->getLastClasses();
+    grl::RDFTools::convertHandClassesToRGB(assignedClasses, calculatedClassesRGB);
+    grl::drawJointsOnImage(handSkeleton, calculatedClassesRGB, _certaintyValue);
+    cvMatRGBToQImage(calculatedClassesRGB, image);
+    _ui.matchedImageBox->setPixmap(QPixmap::fromImage(image));
+}
+
+void MainWindow::all()
+{
+    std::ostringstream debugText;
+    QImage image;
+
+
+	_lastStatus = _recognizer->update(grl::All);
+    if (_lastStatus == grl::GotNothing)
+        return;
+
+    drawDepthWithSkeleton();
+
+    grl::TrackPoints rightTrack;
+    _rightTracker->getCurrentTrack(rightTrack);
+
+    int width, height;
+    _kinect->getSize(width, height);
+    // Draw track for right hand
+    cv::Mat mat = cv::Mat::zeros(height, width, CV_8UC3);
+    grl::drawTrack(rightTrack, mat, *_kinect);
+    cvMatRGBToQImage(mat, image);
+    _ui.skeletonImageBox->setPixmap(QPixmap::fromImage(image));
+
+    if (_lastStatus & grl::GotGesture) {
+        cv::Mat hands = _rdfExtractor->getLastClasses();
+        cv::Mat calculatedClassesRGB;
+        grl::RDFTools::convertHandClassesToRGB(hands, calculatedClassesRGB);
+        grl::drawJointsOnImage(_recognizer->getHandSkeleton(), calculatedClassesRGB, _certaintyValue);
+        cvMatRGBToQImage(calculatedClassesRGB, image);
+        _ui.handImageBox->setPixmap(QPixmap::fromImage(image));
+    }
+    auto tmatch = _recognizer->getTrackMatch();
+    debugText << "Track: " << *tmatch.trackCategory << " " << tmatch.score1 << std::endl;
+
+    auto gmatch = _recognizer->getGestureMatch();
+    debugText << "Gesture: " << *gmatch.gestureCategory << " " << gmatch.score1 << std::endl;
+    
+    _ui.debugLog->clear();
+	_ui.debugLog->setText(QString::fromStdString(debugText.str()));
 }
 
 void MainWindow::updateVideoContext()
 {
-    /*
-	grl::RecognitionStatus status;
+    testDepthAndColorize();
+    //testDepthRanges();
+    //testDepthMedian();
+    //testTrackCapturing();
+    //testHandExtract();
+    //testHandClassify();
+    //all();
 
-	status = _recognizer->update();
-	if (status == grl::NoInput)
-		return;
-
-	QImage image;
-	cv::Mat depthImage = _recognizer->getNormalizedDepth();
-	cvMatGrayToQImage(depthImage, image);
-	_ui.depthImageBox->setPixmap(QPixmap::fromImage(image));
-
-	if (status == grl::NoSkeleton)
-		return;
-
-	const grl::Skeleton &skeleton = _recognizer->getSkeleton();
-
-	cv::cvtColor(depthImage, depthImage, CV_GRAY2RGB);
-
-    drawSimpleSkeleton(skeleton, depthImage);
-
-	std::string debugText;
-	debugText += std::string("skeleton_lean: ") + std::to_string(skeleton.lean) + '\n';
-
-    // Analyze track
-    const grl::OnlineGestureDescriptor &rightOnline = _discreteTracker->getOnlineDescriptorRight();
-    const grl::OnlineGestureDescriptor &leftOnline = _discreteTracker->getOnlineDescriptorLeft();
-
-    debugText += std::string("Right-on: ") + static_cast<std::string>(rightOnline.position) + '\n';
-    debugText += std::string("Left-on: ") + static_cast<std::string>(leftOnline.position) + '\n';
-
-#if 0
-    debugText += std::string("Left-joint: ") + static_cast<std::string>(skeleton.joints[grl::LEFT_HAND].coordWorld) + '\n';
-    debugText += std::string("Right-joint: ") + static_cast<std::string>(skeleton.joints[grl::RIGHT_HAND].coordWorld) + '\n';
-#endif
-    grl::TrackPoints leftTrack;
-    grl::TrackPoints rightTrack;
-    _discreteTracker->getRawTrackLeft(leftTrack);
-    _discreteTracker->getRawTrackRight(rightTrack);
-
-    // Draw track for left hand
-    drawTrack(leftTrack.points, cv::Scalar(255, 0, 0), depthImage);
-
-    // Draw track for right hand
-    drawTrack(rightTrack.points, cv::Scalar(0, 255, 0), depthImage);
-
-    cvMatRGBToQImage(depthImage, image);
-    _ui.skeletonImageBox->setPixmap(QPixmap::fromImage(image));
-
-    uint8_t recognizedTracks = _discreteTracker->getRecognizedTracks();
-    if (recognizedTracks & grl::grlTrackHandLeft)
-        _leftTrackDescriptor = _discreteTracker->getOfflineDescriptorLeft();
-    if (recognizedTracks & grl::grlTrackHandRight)
-        _rightTrackDescriptor = _discreteTracker->getOfflineDescriptorRight();
-
-    if (_leftTrackDescriptor.matchedTrack != nullptr) {
-        debugText += std::string("Left-track: ") + *_leftTrackDescriptor.gestureName + '\n';
-        debugText += std::string("Error: ") + std::to_string(_leftTrackDescriptor.difference) + '\n';
-    }
-    if (_rightTrackDescriptor.matchedTrack != nullptr) {
-        debugText += std::string("Right-track: ") + *_rightTrackDescriptor.gestureName + '\n';
-        debugText += std::string("Error: ") + std::to_string(_rightTrackDescriptor.difference) + '\n';
-    }
-
-	if (status == grl::NoHands) {
-		_ui.debugLog->clear();
-		_ui.debugLog->setText(QString::fromStdString(debugText));
-		return;
-	}
-
-	cv::Mat hands;
-	_recognizer->getHandsImage(hands);
-	cvMatGrayToQImage(hands, image);
-	_ui.handImageBox->setPixmap(QPixmap::fromImage(image));
-
-    const grl::DepthObject &leftHand = _recognizer->getLeftHand();
-    const grl::DepthObject &rightHand = _recognizer->getRightHand();
-
-    debugText += "width: " + std::to_string(rightHand.getBoundingBox().width) + '\n';
-    debugText += "max: " + std::to_string(rightHand.getMaxDepthValue()) + '\n';
-    debugText += "min: " + std::to_string(rightHand.getMinDepthValue()) + '\n';
-
-	_ui.debugLog->clear();
-	_ui.debugLog->setText(QString::fromStdString(debugText));
-    */
+    //	grl::RecognitionStatus status;
+//
+//	status = _recognizer->update();
+//	if (status == grl::NoInput)
+//		return;
+//
+//	QImage image;
+//	cv::Mat depthImage = _recognizer->getNormalizedDepth();
+//	cvMatGrayToQImage(depthImage, image);
+//	_ui.depthImageBox->setPixmap(QPixmap::fromImage(image));
+//
+//	if (status == grl::NoSkeleton)
+//		return;
+//
+//	const grl::Skeleton &skeleton = _recognizer->getSkeleton();
+//
+//	cv::cvtColor(depthImage, depthImage, CV_GRAY2RGB);
+//
+//    drawSimpleSkeleton(skeleton, depthImage);
+//
+//	std::string debugText;
+//	debugText += std::string("skeleton_lean: ") + std::to_string(skeleton.lean) + '\n';
+//
+//    // Analyze track
+//    const grl::OnlineGestureDescriptor &rightOnline = _rightTracker->getOnlineDescriptor();
+//
+//    debugText += std::string("Right-on: ") + static_cast<std::string>(rightOnline.position) + '\n';
+//
+//#if 0
+//    debugText += std::string("Left-joint: ") + static_cast<std::string>(skeleton.joints[grl::LEFT_HAND].coordWorld) + '\n';
+//    debugText += std::string("Right-joint: ") + static_cast<std::string>(skeleton.joints[grl::RIGHT_HAND].coordWorld) + '\n';
+//#endif
+//    grl::TrackPoints rightTrack;
+//    _rightTracker->getCurrentTrack(rightTrack);
+//
+//    // Draw track for right hand
+//    drawTrack(rightTrack, cv::Scalar(0, 255, 0), depthImage);
+//
+//    cvMatRGBToQImage(depthImage, image);
+//    _ui.skeletonImageBox->setPixmap(QPixmap::fromImage(image));
+//
+//	if (status == grl::NoHands) {
+//		_ui.debugLog->clear();
+//		_ui.debugLog->setText(QString::fromStdString(debugText));
+//		return;
+//	}
+//
+//	cv::Mat hands;
+//	_recognizer->getHandsImage(hands);
+//	cvMatGrayToQImage(hands, image);
+//	_ui.handImageBox->setPixmap(QPixmap::fromImage(image));
+//
+//    const grl::DepthObject &leftHand = _recognizer->getLeftHand();
+//    const grl::DepthObject &rightHand = _recognizer->getRightHand();
+//
+//    debugText += "width: " + std::to_string(rightHand.getBoundingBox().width) + '\n';
+//    debugText += "max: " + std::to_string(rightHand.getMaxDepthValue()) + '\n';
+//    debugText += "min: " + std::to_string(rightHand.getMinDepthValue()) + '\n';
+//
+//	_ui.debugLog->clear();
+//	_ui.debugLog->setText(QString::fromStdString(debugText));
 }
 
 
-void MainWindow::drawSimpleSkeleton(const grl::Skeleton &skeleton, cv::Mat &image)
+template<size_t s>
+bool learnTrackClassificator(grl::DiscretizedTrackClassification<s> &classificator)
 {
-    // Left hand
-    cv::line(image,
-             cv::Point(skeleton.joints[grl::LEFT_HAND].coordDepthImage.x, skeleton.joints[grl::LEFT_HAND].coordDepthImage.y),
-             cv::Point(skeleton.joints[grl::LEFT_WRIST].coordDepthImage.x, skeleton.joints[grl::LEFT_WRIST].coordDepthImage.y),
-             cv::Scalar(0, 0, 255));
-    cv::line(image,
-             cv::Point(skeleton.joints[grl::LEFT_WRIST].coordDepthImage.x, skeleton.joints[grl::LEFT_WRIST].coordDepthImage.y),
-             cv::Point(skeleton.joints[grl::LEFT_ELBOW].coordDepthImage.x, skeleton.joints[grl::LEFT_ELBOW].coordDepthImage.y),
-             cv::Scalar(0, 0, 255));
-    cv::line(image,
-             cv::Point(skeleton.joints[grl::LEFT_ELBOW].coordDepthImage.x, skeleton.joints[grl::LEFT_ELBOW].coordDepthImage.y),
-             cv::Point(skeleton.joints[grl::LEFT_SHOULDER].coordDepthImage.x, skeleton.joints[grl::LEFT_SHOULDER].coordDepthImage.y),
-             cv::Scalar(0, 0, 255));
-    cv::line(image,
-             cv::Point(skeleton.joints[grl::LEFT_SHOULDER].coordDepthImage.x, skeleton.joints[grl::LEFT_SHOULDER].coordDepthImage.y),
-             cv::Point(skeleton.joints[grl::SPINE_SHOULDERS].coordDepthImage.x, skeleton.joints[grl::SPINE_SHOULDERS].coordDepthImage.y),
-             cv::Scalar(0, 0, 255));
-    // Right hand
-    cv::line(image,
-             cv::Point(skeleton.joints[grl::RIGHT_HAND].coordDepthImage.x, skeleton.joints[grl::RIGHT_HAND].coordDepthImage.y),
-             cv::Point(skeleton.joints[grl::RIGHT_WRIST].coordDepthImage.x, skeleton.joints[grl::RIGHT_WRIST].coordDepthImage.y),
-             cv::Scalar(0, 0, 255));
-    cv::line(image,
-             cv::Point(skeleton.joints[grl::RIGHT_WRIST].coordDepthImage.x, skeleton.joints[grl::RIGHT_WRIST].coordDepthImage.y),
-             cv::Point(skeleton.joints[grl::RIGHT_ELBOW].coordDepthImage.x, skeleton.joints[grl::RIGHT_ELBOW].coordDepthImage.y),
-             cv::Scalar(0, 0, 255));
-    cv::line(image,
-             cv::Point(skeleton.joints[grl::RIGHT_ELBOW].coordDepthImage.x, skeleton.joints[grl::RIGHT_ELBOW].coordDepthImage.y),
-             cv::Point(skeleton.joints[grl::RIGHT_SHOULDER].coordDepthImage.x, skeleton.joints[grl::RIGHT_SHOULDER].coordDepthImage.y),
-             cv::Scalar(0, 0, 255));
-    cv::line(image,
-             cv::Point(skeleton.joints[grl::RIGHT_SHOULDER].coordDepthImage.x, skeleton.joints[grl::RIGHT_SHOULDER].coordDepthImage.y),
-             cv::Point(skeleton.joints[grl::SPINE_SHOULDERS].coordDepthImage.x, skeleton.joints[grl::SPINE_SHOULDERS].coordDepthImage.y),
-             cv::Scalar(0, 0, 255));
-    // Spine
-    cv::line(image,
-             cv::Point(skeleton.joints[grl::SPINE_BASE].coordDepthImage.x, skeleton.joints[grl::SPINE_BASE].coordDepthImage.y),
-             cv::Point(skeleton.joints[grl::SPINE_SHOULDERS].coordDepthImage.x, skeleton.joints[grl::SPINE_SHOULDERS].coordDepthImage.y),
-             cv::Scalar(0, 0, 255));
+    static const std::string baseFolderLearn("tracks-learn");
+    static constexpr std::array<const char *, 7> baseNames = {
+        "a",
+        "c",
+        "m",
+        "machanie",
+        "zamach",
+        "n",
+        "notu",
+    };
+    static constexpr size_t learnSamples = 6;
+    for (auto it = baseNames.cbegin(); it != baseNames.cend(); ++it) {
+        for (size_t i = 1; i <= learnSamples; ++i) {
+            std::ostringstream file;
+            file << baseFolderLearn << "/" << *it << i << ".dat";
 
-    for (int i = 0; i < grl::JointType::COUNT; ++i) {
-        cv::Scalar color = skeleton.joints[i].tracked ? cv::Scalar(0, 255, 0) : cv::Scalar(255, 0, 0);
-        cv::circle(image,
-                   cv::Point(skeleton.joints[i].coordDepthImage.x, skeleton.joints[i].coordDepthImage.y),
-                   5, color);
+            grl::TrackPoints track;
+            if (!grl::TrackTools::loadTrackFromFile(track, file.str())) {
+                std::cerr << "Cannot load file " << file.str() << std::endl;
+                return false;
+            }
+
+            classificator.updateDatabase(*it, track);
+        }
     }
+
+    return true;
 }
 
-void
-MainWindow::drawTrack(const std::vector<grl::Vec3f> &track, cv::Scalar color, cv::Mat &image)
+bool learnGestureClassificator(grl::BoneOrientationClassificator &classificator)
 {
-    if (track.size() < 2)
-        return;
+    static const std::string basegFolderLearn("gestures-learn");
+    static constexpr std::array<const char *, 8> basegNames = {
+        "nie",
+        "ok",
+        "tak",
+        "piesc",
+        "pokoj",
+        "relaks",
+        "tyl",
+        "stop",
+    };
+    static constexpr size_t learngSamples = 6;
 
-    std::vector<grl::Vec2f> track2D;
-    _kinect->worldToImage(track, track2D);
-    for (auto it = track2D.cbegin() + 1, itBefore = track2D.cbegin(); it != track2D.cend(); itBefore = it++)
-            cv::line(image, cv::Point2f(itBefore->x, itBefore->y), cv::Point2f(it->x, it->y), color, 2);
+    for (auto it = basegNames.cbegin(); it != basegNames.cend(); ++it) {
+        for (size_t i = 1; i <= learngSamples; ++i) {
+            std::ostringstream file;
+            file << basegFolderLearn << "/" << *it << i << ".dat";
+
+            grl::HandSkeleton skeleton;
+            if (!grl::loadHandSkeletonFromFile(skeleton, file.str())) {
+                std::cerr << "Cannot load file " << file.str() << std::endl;
+                return false;
+            }
+
+            classificator.updateDatabase(*it, skeleton);
+        }
+    }
+
+    return true;
 }
 
 void
 MainWindow::loadSampleTracks()
 {
+    learnTrackClassificator(*_trackKNN);
+    learnGestureClassificator(*_gestureKNN);
+
+    //grl::TrackPoints sample;
+    //grl::TrackTools::loadTrackFromFile(sample, "tracks/a1.dat");
     /*
     for (int i = 0; i < 2; ++i) {
         auto &sampleNames = i == 0 ? grlSampleRightTracksNames : grlSampleLeftTracksNames;

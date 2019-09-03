@@ -21,6 +21,7 @@
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QScrollArea>
+#include <QtWidgets/QSlider>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QVBoxLayout>
@@ -32,19 +33,25 @@ class Ui_MainWindowClass
 {
 public:
     QWidget *centralWidget;
-    QHBoxLayout *horizontalLayout;
+    QVBoxLayout *verticalLayout_11;
     QHBoxLayout *horizontalLayout_2;
     QFrame *frame_2;
     QVBoxLayout *verticalLayout;
     QGroupBox *groupBox_2;
     QComboBox *comboBox;
     QGroupBox *groupBox_4;
+    QHBoxLayout *horizontalLayout;
+    QPushButton *saveProfileButton;
     QGroupBox *trackBox;
     QGridLayout *gridLayout_2;
     QPushButton *recordButton;
-    QPushButton *saveTrackButton;
     QGroupBox *groupBox_3;
+    QVBoxLayout *verticalLayout_12;
+    QPushButton *saveGestureButton;
     QPushButton *exrButton;
+    QLabel *label;
+    QSlider *certainty;
+    QLabel *certaintyValue;
     QGroupBox *groupBox_8;
     QVBoxLayout *verticalLayout_10;
     QLabel *debugLog;
@@ -83,12 +90,13 @@ public:
         if (MainWindowClass->objectName().isEmpty())
             MainWindowClass->setObjectName(QString::fromUtf8("MainWindowClass"));
         MainWindowClass->resize(1154, 722);
+        MainWindowClass->setDocumentMode(false);
         centralWidget = new QWidget(MainWindowClass);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
-        horizontalLayout = new QHBoxLayout(centralWidget);
-        horizontalLayout->setSpacing(6);
-        horizontalLayout->setContentsMargins(11, 11, 11, 11);
-        horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
+        verticalLayout_11 = new QVBoxLayout(centralWidget);
+        verticalLayout_11->setSpacing(6);
+        verticalLayout_11->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_11->setObjectName(QString::fromUtf8("verticalLayout_11"));
         horizontalLayout_2 = new QHBoxLayout();
         horizontalLayout_2->setSpacing(6);
         horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
@@ -114,6 +122,15 @@ public:
         groupBox_4 = new QGroupBox(frame_2);
         groupBox_4->setObjectName(QString::fromUtf8("groupBox_4"));
         groupBox_4->setSizeIncrement(QSize(0, 0));
+        horizontalLayout = new QHBoxLayout(groupBox_4);
+        horizontalLayout->setSpacing(6);
+        horizontalLayout->setContentsMargins(11, 11, 11, 11);
+        horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
+        saveProfileButton = new QPushButton(groupBox_4);
+        saveProfileButton->setObjectName(QString::fromUtf8("saveProfileButton"));
+
+        horizontalLayout->addWidget(saveProfileButton);
+
 
         verticalLayout->addWidget(groupBox_4);
 
@@ -133,19 +150,53 @@ public:
 
         gridLayout_2->addWidget(recordButton, 0, 0, 1, 1);
 
-        saveTrackButton = new QPushButton(trackBox);
-        saveTrackButton->setObjectName(QString::fromUtf8("saveTrackButton"));
-
-        gridLayout_2->addWidget(saveTrackButton, 1, 0, 1, 1);
-
 
         verticalLayout->addWidget(trackBox);
 
         groupBox_3 = new QGroupBox(frame_2);
         groupBox_3->setObjectName(QString::fromUtf8("groupBox_3"));
+        verticalLayout_12 = new QVBoxLayout(groupBox_3);
+        verticalLayout_12->setSpacing(6);
+        verticalLayout_12->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_12->setObjectName(QString::fromUtf8("verticalLayout_12"));
+        saveGestureButton = new QPushButton(groupBox_3);
+        saveGestureButton->setObjectName(QString::fromUtf8("saveGestureButton"));
+        sizePolicy.setHeightForWidth(saveGestureButton->sizePolicy().hasHeightForWidth());
+        saveGestureButton->setSizePolicy(sizePolicy);
+
+        verticalLayout_12->addWidget(saveGestureButton);
+
         exrButton = new QPushButton(groupBox_3);
         exrButton->setObjectName(QString::fromUtf8("exrButton"));
-        exrButton->setGeometry(QRect(100, 40, 75, 23));
+        sizePolicy.setHeightForWidth(exrButton->sizePolicy().hasHeightForWidth());
+        exrButton->setSizePolicy(sizePolicy);
+
+        verticalLayout_12->addWidget(exrButton);
+
+        label = new QLabel(groupBox_3);
+        label->setObjectName(QString::fromUtf8("label"));
+
+        verticalLayout_12->addWidget(label);
+
+        certainty = new QSlider(groupBox_3);
+        certainty->setObjectName(QString::fromUtf8("certainty"));
+        sizePolicy.setHeightForWidth(certainty->sizePolicy().hasHeightForWidth());
+        certainty->setSizePolicy(sizePolicy);
+        certainty->setMaximumSize(QSize(250, 16777215));
+        certainty->setMaximum(250);
+        certainty->setValue(70);
+        certainty->setOrientation(Qt::Horizontal);
+        certainty->setTickPosition(QSlider::TicksBelow);
+        certainty->setTickInterval(0);
+
+        verticalLayout_12->addWidget(certainty);
+
+        certaintyValue = new QLabel(groupBox_3);
+        certaintyValue->setObjectName(QString::fromUtf8("certaintyValue"));
+        certaintyValue->setAlignment(Qt::AlignCenter);
+
+        verticalLayout_12->addWidget(certaintyValue);
+
 
         verticalLayout->addWidget(groupBox_3);
 
@@ -189,7 +240,7 @@ public:
         scrollArea->setWidgetResizable(true);
         scrollAreaWidgetContents = new QWidget();
         scrollAreaWidgetContents->setObjectName(QString::fromUtf8("scrollAreaWidgetContents"));
-        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 379, 277));
+        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 370, 259));
         verticalLayout_6 = new QVBoxLayout(scrollAreaWidgetContents);
         verticalLayout_6->setSpacing(6);
         verticalLayout_6->setContentsMargins(11, 11, 11, 11);
@@ -218,7 +269,7 @@ public:
         scrollArea_2->setWidgetResizable(true);
         scrollAreaWidgetContents_2 = new QWidget();
         scrollAreaWidgetContents_2->setObjectName(QString::fromUtf8("scrollAreaWidgetContents_2"));
-        scrollAreaWidgetContents_2->setGeometry(QRect(0, 0, 379, 277));
+        scrollAreaWidgetContents_2->setGeometry(QRect(0, 0, 370, 259));
         verticalLayout_7 = new QVBoxLayout(scrollAreaWidgetContents_2);
         verticalLayout_7->setSpacing(6);
         verticalLayout_7->setContentsMargins(11, 11, 11, 11);
@@ -247,7 +298,7 @@ public:
         scrollArea_3->setWidgetResizable(true);
         scrollAreaWidgetContents_3 = new QWidget();
         scrollAreaWidgetContents_3->setObjectName(QString::fromUtf8("scrollAreaWidgetContents_3"));
-        scrollAreaWidgetContents_3->setGeometry(QRect(0, 0, 379, 276));
+        scrollAreaWidgetContents_3->setGeometry(QRect(0, 0, 370, 259));
         verticalLayout_8 = new QVBoxLayout(scrollAreaWidgetContents_3);
         verticalLayout_8->setSpacing(6);
         verticalLayout_8->setContentsMargins(11, 11, 11, 11);
@@ -276,7 +327,7 @@ public:
         scrollArea_4->setWidgetResizable(true);
         scrollAreaWidgetContents_4 = new QWidget();
         scrollAreaWidgetContents_4->setObjectName(QString::fromUtf8("scrollAreaWidgetContents_4"));
-        scrollAreaWidgetContents_4->setGeometry(QRect(0, 0, 379, 276));
+        scrollAreaWidgetContents_4->setGeometry(QRect(0, 0, 370, 259));
         verticalLayout_9 = new QVBoxLayout(scrollAreaWidgetContents_4);
         verticalLayout_9->setSpacing(6);
         verticalLayout_9->setContentsMargins(11, 11, 11, 11);
@@ -298,12 +349,12 @@ public:
         horizontalLayout_2->addWidget(frame);
 
 
-        horizontalLayout->addLayout(horizontalLayout_2);
+        verticalLayout_11->addLayout(horizontalLayout_2);
 
         MainWindowClass->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindowClass);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 1154, 21));
+        menuBar->setGeometry(QRect(0, 0, 1154, 26));
         MainWindowClass->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MainWindowClass);
         mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));
@@ -325,11 +376,14 @@ public:
         comboBox->setItemText(1, QApplication::translate("MainWindowClass", "Microsoft Kinect - 360", nullptr));
 
         groupBox_4->setTitle(QApplication::translate("MainWindowClass", "Ekstrakcja", nullptr));
+        saveProfileButton->setText(QApplication::translate("MainWindowClass", "Zapisz profilowanie", nullptr));
         trackBox->setTitle(QApplication::translate("MainWindowClass", "\305\232cie\305\274ka", nullptr));
         recordButton->setText(QApplication::translate("MainWindowClass", "Nagrywaj", nullptr));
-        saveTrackButton->setText(QApplication::translate("MainWindowClass", "Zapisz baz\304\231", nullptr));
-        groupBox_3->setTitle(QApplication::translate("MainWindowClass", "Klasyfikacja", nullptr));
+        groupBox_3->setTitle(QApplication::translate("MainWindowClass", "Gesty", nullptr));
+        saveGestureButton->setText(QApplication::translate("MainWindowClass", "Nagrywaj", nullptr));
         exrButton->setText(QApplication::translate("MainWindowClass", "OpenEXR", nullptr));
+        label->setText(QApplication::translate("MainWindowClass", "Certainty setup:", nullptr));
+        certaintyValue->setText(QString());
         groupBox_8->setTitle(QApplication::translate("MainWindowClass", "Logger", nullptr));
         debugLog->setText(QString());
         groupBox_5->setTitle(QApplication::translate("MainWindowClass", "GroupBox", nullptr));

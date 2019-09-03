@@ -8,13 +8,9 @@ class TrackSaver : public QDialog
 {
     Q_OBJECT
 public:
-    TrackSaver(QWidget *parent, 
-               const grl::DepthCamera &camera,
-               grl::GestureTracker &tracker,
-               const grl::TrackOffsets *leftTrack = nullptr,
-               const grl::TrackOffsets *rightTrack = nullptr);
+    TrackSaver(QWidget *parent, const grl::DepthCamera &camera);
 
-    void setTracks(const grl::TrackOffsets *leftTrack, const grl::TrackOffsets *rightTrack);
+    void setTrack(const grl::TrackPoints *track);
 
 public slots:
     virtual int exec() override;
@@ -24,19 +20,14 @@ private slots:
 
 private:
     Ui::SaveTrackDialog _ui;
-
-    const grl::TrackOffsets *_leftTrack;
-    const grl::TrackOffsets *_rightTrack;
-    grl::TrackPoints _leftTrackProcessed;
-    grl::TrackPoints _rightTrackProcessed;
-
     const grl::DepthCamera &_camera;
-    grl::GestureTracker &_tracker;
+    const grl::TrackPoints *_track;
+    cv::Mat _trackImage;
+    std::map<std::string, size_t> _poseCount;
 };
 
-inline void 
-TrackSaver::setTracks(const grl::TrackOffsets *leftTrack, const grl::TrackOffsets *rightTrack)
+inline void
+TrackSaver::setTrack(const grl::TrackPoints *track)
 {
-    _leftTrack = leftTrack;
-    _rightTrack = rightTrack;
+    _track = track;
 }

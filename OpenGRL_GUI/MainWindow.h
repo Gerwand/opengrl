@@ -6,12 +6,14 @@
 
 #include "ui_MainWindow.h"
 #include "TrackSaver.h"
+#include "GestureSaver.h"
 
 #include <grl/gesture/GestureRecognizer.h>
 #include <grl/gesture/SkeletonExtractor.h>
 #include <grl/camera/KinectCamera.h>
-#include <grl/gesture/ORBMatcher.h>
 #include <grl/track/GestureTracker.h>
+#include <grl/gesture/RDFHandSkeletonExtractor.h>
+#include <grl/gesture/GestureClassificator.h>
 
 constexpr int recordDelay = 5;
 constexpr int idleDelay = 3;
@@ -36,34 +38,55 @@ public:
 private slots:
 	void updateVideoContext();
     void recordTrack();
+    void recordGesture();
 
     void recordButtonHandler();
-    void saveTrackButtonHandler();
+    void recordGestureButtonHandler();
     void exrButtonHandler();
+    void saveProfileButtonHandler();
+
+    void updateSliderHandler(int value);
 
 private:
 	Ui::MainWindowClass _ui;
-    TrackSaver *_trackSaver;
+    TrackSaver *_trackSaver = nullptr;
+    GestureSaver *_gestureSaver = nullptr;
 
 	QTimer *_captureTimer = nullptr;
-    
+
 	grl::KinectCamera		*_kinect = nullptr;
-	grl::ORBMatcher			*_orbMatcher = nullptr;
 	grl::GestureRecognizer	*_recognizer = nullptr;
 	grl::SkeletonExtractor	*_extractor = nullptr;
-    grl::GestureTracker     *_leftTracker = nullptr;
     grl::GestureTracker     *_rightTracker = nullptr;
+    grl::DiscretizedTrackClassification<14> *_trackKNN = nullptr;
+    grl::RDFHandSkeletonExtractor *_rdfExtractor = nullptr;
+    grl::BoneOrientationClassificator *_gestureKNN = nullptr;
 
-    grl::TrackRecorder      *_leftRecorder = nullptr;
-    grl::TrackRecorder      *_rightRecorder = nullptr;
-    bool _recordingLeftFinished;
-    bool _recordingRightFinished;
+    bool _recordingFinished;
 
     QTime _endTime;
     QTime _lastTime;
     QTime _idleDeadline;
 
-    void drawTrack(const std::vector<grl::Vec3f> &track, cv::Scalar color, cv::Mat &image);
+    float _certaintyValue;
+
+    std::vector<cv::Mat> _handImages;
+    std::vector<grl::HandSkeleton> _handSkeletons;
+
+    uint64_t _lastStatus;
+
     void loadSampleTracks();
-    static void drawSimpleSkeleton(const grl::Skeleton &skeleton, cv::Mat &image);
+
+    void testDepthAndColorize();
+
+    void testDepthRanges();
+    void testDepthMedian();
+
+    void testTrackCapturing();
+    void testHandExtract();
+
+    void testHandClassify();
+
+    void drawDepthWithSkeleton();
+    void all();
 };
