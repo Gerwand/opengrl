@@ -21,6 +21,8 @@
   <ItemGroup>
     <ClInclude Include="include\grl\camera\DepthCamera.h" />
     <ClInclude Include="include\grl\camera\KinectCamera.h" />
+    <ClInclude Include="include\grl\classification\Classificator.h" />
+    <ClInclude Include="include\grl\classification\Features.h" />
     <ClInclude Include="include\grl\gesture\FloodFillClipped.h" />
     <ClInclude Include="include\grl\gesture\GestureExtractor.h" />
     <ClInclude Include="include\grl\gesture\GestureMatcher.h" />
@@ -30,9 +32,16 @@
     <ClInclude Include="include\grl\rdf\DecisionTree.h" />
     <ClInclude Include="include\grl\rdf\RandomDecisionForest.h" />
     <ClInclude Include="include\grl\rdf\SegmentedDepthUtils.h" />
-    <ClInclude Include="include\grl\track\DiscretizedGestureTracker.h" />
     <ClInclude Include="include\grl\track\GestureTracker.h" />
+    <ClInclude Include="include\grl\track\Track.h" />
+    <ClInclude Include="include\grl\track\TrackClassificator.h" />
+    <ClInclude Include="include\grl\track\TrackOffsets.h" />
+    <ClInclude Include="include\grl\track\TrackPoints.h" />
+    <ClInclude Include="include\grl\track\TrackRecorder.h" />
+    <ClInclude Include="include\grl\track\TrackRecorderQueue.h" />
+    <ClInclude Include="include\grl\track\TrackTools.h" />
     <ClInclude Include="include\grl\utils\Algorithm.h" />
+    <ClInclude Include="include\grl\utils\Catalogue.h" />
     <ClInclude Include="include\grl\utils\DebugTools.h" />
     <ClInclude Include="include\grl\utils\DoG.h" />
     <ClInclude Include="include\grl\utils\Histogram.h" />
@@ -55,8 +64,12 @@
     <ClCompile Include="src\rdf\DecisionTree.cpp" />
     <ClCompile Include="src\rdf\RandomDecisionForest.cpp" />
     <ClCompile Include="src\rdf\SegmentedDepthUtils.cpp" />
-    <ClCompile Include="src\track\DiscretizedGestureTracker.cpp" />
     <ClCompile Include="src\track\GestureTracker.cpp" />
+    <ClCompile Include="src\track\TrackOffsets.cpp" />
+    <ClCompile Include="src\track\TrackPoints.cpp" />
+    <ClCompile Include="src\track\TrackRecorder.cpp" />
+    <ClCompile Include="src\track\TrackRecorderQueue.cpp" />
+    <ClCompile Include="src\track\TrackTools.cpp" />
     <ClCompile Include="src\utils\Histogram.cpp" />
     <ClCompile Include="src\utils\HistogramGray.cpp" />
     <ClCompile Include="src\utils\math\GaussianKernel.cpp" />

@@ -42,6 +42,11 @@ public:
     float getDistance() const;
 
     /**
+     * Set new length of the transformation.
+     */
+    void setDistance(float newDistance);
+
+    /**
      * Get unit vector describing orientation of the transformation.
      *
      * @returns unit vector describing orientation of the transformation.
@@ -112,4 +117,11 @@ OrientedTransformation::getTransformationVector() const
 {
     return _distance * _unitVector;
 }
+
+inline void
+OrientedTransformation::setDistance(float newDistance)
+{
+    _distance = newDistance;
+}
+
 }

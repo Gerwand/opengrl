@@ -26,14 +26,19 @@ enum RecognitionStatus
 class GestureRecognizer
 {
 public:
-	bool init(DepthCamera *camera, GestureExtractor *extractor, GestureTracker *tracker, GestureMatcher *matcher);
+	bool init(DepthCamera *camera,
+              GestureExtractor *extractor,
+              GestureTracker *leftTracker,
+              GestureTracker *rightTracker,
+              GestureMatcher *matcher);
 	RecognitionStatus update();
 	bool isValid() { return _valid; }
 	void destroy();
 
     DepthCamera * getCamera() { return _depthCamera; }
 	GestureExtractor * getExtractor() { return _extractor; }
-    GestureTracker * getTracker() { return _tracker; }
+    GestureTracker * getLeftTracker() { return _leftTracker; }
+    GestureTracker * getRightTracker() { return _rightTracker; }
 	GestureMatcher * getMatcher() { return _matcher; }
 
     const DepthObject& getLeftHand() { return _leftHand; }
@@ -52,7 +57,8 @@ private:
 
 	DepthCamera *_depthCamera;
 	GestureExtractor *_extractor;
-    GestureTracker *_tracker;
+    GestureTracker *_leftTracker;
+    GestureTracker *_rightTracker;
 	GestureMatcher *_matcher;
 
 	Skeleton _skeleton;

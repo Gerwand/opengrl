@@ -8,7 +8,8 @@ namespace grl {
 bool
 GestureRecognizer::init(DepthCamera *camera,
                         GestureExtractor *extractor,
-                        GestureTracker *tracker,
+                        GestureTracker *leftTracker,
+                        GestureTracker *rightTracker,
                         GestureMatcher *matcher)
 {
 	if (_valid) {
@@ -18,7 +19,8 @@ GestureRecognizer::init(DepthCamera *camera,
 
 	_depthCamera = camera;
 	_extractor = extractor;
-    _tracker = tracker;
+    _leftTracker = leftTracker;
+    _rightTracker = rightTracker;
 	_matcher = matcher;
 
 	_valid = true;
@@ -62,7 +64,8 @@ GestureRecognizer::update()
 
 	_skeleton = *closestSkeleton;
 
-    _tracker->update(_skeleton.joints[LEFT_HAND], _skeleton.joints[RIGHT_HAND]);
+    _leftTracker->update(_skeleton.joints[LEFT_HAND]);
+    _rightTracker->update(_skeleton.joints[RIGHT_HAND]);
 
 	_extractor->extractHands(depthFrame, _skeleton, _leftHand, _rightHand);
 
@@ -79,7 +82,7 @@ GestureRecognizer::update()
 	// if (_handFound) {
 		// Enhance Image
 		// EnhanceExtractedHand(_extractedHand);
-		
+
 		// Skip matching for now
 		// _lastMatch = _matcher->matchBestGesture(_extractedHand);
 
@@ -88,7 +91,7 @@ GestureRecognizer::update()
 	return NoGesture;
 }
 
-void 
+void
 GestureRecognizer::getHandsImage(cv::Mat &destination)
 {
 	int rows, cols;

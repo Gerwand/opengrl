@@ -55,6 +55,9 @@
     <Filter Include="Pliki nagłówkowe\grl\utils\math">
       <UniqueIdentifier>{8c256071-4996-4d7f-8bd7-7b2db5428484}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pliki nagłówkowe\grl\classification">
+      <UniqueIdentifier>{1172576c-f815-4837-ad71-9ae79fd1fe30}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\grl\camera\DepthCamera.h">
@@ -89,9 +92,6 @@
     </ClInclude>
     <ClInclude Include="include\grl\rdf\RandomDecisionForest.h">
       <Filter>Pliki nagłówkowe\grl\rdf</Filter>
-    </ClInclude>
-    <ClInclude Include="include\grl\track\DiscretizedGestureTracker.h">
-      <Filter>Pliki nagłówkowe\grl\track</Filter>
     </ClInclude>
     <ClInclude Include="include\grl\track\GestureTracker.h">
       <Filter>Pliki nagłówkowe\grl\track</Filter>
@@ -132,6 +132,36 @@
     <ClInclude Include="include\grl\utils\math\Ranges.h">
       <Filter>Pliki nagłówkowe\grl\utils\math</Filter>
     </ClInclude>
+    <ClInclude Include="include\grl\track\Track.h">
+      <Filter>Pliki nagłówkowe\grl\track</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\classification\Classificator.h">
+      <Filter>Pliki nagłówkowe\grl\classification</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\classification\Features.h">
+      <Filter>Pliki nagłówkowe\grl\classification</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\track\TrackClassificator.h">
+      <Filter>Pliki nagłówkowe\grl\track</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\track\TrackOffsets.h">
+      <Filter>Pliki nagłówkowe\grl\track</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\track\TrackPoints.h">
+      <Filter>Pliki nagłówkowe\grl\track</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\track\TrackRecorder.h">
+      <Filter>Pliki nagłówkowe\grl\track</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\track\TrackRecorderQueue.h">
+      <Filter>Pliki nagłówkowe\grl\track</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\track\TrackTools.h">
+      <Filter>Pliki nagłówkowe\grl\track</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grl\utils\Catalogue.h">
+      <Filter>Pliki nagłówkowe\grl\utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\rdf\DecisionTree.cpp">
@@ -142,9 +172,6 @@
     </ClCompile>
     <ClCompile Include="src\rdf\SegmentedDepthUtils.cpp">
       <Filter>Pliki źródłowe\grl\rdf</Filter>
-    </ClCompile>
-    <ClCompile Include="src\track\DiscretizedGestureTracker.cpp">
-      <Filter>Pliki źródłowe\grl\track</Filter>
     </ClCompile>
     <ClCompile Include="src\track\GestureTracker.cpp">
       <Filter>Pliki źródłowe\grl\track</Filter>
@@ -178,6 +205,21 @@
     </ClCompile>
     <ClCompile Include="src\camera\KinectCamera.cpp">
       <Filter>Pliki źródłowe\grl\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="src\track\TrackOffsets.cpp">
+      <Filter>Pliki źródłowe\grl\track</Filter>
+    </ClCompile>
+    <ClCompile Include="src\track\TrackPoints.cpp">
+      <Filter>Pliki źródłowe\grl\track</Filter>
+    </ClCompile>
+    <ClCompile Include="src\track\TrackRecorder.cpp">
+      <Filter>Pliki źródłowe\grl\track</Filter>
+    </ClCompile>
+    <ClCompile Include="src\track\TrackRecorderQueue.cpp">
+      <Filter>Pliki źródłowe\grl\track</Filter>
+    </ClCompile>
+    <ClCompile Include="src\track\TrackTools.cpp">
+      <Filter>Pliki źródłowe\grl\track</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
