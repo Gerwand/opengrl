@@ -38,24 +38,19 @@ MainWindow::MainWindow(QWidget *parent)
 		QCoreApplication::exit(EFAULT);
 	}
 
-    std::unique_ptr<grl::DiscretizedTrackerConfig> discretizedTrackerConfig = std::make_unique<grl::DiscretizedTrackerConfig>();
-    discretizedTrackerConfig->commonDatabase = false;
-    discretizedTrackerConfig->discreteDelta = 0.05f;
-    discretizedTrackerConfig->minDistance = 0.01f;
-    discretizedTrackerConfig->framesIdleReset = 2; // Around 2 seconds
-    discretizedTrackerConfig->trackingLength = 25;
-    discretizedTrackerConfig->frameSkip = 1;
-    discretizedTrackerConfig->filterPoints = 5;
-    discretizedTrackerConfig->maxCompareSegmentsDiff = 10;
+    grl::TrackerConfig trackerConfig;
+    trackerConfig.filterPoints = 5;
+    trackerConfig.framesIdleReset = 2;
+    trackerConfig.frameSkip = 1;
+    trackerConfig.minDistance = 0.01f;
+    trackerConfig.trackingLength = 25;
 
-    SAFE_QT_NEW(_discreteTracker, grl::DiscretizedGestureTracker);
-    if (!_discreteTracker->init(std::move(discretizedTrackerConfig))) {
-        QMessageBox::critical(this, "Fatal error", "Error when intitializing tracker");
-        QCoreApplication::exit(EFAULT);
-    }
+    SAFE_QT_NEW(_leftTracker, grl::GestureTracker);
+    _leftTracker->init(trackerConfig);
+    _rightTracker->init(trackerConfig);
 
 	SAFE_QT_NEW(_recognizer, grl::GestureRecognizer);
-	if (!_recognizer->init(_kinect, _extractor, _discreteTracker, _orbMatcher)) {
+	if (!_recognizer->init(_kinect, _extractor, _leftTracker, _rightTracker, _orbMatcher)) {
 		QMessageBox::critical(this, "Fatal error", "Error when intitializing recognizer");
 		QCoreApplication::exit(EFAULT);
 	}
@@ -64,7 +59,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     _ui.setupUi(this);
 
-    SAFE_QT_NEW(_trackSaver, TrackSaver(this, *_kinect, *_discreteTracker));
+    //SAFE_QT_NEW(_trackSaver, TrackSaver(this, *_kinect, *_discreteTracker));
     SAFE_QT_NEW(_captureTimer, QTimer(this));
 
     connect(_ui.recordButton, SIGNAL(clicked()), this, SLOT(recordButtonHandler()));
@@ -109,8 +104,8 @@ void MainWindow::recordButtonHandler()
 
 void MainWindow::saveTrackButtonHandler()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, "Track database file selector");
-    _discreteTracker->writeDatabaseToFile(fileName.toStdString());
+    //QString fileName = QFileDialog::getSaveFileName(this, "Track database file selector");
+    //_discreteTracker->writeDatabaseToFile(fileName.toStdString());
 }
 
 void MainWindow::exrButtonHandler()
@@ -139,6 +134,7 @@ void MainWindow::exrButtonHandler()
 
 void MainWindow::recordTrack()
 {
+    /*
     grl::RecognitionStatus status;
     status = _recognizer->update();
     QTime currentTime = QTime::currentTime();
@@ -277,12 +273,12 @@ void MainWindow::recordTrack()
         connect(_captureTimer, SIGNAL(timeout()), this, SLOT(updateVideoContext()));
     }
 
-
-
+    */
 }
 
 void MainWindow::updateVideoContext()
 {
+    /*
 	grl::RecognitionStatus status;
 
 	status = _recognizer->update();
@@ -366,6 +362,7 @@ void MainWindow::updateVideoContext()
 
 	_ui.debugLog->clear();
 	_ui.debugLog->setText(QString::fromStdString(debugText));
+    */
 }
 
 
@@ -434,6 +431,7 @@ MainWindow::drawTrack(const std::vector<grl::Vec3f> &track, cv::Scalar color, cv
 void
 MainWindow::loadSampleTracks()
 {
+    /*
     for (int i = 0; i < 2; ++i) {
         auto &sampleNames = i == 0 ? grlSampleRightTracksNames : grlSampleLeftTracksNames;
         auto &samplePointers = i == 0 ? grlSampleRightTracksPointers : grlSampleLeftTracksPointers;
@@ -455,4 +453,5 @@ MainWindow::loadSampleTracks()
             }
         }
     }
+    */
 }

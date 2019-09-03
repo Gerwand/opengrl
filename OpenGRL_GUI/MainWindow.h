@@ -11,7 +11,7 @@
 #include <grl/gesture/SkeletonExtractor.h>
 #include <grl/camera/KinectCamera.h>
 #include <grl/gesture/ORBMatcher.h>
-#include <grl/track/DiscretizedGestureTracker.h>
+#include <grl/track/GestureTracker.h>
 
 constexpr int recordDelay = 5;
 constexpr int idleDelay = 3;
@@ -51,7 +51,8 @@ private:
 	grl::ORBMatcher			*_orbMatcher = nullptr;
 	grl::GestureRecognizer	*_recognizer = nullptr;
 	grl::SkeletonExtractor	*_extractor = nullptr;
-    grl::DiscretizedGestureTracker *_discreteTracker = nullptr;
+    grl::GestureTracker     *_leftTracker = nullptr;
+    grl::GestureTracker     *_rightTracker = nullptr;
 
     grl::TrackRecorder      *_leftRecorder = nullptr;
     grl::TrackRecorder      *_rightRecorder = nullptr;
@@ -61,9 +62,6 @@ private:
     QTime _endTime;
     QTime _lastTime;
     QTime _idleDeadline;
-
-    grl::OfflineGestureDescriptor _leftTrackDescriptor;
-    grl::OfflineGestureDescriptor _rightTrackDescriptor;
 
     void drawTrack(const std::vector<grl::Vec3f> &track, cv::Scalar color, cv::Mat &image);
     void loadSampleTracks();

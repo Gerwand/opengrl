@@ -24,6 +24,8 @@ int
 TrackSaver::exec()
 {
     _ui.retranslateUi(this);
+
+    /* TODO - convert the code for the new API
     _tracker.processTrack(*_leftTrack, _leftTrackProcessed);
     _tracker.processTrack(*_rightTrack, _rightTrackProcessed);
 
@@ -72,6 +74,7 @@ TrackSaver::exec()
     _ui.labRightEnd->setText(QString::fromStdString(translatedTrackRight.points.back()));
     _ui.labRightLen->setText(QString::fromStdString(std::to_string(_rightTrack->getLength())));
     _ui.labRightPoints->setText(QString::fromStdString(std::to_string(_rightTrackProcessed.points.size())));
+    */
 
     return QDialog::exec();
 }
@@ -79,6 +82,7 @@ TrackSaver::exec()
 void
 TrackSaver::saveTrackHandler()
 {
+    /*
     std::string trackName = _ui.inTrackName->toPlainText().toStdString();
     if (trackName.empty()) {
         QMessageBox::warning(this, "Save track error", "The name of the track cannot be empty", QMessageBox::StandardButton::Ok);
@@ -108,4 +112,5 @@ TrackSaver::saveTrackHandler()
     QMessageBox::information(this, "Save track", message, QMessageBox::StandardButton::Ok);
 
     accept();
+    */
 }
