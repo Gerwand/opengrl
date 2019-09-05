@@ -27,6 +27,9 @@ bool GestureRecognizer::init(DepthCamera *camera,
     _handSkeletonExtractor = handSkeletonExtractor;
     _gestureClassificator = gestureClassificator;
 
+    _trackDesc.trackCategory = nullptr;
+    _gestureDesc.gestureCategory = nullptr;
+
 	_valid = true;
 
 	return true;
