@@ -344,10 +344,12 @@ void MainWindow::all()
         _ui.handImageBox->setPixmap(QPixmap::fromImage(image));
     }
     auto tmatch = _recognizer->getTrackMatch();
-    debugText << "Track: " << *tmatch.trackCategory << " " << tmatch.score1 << std::endl;
+    if (tmatch.trackCategory != nullptr)
+        debugText << "Track: " << *tmatch.trackCategory << " " << tmatch.score1 << std::endl;
 
     auto gmatch = _recognizer->getGestureMatch();
-    debugText << "Gesture: " << *gmatch.gestureCategory << " " << gmatch.score1 << std::endl;
+    if (gmatch.gestureCategory != nullptr)
+        debugText << "Gesture: " << *gmatch.gestureCategory << " " << gmatch.score1 << std::endl;
     
     _ui.debugLog->clear();
 	_ui.debugLog->setText(QString::fromStdString(debugText.str()));
